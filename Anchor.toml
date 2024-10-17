@@ -7,14 +7,14 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-ruma = "7CNQHU6f1cxCUjkhqCMPN8aEFofREEsVUFsCA72gV6fj"
+ruma = "E2iAM2RNDLgMAY5jBsr2WiTqL6umZ4wkZhBBvmEBGWJ5"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "Localnet"
-wallet = "~/.config/solana/id.json"
+wallet = "ruma-wallet.json"
 
 [scripts]
 test = "bunx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
