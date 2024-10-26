@@ -6,7 +6,7 @@ describe("ruma", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace.RumaAnchor as Program<Ruma>;
+  const program = anchor.workspace.Ruma as Program<Ruma>;
 
   it("Is initialized!", async () => {
     // Add your test here.
