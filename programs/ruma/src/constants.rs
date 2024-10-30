@@ -1,4 +1,9 @@
 use anchor_lang::prelude::*;
 
 #[constant]
-pub const DISCRIMINATOR_SIZE: usize = 8;
+pub const RUMA_WALLET: Pubkey = pubkey!("RUMAAgFQxafzGWmfPhcBSL6AeGfw77gFZrSvDdkRUMk");
+pub const ATTENDEE_SEED: &str = "attendee";
+pub const EVENT_SEED: &str = "event";
+pub const EVENT_DATA_SEED: &str = "event_data";
+pub const USER_SEED: &str = "user";
+pub const USER_DATA_SEED: &str = "user_data";
