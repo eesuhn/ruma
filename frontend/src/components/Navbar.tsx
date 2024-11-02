@@ -22,10 +22,10 @@
          <span className="text-[28px]  font-semibold">Ruma</span>
        </Link>
        <div className="hidden lg:flex gap-12">
-         <Link href="#" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>
+         <Link href="/" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>
            Home
          </Link>
-         <Link href="/eventpage" className={`text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4 ${isActive("/eventpage")}`} prefetch={false}>
+         <Link href="/events" className={`text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4 ${isActive("/eventpage")}`} prefetch={false}>
            Event
          </Link>
          <Link href="#" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>

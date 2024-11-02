@@ -1,5 +1,6 @@
 import {Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent} from "@/components/ui/card"
 import Image from "next/image";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FiCalendar } from "react-icons/fi";
 import { GrLocation } from "react-icons/gr";
@@ -9,8 +10,10 @@ interface Event{
     title: string;
     event_img: string;
     venue: string;
+    address:string;
     time: number; // Assuming time is in 24-hour format, e.g., 1300 for 1:00 PM
     date: Date;
+    description:string;
     organizer:string;
     organizerimg:string
 }
@@ -23,8 +26,10 @@ export default function eventpage(){
           title: "Community Meetup",
           event_img: "/img/event1.png", // Example image path
           venue: "Tech Conference Center",
+          address:"123, orchard road, merlion den",
           time: 1400,
           date: new Date("2024-12-12"),
+          description:"test123",
           organizer:"gdsc_logo",
           organizerimg:"/img/gdsc_logo.png"
         },
@@ -33,8 +38,10 @@ export default function eventpage(){
           title: "Annual Tech Summit",
           event_img: "/images/event2.jpg",
           venue: "Innovation Hub",
+          address:"123, orchard road, merlion den",
           time: 900,
           date: new Date("2024-11-05"),
+          description:"test123",
           organizer:"stc",
           organizerimg:"/img/gdsc_logo.png"
         },
@@ -43,8 +50,10 @@ export default function eventpage(){
           title: "Startup Pitch Night",
           event_img: "/images/event3.jpg",
           venue: "Entrepreneurship Lounge",
+          address:"123, orchard road, merlion den",
           time: 1830,
           date: new Date("2024-10-25"),
+          description:"test123",
           organizer:"stc",
           organizerimg:"/img/gdsc_logo.png"
         },
@@ -53,8 +62,10 @@ export default function eventpage(){
           title: "Startup Pitch Night",
           event_img: "/images/event3.jpg",
           venue: "Entrepreneurship Lounge",
+          address:"123, orchard road, merlion den",
           time: 1830,
           date: new Date("2024-10-25"),
+          description:"test123",
           organizer:"stc",
           organizerimg:"/img/gdsc_logo.png"
           },
@@ -63,8 +74,10 @@ export default function eventpage(){
           title: "Startup Pitch Night",
           event_img: "/images/event3.jpg",
           venue: "Entrepreneurship Lounge",
+          address:"123, orchard road, merlion den",
           time: 1830,
           date: new Date("2024-10-25"),
+          description:"test123",
           organizer:"stc",
           organizerimg:"/img/gdsc_logo.png"
         },
@@ -73,6 +86,8 @@ export default function eventpage(){
           title: "Startup Pitch Night",
           event_img: "/images/event3.jpg",
           venue: "Entrepreneurship Lounge",
+          address:"123, orchard road, merlion den",
+          description:"test123",
           organizer:"stc",
           time: 1830,
           date: new Date("2024-10-25"),
@@ -83,6 +98,8 @@ export default function eventpage(){
           title: "Startup Pitch Night",
           event_img: "/images/event3.jpg",
           venue: "Entrepreneurship Lounge",
+          address:"123, orchard road, merlion den",
+          description:"test123",
           time: 1830,
           date: new Date("2024-10-25"),
           organizer:"stc",
@@ -124,9 +141,11 @@ export default function eventpage(){
                 </CardContent>
                 <CardFooter className="place-self-center">
                     {/* You can add more actions or buttons in the footer */}
-                    <div className="bg-blue-200 rounded-md hover:bg-blue-400 px-4 py-2 cursor-pointer hover:scale-105 group ">
-                        <a className="block text-[#444444] group-hover:text-white  font-semibold">View Details</a>
-                    </div>
+                    <Link href={`/events/${index}`}>
+                        <div className="bg-blue-200 rounded-md hover:bg-blue-400 px-4 py-2 cursor-pointer hover:scale-105 group ">
+                            <div className="block text-[#444444] group-hover:text-white  font-semibold">View Details</div>
+                        </div>
+                    </Link>
                 </CardFooter>
                 </Card>
             ))}

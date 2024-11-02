@@ -12,7 +12,7 @@ export default function Home() {
           </p>
           <a
             className="rounded-full w-[25%] text-[24px] mt-4 border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc]  sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="/eventpage"  
+            href="/events"  
           >
             <p className="text-[24px]">Events</p>
             <Blockchainicon />
@@ -21,8 +21,8 @@ export default function Home() {
         </div>
         <Image
           className="dark:invert rounded-md shadow-lg"
-          src={'/landingimg.jpg'}
-          alt="Next.js logo"
+          src={'/img/landingimg.jpg'}
+          alt="Landing Image"
           width={360}
           height={38}
           priority
