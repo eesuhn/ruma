@@ -122,7 +122,7 @@ pub struct CreateEvent<'info> {
     pub organizer: Account<'info, User>,
     #[account(
         init,
-        space = Event::min_space() + name.len() + start_date.as_ref().map(|s| s.len()).unwrap_or(0) + end_date.as_ref().map(|s| s.len()).unwrap_or(0) + start_time.as_ref().map(|s| s.len()).unwrap_or(0) + end_time.as_ref().map(|s| s.len()).unwrap_or(0) + location.as_ref().map(|s| s.len()).unwrap_or(0) + about.as_ref().map(|s| s.len()).unwrap_or(0) + image.as_ref().map(|s| s.len()).unwrap_or(0),
+        space = Event::MIN_SPACE + name.len() + start_date.as_ref().map(|s| s.len()).unwrap_or(0) + end_date.as_ref().map(|s| s.len()).unwrap_or(0) + start_time.as_ref().map(|s| s.len()).unwrap_or(0) + end_time.as_ref().map(|s| s.len()).unwrap_or(0) + location.as_ref().map(|s| s.len()).unwrap_or(0) + about.as_ref().map(|s| s.len()).unwrap_or(0) + image.as_ref().map(|s| s.len()).unwrap_or(0),
         seeds = [EVENT_SEED.as_bytes(), organizer.key().as_ref(), name.as_bytes()],
         bump,
         payer = payer,

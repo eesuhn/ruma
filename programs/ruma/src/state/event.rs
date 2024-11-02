@@ -11,12 +11,7 @@ pub struct Event {
 }
 
 impl Event {
-    pub fn min_space() -> usize {
-        let mut space = Event::DISCRIMINATOR.len();
-
-        // bump, organizer, data, badge, attendees
-        space += 1 + User::min_space() + EventData::min_space() + 32 + 4;
-
-        space
-    }
+    // discriminator, bump, organizer, data, badge, attendees
+    pub const MIN_SPACE: usize =
+        Event::DISCRIMINATOR.len() + 1 + User::MIN_SPACE + EventData::MIN_SPACE + 32 + 4;
 }

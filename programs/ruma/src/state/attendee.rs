@@ -9,14 +9,8 @@ pub struct Attendee {
 }
 
 impl Attendee {
-    pub fn min_space() -> usize {
-        let mut space = Attendee::DISCRIMINATOR.len();
-
-        // user, status
-        space += User::min_space() + (1 + 1);
-
-        space
-    }
+    // discriminator, user, status
+    pub const MIN_SPACE: usize = Attendee::DISCRIMINATOR.len() + User::MIN_SPACE + (1 + 1);
 }
 
 #[derive(

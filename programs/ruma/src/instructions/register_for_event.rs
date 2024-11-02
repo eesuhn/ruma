@@ -30,7 +30,7 @@ pub struct RegisterForEvent<'info> {
         mut,
         seeds = [EVENT_SEED.as_bytes(), organizer.key().as_ref(), name.as_bytes()],
         bump = event.bump,
-        realloc = event.to_account_info().data_len() + Attendee::min_space(),
+        realloc = event.to_account_info().data_len() + Attendee::MIN_SPACE,
         realloc::payer = payer,
         realloc::zero = false,
     )]

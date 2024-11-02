@@ -28,7 +28,7 @@ pub struct CreateProfile<'info> {
     pub payer: Signer<'info>,
     #[account(
         init,
-        space = User::min_space() + name.len() + image.len(),
+        space = User::MIN_SPACE + name.len() + image.len(),
         seeds = [USER_DATA_SEED.as_bytes(), pubkey.as_ref()],
         bump,
         payer = payer,

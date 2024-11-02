@@ -16,12 +16,6 @@ pub struct EventData {
 }
 
 impl EventData {
-    pub fn min_space() -> usize {
-        let mut space = EventData::DISCRIMINATOR.len();
-
-        // name, is_public, needs_approval, start_date, end_date, start_time, end_time, location, about, image, capacity
-        space += 4 + 1 + 1 + (1 + 4) * 7 + (1 + 4);
-
-        space
-    }
+    // discriminator, name, is_public, needs_approval, start_date, end_date, start_time, end_time, location, about, image, capacity
+    pub const MIN_SPACE: usize = EventData::DISCRIMINATOR.len() + 4 + 1 + 1 + (1 + 4) * 7 + (1 + 4);
 }

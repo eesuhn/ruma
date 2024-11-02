@@ -10,12 +10,6 @@ pub struct User {
 }
 
 impl User {
-    pub fn min_space() -> usize {
-        let mut space = User::DISCRIMINATOR.len();
-
-        // bump, pubkey, data, badges
-        space += 1 + 32 + UserData::min_space() + 4;
-
-        space
-    }
+    // discriminator, bump, pubkey, data, badges
+    pub const MIN_SPACE: usize = User::DISCRIMINATOR.len() + 1 + 32 + UserData::MIN_SPACE + 4;
 }
