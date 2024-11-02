@@ -11,12 +11,11 @@ export default function Home() {
           Start joining events on the chain and get some cool NFTs
           </p>
           <a
-            className="rounded-full w-[22%] text-[24px] mt-4 border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc]  sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="#"
-            
+            className="rounded-full w-[25%] text-[24px] mt-4 border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc]  sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+            href="/eventpage"  
           >
             <p className="text-[24px]">Events</p>
-            <Blockchainicon/>
+            <Blockchainicon />
             
           </a>
         </div>

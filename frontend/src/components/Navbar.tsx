@@ -3,7 +3,9 @@
  * @see https://v0.dev/t/CowzfwdSDEY
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
+"use client"
  import Link from "next/link"
+ import { usePathname } from "next/navigation";
  import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
  import { Button } from "@/components/ui/button"
  import { CgProfile } from "react-icons/cg";
@@ -11,37 +13,39 @@
 
  
  export default function Navbar() {
+  const pathname= usePathname();
+  const isActive = (path: string) => pathname === path ? 'underline text-black' : '';
    return (
-     <div className="flex items-center justify-between px-6 py-4 ">
-       <Link href="#" className="flex items-center gap-2" prefetch={false}>
+     <div className="flex items-center justify-between px-6 py-4 font-[family-name:var(--font-geist-sans)]">
+       <Link href="/" className="flex items-center gap-2" prefetch={false}>
          <MountainIcon className="h-6 w-6" />
          <span className="text-[28px]  font-semibold">Ruma</span>
        </Link>
        <div className="hidden lg:flex gap-12">
-         <Link href="#" className="text-lg text-[#999999] font-medium hover:underline underline-offset-4" prefetch={false}>
+         <Link href="#" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>
            Home
          </Link>
-         <Link href="#" className="text-lg text-[#999999] font-medium hover:underline underline-offset-4" prefetch={false}>
-           About
+         <Link href="/eventpage" className={`text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4 ${isActive("/eventpage")}`} prefetch={false}>
+           Event
          </Link>
-         <Link href="#" className="text-lg text-[#999999] font-medium hover:underline underline-offset-4" prefetch={false}>
-           Services
+         <Link href="#" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>
+           Calender
          </Link>
-         <Link href="#" className="text-lg text-[#999999] font-medium hover:underline underline-offset-4" prefetch={false}>
-           Portfolio
+         <Link href="#" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>
+           Discover
          </Link>
-         <Link href="#" className="text-lg text-[#999999] font-medium hover:underline underline-offset-4" prefetch={false}>
+         <Link href="#" className="text-lg text-[#999999]  hover:underline hover:text-black underline-offset-4" prefetch={false}>
            Contact
          </Link>
        </div>
        <div className="flex flex-row place-content-center items-center">
-        <a className="mr-6 py-1 px-4 border-[2px] border-[#999999] text-slate-500 cursor-pointer hover:scale-110 hover:text-black hover:border-black rounded-md" >
+        <a className="mr-6 py-1 px-4 border-[2px] border-[#999999] text-slate-500 cursor-pointer hover:scale-105 hover:text-black hover:border-black rounded-md" >
           <p className="flex flex-row items-center">
             <BsQrCodeScan className="mr-2"/>Check In
           </p>
         </a>
         <Link href="#" className="flex items-center gap-2" prefetch={false}>
-         <CgProfile className="h-10 w-10 text-[#999999]" />
+         <CgProfile className="h-10 w-10 text-[#999999] hover:text-black hover:scale-105 " />
          
        </Link>
        </div>
