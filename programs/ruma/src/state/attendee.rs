@@ -4,13 +4,13 @@ use num_derive::*;
 
 #[account]
 pub struct Attendee {
-    pub user: User,
     pub status: AttendeeStatus,
+    pub user: User,
 }
 
 impl Attendee {
-    // discriminator, user, status
-    pub const MIN_SPACE: usize = Attendee::DISCRIMINATOR.len() + User::MIN_SPACE + (1 + 1);
+    // discriminator, status, user
+    pub const MIN_SPACE: usize = Attendee::DISCRIMINATOR.len() + (1 + 1) + User::MIN_SPACE;
 }
 
 #[derive(

@@ -13,12 +13,12 @@ use anchor_spl::{
 
 pub fn create_event(
     ctx: Context<CreateEvent>,
-    name: String,
     is_public: bool,
     needs_approval: bool,
     capacity: Option<i32>,
     start_timestamp: Option<i64>,
     end_timestamp: Option<i64>,
+    name: String,
     location: Option<String>,
     about: Option<String>,
     image: Option<String>,
@@ -37,12 +37,12 @@ pub fn create_event(
     event.bump = ctx.bumps.event;
     event.organizer = (*ctx.accounts.organizer).clone();
     event.data = EventData {
-        name,
         is_public,
         needs_approval,
         capacity,
         start_timestamp,
         end_timestamp,
+        name,
         location,
         about,
         image,
