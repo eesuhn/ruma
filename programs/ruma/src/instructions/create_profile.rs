@@ -9,6 +9,7 @@ pub fn create_profile(
     name: String,
     image: String,
 ) -> Result<()> {
+    require!(!name.is_empty(), RumaError::UserNameRequired);
     require!(name.len() <= 32, RumaError::UserNameTooLong);
 
     let user = &mut ctx.accounts.user;

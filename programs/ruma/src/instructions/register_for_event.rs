@@ -4,6 +4,7 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 
 pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Result<()> {
+    require!(!name.is_empty(), RumaError::EventNameRequired);
     require!(name.len() <= 128, RumaError::EventNameTooLong);
 
     let event = &mut ctx.accounts.event;
