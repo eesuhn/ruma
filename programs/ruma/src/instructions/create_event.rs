@@ -117,7 +117,8 @@ pub struct CreateEvent<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(
-        owner = crate::ID,
+        seeds = [USER_DATA_SEED.as_bytes(), payer.key().as_ref()],
+        bump = organizer.bump,
     )]
     pub organizer: Account<'info, User>,
     #[account(
