@@ -16,14 +16,12 @@ pub fn create_event(
     name: String,
     is_public: bool,
     needs_approval: bool,
-    start_date: Option<String>,
-    end_date: Option<String>,
-    start_time: Option<String>,
-    end_time: Option<String>,
+    capacity: Option<i32>,
+    start_timestamp: Option<i64>,
+    end_timestamp: Option<i64>,
     location: Option<String>,
     about: Option<String>,
     image: Option<String>,
-    capacity: Option<i32>,
     badge_name: String,
     badge_symbol: String,
     badge_uri: String,
@@ -38,14 +36,12 @@ pub fn create_event(
         name,
         is_public,
         needs_approval,
-        start_date,
-        end_date,
-        start_time,
-        end_time,
+        capacity,
+        start_timestamp,
+        end_timestamp,
         location,
         about,
         image,
-        capacity,
     };
     event.attendees = Vec::new();
 
@@ -112,7 +108,7 @@ pub fn create_event(
 }
 
 #[derive(Accounts)]
-#[instruction(name: String, start_date: Option<String>, end_date: Option<String>, start_time: Option<String>, end_time: Option<String>, location: Option<String>, about: Option<String>, image: Option<String>)]
+#[instruction(name: String, location: Option<String>, about: Option<String>, image: Option<String>)]
 pub struct CreateEvent<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -122,7 +118,7 @@ pub struct CreateEvent<'info> {
     pub organizer: Account<'info, User>,
     #[account(
         init,
-        space = Event::MIN_SPACE + name.len() + start_date.as_ref().map(|s| s.len()).unwrap_or(0) + end_date.as_ref().map(|s| s.len()).unwrap_or(0) + start_time.as_ref().map(|s| s.len()).unwrap_or(0) + end_time.as_ref().map(|s| s.len()).unwrap_or(0) + location.as_ref().map(|s| s.len()).unwrap_or(0) + about.as_ref().map(|s| s.len()).unwrap_or(0) + image.as_ref().map(|s| s.len()).unwrap_or(0),
+        space = Event::MIN_SPACE + name.len() + location.as_ref().map(|s| s.len()).unwrap_or(0) + about.as_ref().map(|s| s.len()).unwrap_or(0) + image.as_ref().map(|s| s.len()).unwrap_or(0),
         seeds = [EVENT_SEED.as_bytes(), organizer.key().as_ref(), name.as_bytes()],
         bump,
         payer = payer,

@@ -5,17 +5,16 @@ pub struct EventData {
     pub name: String,
     pub is_public: bool,
     pub needs_approval: bool,
-    pub start_date: Option<String>,
-    pub end_date: Option<String>,
-    pub start_time: Option<String>,
-    pub end_time: Option<String>,
+    pub capacity: Option<i32>,
+    pub start_timestamp: Option<i64>,
+    pub end_timestamp: Option<i64>,
     pub location: Option<String>,
     pub about: Option<String>,
     pub image: Option<String>,
-    pub capacity: Option<i32>,
 }
 
 impl EventData {
-    // discriminator, name, is_public, needs_approval, start_date, end_date, start_time, end_time, location, about, image, capacity
-    pub const MIN_SPACE: usize = EventData::DISCRIMINATOR.len() + 4 + 1 + 1 + (1 + 4) * 7 + (1 + 4);
+    // discriminator, name, is_public, needs_approval, capacity, start_timestamp, end_timestamp, location, about, image
+    pub const MIN_SPACE: usize =
+        EventData::DISCRIMINATOR.len() + 4 + 1 + 1 + (1 + 4) + ((1 + 8) * 2) + ((1 + 4) * 3);
 }
