@@ -27,7 +27,10 @@ pub fn create_event(
     badge_uri: String,
 ) -> Result<()> {
     require!(!name.is_empty(), RumaError::EventNameRequired);
-    require!(name.len() <= 128, RumaError::EventNameTooLong);
+    require!(
+        name.len() <= MAX_EVENT_NAME_LEN,
+        RumaError::EventNameTooLong
+    );
 
     let event = &mut ctx.accounts.event;
 
