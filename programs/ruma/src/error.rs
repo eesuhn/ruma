@@ -10,4 +10,8 @@ pub enum RumaError {
     EventNameRequired,
     #[msg("Event name can not be longer than 128 characters")]
     EventNameTooLong,
+    #[msg("Attendee not found")]
+    AttendeeNotFound,
+    #[msg("Invalid attendee status")]
+    InvalidStatus,
 }
