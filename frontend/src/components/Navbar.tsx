@@ -44,7 +44,7 @@
             <BsQrCodeScan className="mr-2"/>Check In
           </p>
         </a>
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
+        <Link href="/profile" className="flex items-center gap-2" prefetch={false}>
          <CgProfile className="h-10 w-10 text-[#999999] hover:text-black hover:scale-105 " />
          
        </Link>

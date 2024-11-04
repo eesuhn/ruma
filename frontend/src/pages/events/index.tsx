@@ -11,7 +11,7 @@ interface Event{
     event_img: string;
     venue: string;
     address:string;
-    time: number; // Assuming time is in 24-hour format, e.g., 1300 for 1:00 PM
+    time: number; 
     date: Date;
     description:string;
     organizer:string;
