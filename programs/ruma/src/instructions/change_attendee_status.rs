@@ -5,8 +5,8 @@ use anchor_lang::prelude::*;
 
 pub fn change_attendee_status(
     ctx: Context<ChangeAttendeeStatus>,
+    status: AttendeeStatus,
     _name: String,
-    status: String,
 ) -> Result<()> {
     let event = &mut ctx.accounts.event;
 
@@ -15,17 +15,7 @@ pub fn change_attendee_status(
         .iter_mut()
         .find(|a| a.user.pubkey == ctx.accounts.attendee.key())
     {
-        match status.as_str() {
-            "approved" => {
-                attendee.status = AttendeeStatus::Approved;
-            }
-            "rejected" => {
-                attendee.status = AttendeeStatus::Rejected;
-            }
-            _ => {
-                return Err(error!(RumaError::InvalidStatus));
-            }
-        }
+        attendee.status = status;
     } else {
         return Err(error!(RumaError::AttendeeNotFound));
     }
