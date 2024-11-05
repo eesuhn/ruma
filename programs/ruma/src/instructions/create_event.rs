@@ -35,6 +35,7 @@ pub fn create_event(
     let event = &mut ctx.accounts.event;
 
     event.bump = ctx.bumps.event;
+    event.badge = ctx.accounts.edition.key();
     event.organizer = (*ctx.accounts.organizer).clone();
     event.data = EventData {
         is_public,
@@ -104,11 +105,7 @@ pub fn create_event(
             },
         ),
         capacity.map(|c| c as u64),
-    )?;
-
-    event.badge = ctx.accounts.edition.key();
-
-    Ok(())
+    )
 }
 
 #[derive(Accounts)]
@@ -142,6 +139,7 @@ pub struct CreateEvent<'info> {
         payer = payer,
         associated_token::mint = mint,
         associated_token::authority = payer,
+        associated_token::token_program = token_program,
     )]
     pub associated_token_account: InterfaceAccount<'info, TokenAccount>,
     /// CHECK: initialized by Metaplex Token Metadata program
