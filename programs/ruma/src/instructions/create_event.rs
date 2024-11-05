@@ -128,7 +128,7 @@ pub struct CreateEvent<'info> {
         bump,
         payer = payer,
     )]
-    pub event: Account<'info, Event>,
+    pub event: Box<Account<'info, Event>>,
     #[account(
         init,
         payer = payer,
