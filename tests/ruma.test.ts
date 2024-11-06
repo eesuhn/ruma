@@ -7,7 +7,6 @@ import IDL from "../target/idl/ruma.json";
 import { createAvatar } from "@dicebear/core";
 import { shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { mplCore } from "@metaplex-foundation/mpl-core";
 import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
 import { createGenericFile } from "@metaplex-foundation/umi";
 
@@ -17,7 +16,6 @@ describe("ruma", () => {
 
   const umi = createUmi(web3.clusterApiUrl("devnet"))
     .use(mockStorage())
-    .use(mplCore());
 
   let context: ProgramTestContext;
   let provider: BankrunProvider;
