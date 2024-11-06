@@ -3,15 +3,20 @@ use crate::error::RumaError;
 use crate::state::*;
 use anchor_lang::prelude::*;
 
-pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) -> Result<()> {
-    require!(!name.is_empty(), RumaError::UserNameRequired);
-    require!(name.len() <= MAX_USER_NAME_LEN, RumaError::UserNameTooLong);
+pub fn create_profile(ctx: Context<CreateProfile>, user_data: UserData) -> Result<()> {
+    let user_name = user_data.name.clone();
+
+    require!(!user_name.is_empty(), RumaError::UserNameRequired);
+    require!(
+        user_name.len() <= MAX_USER_NAME_LEN,
+        RumaError::UserNameTooLong
+    );
 
     let user = &mut ctx.accounts.user;
 
     user.bump = ctx.bumps.user;
     user.pubkey = ctx.accounts.payer.key();
-    user.data = UserData { name, image };
+    user.data = user_data;
     user.badges = Vec::new();
 
     Ok(())

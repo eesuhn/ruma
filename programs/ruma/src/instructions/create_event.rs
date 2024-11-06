@@ -13,22 +13,16 @@ use anchor_spl::{
 
 pub fn create_event(
     ctx: Context<CreateEvent>,
-    is_public: bool,
-    needs_approval: bool,
-    capacity: Option<i32>,
-    start_timestamp: Option<i64>,
-    end_timestamp: Option<i64>,
-    name: String,
-    location: Option<String>,
-    about: Option<String>,
-    image: Option<String>,
+    event_data: EventData,
     badge_name: String,
     badge_symbol: String,
     badge_uri: String,
 ) -> Result<()> {
-    require!(!name.is_empty(), RumaError::EventNameRequired);
+    let event_name = event_data.name.clone();
+
+    require!(!event_name.is_empty(), RumaError::EventNameRequired);
     require!(
-        name.len() <= MAX_EVENT_NAME_LEN,
+        event_name.len() <= MAX_EVENT_NAME_LEN,
         RumaError::EventNameTooLong
     );
 
@@ -37,17 +31,7 @@ pub fn create_event(
     event.bump = ctx.bumps.event;
     event.badge = ctx.accounts.edition.key();
     event.organizer = (*ctx.accounts.organizer).clone();
-    event.data = EventData {
-        is_public,
-        needs_approval,
-        capacity,
-        start_timestamp,
-        end_timestamp,
-        name,
-        location,
-        about,
-        image,
-    };
+    event.data = event_data;
     event.attendees = Vec::new();
 
     mint_to(
@@ -104,7 +88,8 @@ pub fn create_event(
                 rent: ctx.accounts.rent.to_account_info(),
             },
         ),
-        capacity.map(|c| c as u64),
+        // capacity.map(|c| c as u64),
+        event.data.capacity.map(|c| c as u64),
     )
 }
 
