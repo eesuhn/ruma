@@ -46,12 +46,12 @@ pub struct CheckIntoEvent<'info> {
         mint::decimals = 0,
         mint::authority = payer.key(),
         mint::freeze_authority = payer.key(),
+        mint::token_program = token_program,
     )]
     pub new_mint: InterfaceAccount<'info, Mint>,
     /// CHECK: no checks needed
     pub new_mint_authority: UncheckedAccount<'info>,
-    /// CHECK: initialized by Metaplex Token Metadata program
-    pub new_metadata: UncheckedAccount<'info>,
+    pub new_metadata: Account<'info, MetadataAccount>,
     /// CHECK: no checks needed
     pub new_metadata_update_authority: UncheckedAccount<'info>,
     /// CHECK: initialized by Metaplex Token Metadata program

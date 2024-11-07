@@ -1,12 +1,13 @@
 use crate::constants::*;
-use crate::error::RumaError;
+use crate::error::*;
 use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
     metadata::{
         create_master_edition_v3, create_metadata_accounts_v3, mpl_token_metadata::types::DataV2,
-        CreateMasterEditionV3, CreateMetadataAccountsV3, Metadata,
+        sign_metadata, CreateMasterEditionV3, CreateMetadataAccountsV3, Metadata, MetadataAccount,
+        SignMetadata,
     },
     token_interface::{mint_to, Mint, MintTo, TokenAccount, TokenInterface},
 };
@@ -88,9 +89,16 @@ pub fn create_event(
                 rent: ctx.accounts.rent.to_account_info(),
             },
         ),
-        // capacity.map(|c| c as u64),
         event.data.capacity.map(|c| c as u64),
-    )
+    )?;
+
+    sign_metadata(CpiContext::new(
+        ctx.accounts.token_metadata_program.to_account_info(),
+        SignMetadata {
+            creator: ctx.accounts.payer.to_account_info(),
+            metadata: ctx.accounts.metadata.to_account_info(),
+        },
+    ))
 }
 
 #[derive(Accounts)]
@@ -117,6 +125,7 @@ pub struct CreateEvent<'info> {
         mint::decimals = 0,
         mint::authority = payer.key(),
         mint::freeze_authority = payer.key(),
+        mint::token_program = token_program,
     )]
     pub mint: InterfaceAccount<'info, Mint>,
     #[account(
@@ -127,8 +136,7 @@ pub struct CreateEvent<'info> {
         associated_token::token_program = token_program,
     )]
     pub associated_token_account: InterfaceAccount<'info, TokenAccount>,
-    /// CHECK: initialized by Metaplex Token Metadata program
-    pub metadata: UncheckedAccount<'info>,
+    pub metadata: Account<'info, MetadataAccount>,
     /// CHECK: initialized by Metaplex Token Metadata program
     pub edition: UncheckedAccount<'info>,
     pub token_metadata_program: Program<'info, Metadata>,
