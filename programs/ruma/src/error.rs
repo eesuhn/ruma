@@ -10,8 +10,14 @@ pub enum RumaError {
     EventNameRequired,
     #[msg("Event name can not be longer than 128 characters")]
     EventNameTooLong,
-    #[msg("Attendee not found")]
-    AttendeeNotFound,
-    #[msg("Invalid attendee status")]
-    InvalidStatus,
+    #[msg("Image is required")]
+    ImageRequired,
+    #[msg("Badge name is required")]
+    BadgeNameRequired,
+    #[msg("Badge symbol is required")]
+    BadgeSymbolRequired,
+    #[msg("Badge URI is required")]
+    BadgeUriRequired,
+    #[msg("Signer not authorized")]
+    UnauthorizedMasterWallet,
 }

@@ -1,17 +1,15 @@
-use crate::state::*;
 use anchor_lang::{prelude::*, Discriminator};
 
 #[account]
 pub struct Event {
     pub bump: u8,
-    pub badge: Pubkey,
-    pub organizer: User,
-    pub data: EventData,
-    pub attendees: Vec<Attendee>,
+    pub organizer: Pubkey,
+    pub data: Pubkey,
+    pub badge: Option<Pubkey>,
+    pub attendees: Vec<Pubkey>,
 }
 
 impl Event {
-    // discriminator, badge, bump, organizer, data, attendees
-    pub const MIN_SPACE: usize =
-        Event::DISCRIMINATOR.len() + 32 + 1 + User::MIN_SPACE + EventData::MIN_SPACE + 4;
+    // discriminator, bump, organizer, data, badge, attendees
+    pub const MIN_SPACE: usize = Event::DISCRIMINATOR.len() + 1 + 32 + 32 + (1 + 32) + 4;
 }

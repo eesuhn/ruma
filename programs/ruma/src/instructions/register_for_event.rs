@@ -1,6 +1,4 @@
-use crate::constants::*;
-use crate::error::*;
-use crate::state::*;
+use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
 
 pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Result<()> {
@@ -10,12 +8,14 @@ pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Resul
         RumaError::EventNameTooLong
     );
 
+    let attendee = &mut ctx.accounts.attendee;
+
+    attendee.bump = ctx.bumps.attendee;
+    attendee.status = AttendeeStatus::Pending;
+
     let event = &mut ctx.accounts.event;
 
-    event.attendees.push(Attendee {
-        user: (*ctx.accounts.attendee).clone(),
-        status: AttendeeStatus::Pending,
-    });
+    event.attendees.push(ctx.accounts.attendee.key());
 
     Ok(())
 }
@@ -25,19 +25,27 @@ pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Resul
 pub struct RegisterForEvent<'info> {
     #[account(
         mut,
-        address = RUMA_WALLET
+        address = RUMA_WALLET @ RumaError::UnauthorizedMasterWallet
     )]
     pub payer: Signer<'info>,
     pub organizer: Account<'info, User>,
-    pub attendee: Account<'info, User>,
+    pub user: Account<'info, User>,
     #[account(
         mut,
-        seeds = [EVENT_SEED.as_bytes(), organizer.key().as_ref(), name.as_bytes()],
+        seeds = [EVENT_SEED, organizer.key().as_ref(), name.as_bytes()],
         bump = event.bump,
-        realloc = event.to_account_info().data_len() + Attendee::MIN_SPACE,
+        realloc = event.to_account_info().data_len() + attendee.key().to_bytes().len(),
         realloc::payer = payer,
         realloc::zero = false,
     )]
     pub event: Account<'info, Event>,
+    #[account(
+        init,
+        space = Attendee::MIN_SPACE,
+        seeds = [ATTENDEE_SEED, user.key().as_ref(), event.key().as_ref()],
+        bump,
+        payer = payer,
+    )]
+    pub attendee: Account<'info, Attendee>,
     pub system_program: Program<'info, System>,
 }

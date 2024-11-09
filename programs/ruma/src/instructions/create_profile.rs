@@ -1,22 +1,21 @@
-use crate::constants::*;
-use crate::error::RumaError;
-use crate::state::*;
+use crate::{constants::*, error::RumaError, state::*};
 use anchor_lang::prelude::*;
 
-pub fn create_profile(ctx: Context<CreateProfile>, user_data: UserData) -> Result<()> {
-    let user_name = user_data.name.clone();
+pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) -> Result<()> {
+    require!(!name.is_empty(), RumaError::UserNameRequired);
+    require!(name.len() <= MAX_USER_NAME_LEN, RumaError::UserNameTooLong);
+    require!(!image.is_empty(), RumaError::ImageRequired);
 
-    require!(!user_name.is_empty(), RumaError::UserNameRequired);
-    require!(
-        user_name.len() <= MAX_USER_NAME_LEN,
-        RumaError::UserNameTooLong
-    );
+    let user_data = &mut ctx.accounts.user_data;
+
+    user_data.bump = ctx.bumps.user_data;
+    user_data.name = name;
+    user_data.image = image;
 
     let user = &mut ctx.accounts.user;
 
     user.bump = ctx.bumps.user;
-    user.pubkey = ctx.accounts.payer.key();
-    user.data = user_data;
+    user.data = ctx.accounts.user_data.key();
     user.badges = Vec::new();
 
     Ok(())
@@ -29,11 +28,19 @@ pub struct CreateProfile<'info> {
     pub payer: Signer<'info>,
     #[account(
         init,
-        space = User::MIN_SPACE + name.len() + image.len(),
-        seeds = [USER_DATA_SEED.as_bytes(), payer.key.as_ref()],
+        space = User::MIN_SPACE,
+        seeds = [USER_SEED, payer.key().as_ref()],
         bump,
         payer = payer,
     )]
     pub user: Account<'info, User>,
+    #[account(
+        init,
+        space = UserData::MIN_SPACE + name.len() + image.len(),
+        seeds = [USER_DATA_SEED, payer.key().as_ref()],
+        bump,
+        payer = payer,
+    )]
+    pub user_data: Account<'info, UserData>,
     pub system_program: Program<'info, System>,
 }

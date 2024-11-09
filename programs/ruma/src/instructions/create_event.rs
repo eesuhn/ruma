@@ -1,147 +1,84 @@
-use crate::constants::*;
-use crate::error::*;
-use crate::state::*;
+use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
-use anchor_spl::{
-    associated_token::AssociatedToken,
-    metadata::{
-        create_master_edition_v3, create_metadata_accounts_v3, mpl_token_metadata::types::DataV2,
-        sign_metadata, CreateMasterEditionV3, CreateMetadataAccountsV3, Metadata, MetadataAccount,
-        SignMetadata,
-    },
-    token_interface::{mint_to, Mint, MintTo, TokenAccount, TokenInterface},
-};
 
 pub fn create_event(
     ctx: Context<CreateEvent>,
-    event_data: EventData,
-    badge_name: String,
-    badge_symbol: String,
-    badge_uri: String,
+    is_public: bool,
+    needs_approval: bool,
+    name: String,
+    image: String,
+    capacity: Option<i32>,
+    start_timestamp: Option<i64>,
+    end_timestamp: Option<i64>,
+    location: Option<String>,
+    about: Option<String>,
 ) -> Result<()> {
-    let event_name = event_data.name.clone();
-
-    require!(!event_name.is_empty(), RumaError::EventNameRequired);
+    require!(!name.is_empty(), RumaError::EventNameRequired);
     require!(
-        event_name.len() <= MAX_EVENT_NAME_LEN,
+        name.len() <= MAX_EVENT_NAME_LEN,
         RumaError::EventNameTooLong
     );
+    require!(!image.is_empty(), RumaError::ImageRequired);
+
+    let event_data = &mut ctx.accounts.event_data;
+
+    event_data.bump = ctx.bumps.event_data;
+    event_data.is_public = is_public;
+    event_data.needs_approval = needs_approval;
+    event_data.name = name;
+    event_data.image = image;
+    event_data.capacity = capacity;
+    event_data.start_timestamp = start_timestamp;
+    event_data.end_timestamp = end_timestamp;
+    event_data.location = location;
+    event_data.about = about;
 
     let event = &mut ctx.accounts.event;
 
     event.bump = ctx.bumps.event;
-    event.badge = ctx.accounts.edition.key();
-    event.organizer = (*ctx.accounts.organizer).clone();
-    event.data = event_data;
+    event.organizer = ctx.accounts.organizer.key();
+    event.data = ctx.accounts.event_data.key();
+    event.badge = None;
     event.attendees = Vec::new();
 
-    mint_to(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            MintTo {
-                mint: ctx.accounts.mint.to_account_info(),
-                to: ctx.accounts.associated_token_account.to_account_info(),
-                authority: ctx.accounts.payer.to_account_info(),
-            },
-        ),
-        1,
-    )?;
-
-    create_metadata_accounts_v3(
-        CpiContext::new(
-            ctx.accounts.token_metadata_program.to_account_info(),
-            CreateMetadataAccountsV3 {
-                metadata: ctx.accounts.metadata.to_account_info(),
-                mint: ctx.accounts.mint.to_account_info(),
-                mint_authority: ctx.accounts.payer.to_account_info(),
-                update_authority: ctx.accounts.payer.to_account_info(),
-                payer: ctx.accounts.payer.to_account_info(),
-                system_program: ctx.accounts.system_program.to_account_info(),
-                rent: ctx.accounts.rent.to_account_info(),
-            },
-        ),
-        DataV2 {
-            name: badge_name,
-            symbol: badge_symbol,
-            uri: badge_uri,
-            seller_fee_basis_points: 0,
-            creators: None,
-            collection: None,
-            uses: None,
-        },
-        true,
-        true,
-        None,
-    )?;
-
-    create_master_edition_v3(
-        CpiContext::new(
-            ctx.accounts.token_metadata_program.to_account_info(),
-            CreateMasterEditionV3 {
-                edition: ctx.accounts.edition.to_account_info(),
-                mint: ctx.accounts.mint.to_account_info(),
-                update_authority: ctx.accounts.payer.to_account_info(),
-                mint_authority: ctx.accounts.payer.to_account_info(),
-                payer: ctx.accounts.payer.to_account_info(),
-                metadata: ctx.accounts.metadata.to_account_info(),
-                token_program: ctx.accounts.token_program.to_account_info(),
-                system_program: ctx.accounts.system_program.to_account_info(),
-                rent: ctx.accounts.rent.to_account_info(),
-            },
-        ),
-        event.data.capacity.map(|c| c as u64),
-    )?;
-
-    sign_metadata(CpiContext::new(
-        ctx.accounts.token_metadata_program.to_account_info(),
-        SignMetadata {
-            creator: ctx.accounts.payer.to_account_info(),
-            metadata: ctx.accounts.metadata.to_account_info(),
-        },
-    ))
+    Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(name: String, location: Option<String>, about: Option<String>, image: Option<String>)]
+#[instruction(
+    _is_public: bool,
+    _needs_approval: bool,
+    name: String,
+    image: String,
+    _capacity: Option<i32>,
+    _start_timestamp: Option<i64>,
+    _end_timestamp: Option<i64>,
+    location: Option<String>,
+    about: Option<String>,
+)]
 pub struct CreateEvent<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(
-        seeds = [USER_DATA_SEED.as_bytes(), payer.key().as_ref()],
+        seeds = [USER_SEED, payer.key().as_ref()],
         bump = organizer.bump,
     )]
     pub organizer: Account<'info, User>,
     #[account(
         init,
-        space = Event::MIN_SPACE + name.len() + location.as_ref().map(|s| s.len()).unwrap_or(0) + about.as_ref().map(|s| s.len()).unwrap_or(0) + image.as_ref().map(|s| s.len()).unwrap_or(0),
-        seeds = [EVENT_SEED.as_bytes(), organizer.key().as_ref(), name.as_bytes()],
+        space = Event::MIN_SPACE,
+        seeds = [EVENT_SEED, organizer.key().as_ref(), name.as_bytes()],
         bump,
         payer = payer,
     )]
-    pub event: Box<Account<'info, Event>>,
+    pub event: Account<'info, Event>,
     #[account(
         init,
+        space = EventData::MIN_SPACE + name.len() + image.len() + location.map(|s| s.len()).unwrap_or(0) + about.map(|s| s.len()).unwrap_or(0),
+        seeds = [EVENT_DATA_SEED, organizer.key().as_ref(), name.as_bytes()],
+        bump,
         payer = payer,
-        mint::decimals = 0,
-        mint::authority = payer.key(),
-        mint::freeze_authority = payer.key(),
-        mint::token_program = token_program,
     )]
-    pub mint: InterfaceAccount<'info, Mint>,
-    #[account(
-        init,
-        payer = payer,
-        associated_token::mint = mint,
-        associated_token::authority = payer,
-        associated_token::token_program = token_program,
-    )]
-    pub associated_token_account: InterfaceAccount<'info, TokenAccount>,
-    pub metadata: Account<'info, MetadataAccount>,
-    /// CHECK: initialized by Metaplex Token Metadata program
-    pub edition: UncheckedAccount<'info>,
-    pub token_metadata_program: Program<'info, Metadata>,
-    pub token_program: Interface<'info, TokenInterface>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub event_data: Account<'info, EventData>,
     pub system_program: Program<'info, System>,
-    pub rent: Sysvar<'info, Rent>,
 }

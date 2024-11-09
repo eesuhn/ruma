@@ -1,12 +1,10 @@
 use anchor_lang::prelude::*;
+use {instructions::*, state::*};
 
 pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
-
-use instructions::*;
-use state::*;
 
 declare_id!("RUMAjHRSEoL4TQB5SZ8KJnxMUui7QzmzzznZU7qPXgn");
 
@@ -14,18 +12,44 @@ declare_id!("RUMAjHRSEoL4TQB5SZ8KJnxMUui7QzmzzznZU7qPXgn");
 pub mod ruma {
     use super::*;
 
-    pub fn create_profile(ctx: Context<CreateProfile>, user_data: UserData) -> Result<()> {
-        instructions::create_profile(ctx, user_data)
+    pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) -> Result<()> {
+        instructions::create_profile(ctx, name, image)
     }
 
     pub fn create_event(
         ctx: Context<CreateEvent>,
-        event_data: EventData,
+        is_public: bool,
+        needs_approval: bool,
+        name: String,
+        image: String,
+        capacity: Option<i32>,
+        start_timestamp: Option<i64>,
+        end_timestamp: Option<i64>,
+        location: Option<String>,
+        about: Option<String>,
+    ) -> Result<()> {
+        instructions::create_event(
+            ctx,
+            is_public,
+            needs_approval,
+            name,
+            image,
+            capacity,
+            start_timestamp,
+            end_timestamp,
+            location,
+            about,
+        )
+    }
+
+    pub fn create_badge(
+        ctx: Context<CreateBadge>,
         badge_name: String,
         badge_symbol: String,
         badge_uri: String,
+        max_supply: Option<u32>,
     ) -> Result<()> {
-        instructions::create_event(ctx, event_data, badge_name, badge_symbol, badge_uri)
+        instructions::create_badge(ctx, badge_name, badge_symbol, badge_uri, max_supply)
     }
 
     pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Result<()> {
@@ -35,9 +59,8 @@ pub mod ruma {
     pub fn change_attendee_status(
         ctx: Context<ChangeAttendeeStatus>,
         status: AttendeeStatus,
-        name: String,
     ) -> Result<()> {
-        instructions::change_attendee_status(ctx, status, name)
+        instructions::change_attendee_status(ctx, status)
     }
 
     pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition: u64) -> Result<()> {

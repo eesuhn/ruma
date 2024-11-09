@@ -1,16 +1,15 @@
-use crate::state::*;
 use anchor_lang::{prelude::*, Discriminator};
 use num_derive::*;
 
 #[account]
 pub struct Attendee {
+    pub bump: u8,
     pub status: AttendeeStatus,
-    pub user: User,
 }
 
 impl Attendee {
-    // discriminator, status, user
-    pub const MIN_SPACE: usize = Attendee::DISCRIMINATOR.len() + (1 + 1) + User::MIN_SPACE;
+    // discriminator, status
+    pub const MIN_SPACE: usize = Attendee::DISCRIMINATOR.len() + 1 + (1 + 1);
 }
 
 #[derive(

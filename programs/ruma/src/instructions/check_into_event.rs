@@ -1,3 +1,4 @@
+use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
 use anchor_spl::{
     metadata::{
@@ -17,14 +18,11 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition: u64) -> Result<()
                 master_edition: ctx.accounts.master_edition.to_account_info(),
                 new_mint: ctx.accounts.new_mint.to_account_info(),
                 edition_mark_pda: ctx.accounts.edition_mark_pda.to_account_info(),
-                new_mint_authority: ctx.accounts.new_mint_authority.to_account_info(),
+                new_mint_authority: ctx.accounts.organizer.to_account_info(),
                 payer: ctx.accounts.payer.to_account_info(),
-                token_account_owner: ctx.accounts.token_account_owner.to_account_info(),
+                token_account_owner: ctx.accounts.user.to_account_info(),
                 token_account: ctx.accounts.token_account.to_account_info(),
-                new_metadata_update_authority: ctx
-                    .accounts
-                    .new_metadata_update_authority
-                    .to_account_info(),
+                new_metadata_update_authority: ctx.accounts.organizer.to_account_info(),
                 metadata: ctx.accounts.metadata.to_account_info(),
                 token_program: ctx.accounts.token_program.to_account_info(),
                 system_program: ctx.accounts.system_program.to_account_info(),
@@ -33,13 +31,26 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition: u64) -> Result<()
             },
         ),
         edition,
-    )
+    )?;
+
+    ctx.accounts
+        .user
+        .badges
+        .push(ctx.accounts.new_edition.key());
+
+    Ok(())
 }
 
 #[derive(Accounts)]
 pub struct CheckIntoEvent<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        address = RUMA_WALLET @ RumaError::UnauthorizedMasterWallet
+    )]
     pub payer: Signer<'info>,
+    pub organizer: Account<'info, User>,
+    #[account(mut)]
+    pub user: Account<'info, User>,
     #[account(
         init,
         payer = payer,
@@ -49,22 +60,15 @@ pub struct CheckIntoEvent<'info> {
         mint::token_program = token_program,
     )]
     pub new_mint: InterfaceAccount<'info, Mint>,
-    /// CHECK: no checks needed
-    pub new_mint_authority: UncheckedAccount<'info>,
     pub new_metadata: Account<'info, MetadataAccount>,
-    /// CHECK: no checks needed
-    pub new_metadata_update_authority: UncheckedAccount<'info>,
     /// CHECK: initialized by Metaplex Token Metadata program
     pub new_edition: UncheckedAccount<'info>,
-    /// CHECK: no checks needed
+    /// CHECK: initialized by Metaplex Token Metadata program
     pub edition_mark_pda: UncheckedAccount<'info>,
-    /// CHECK: no checks needed
-    pub metadata_mint: UncheckedAccount<'info>,
+    pub metadata_mint: InterfaceAccount<'info, Mint>,
     pub metadata: Account<'info, MetadataAccount>,
     pub master_edition: Account<'info, MasterEditionAccount>,
     pub token_account: InterfaceAccount<'info, TokenAccount>,
-    /// CHECK: no checks needed
-    pub token_account_owner: UncheckedAccount<'info>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
