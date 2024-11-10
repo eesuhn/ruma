@@ -4,7 +4,7 @@ import { ProgramTestContext, startAnchor } from "solana-bankrun";
 import { BankrunProvider } from "anchor-bankrun";
 import { BN, Program, web3 } from "@coral-xyz/anchor";
 import IDL from "../target/idl/ruma.json";
-import { createAvatar } from "@dicebear/core";
+import { createAvatar, Style } from "@dicebear/core";
 import { icons, shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
@@ -12,6 +12,26 @@ import { createGenericFile } from "@metaplex-foundation/umi";
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 
 describe("ruma", () => {
+  async function generateAvatarUri(style: Style<shapes.Options>, name: string, seed: string = ""): Promise<string> {
+    const avatar = createAvatar(style, {
+      seed,
+      flip: Math.random() >= 0.5,
+      rotate: Math.random() * 360,
+    });
+
+    const file = createGenericFile(
+      avatar.toDataUri(),
+      name,
+      {
+        contentType: "image/svg+xml",
+      }
+    );
+
+    const [uri] = await umi.uploader.upload([file]);
+
+    return uri;
+  }
+
   const organizer = web3.Keypair.generate();
   const attendee = web3.Keypair.generate();
 
@@ -60,24 +80,9 @@ describe("ruma", () => {
 
   test("create profiles", async () => {
     // default profile image
-    const shapeA = createAvatar(shapes, {
-      seed: organizer.publicKey.toBase58(),
-      flip: Math.random() >= 0.5,
-      rotate: Math.random() * 360,
-    });
-
-    const fileA = createGenericFile(
-      shapeA.toDataUri(),
-      "shapeA",
-      {
-        contentType: "image/svg+xml",
-      }
-    );
-
-    const [uriA] = await umi.uploader.upload([fileA]);
 
     const organizerName = "Jeff";
-    const organizerImage = uriA;
+    const organizerImage = await generateAvatarUri(shapes, "organizerImage", organizer.publicKey.toBase58());
 
     await program.methods
       .createProfile(organizerName, organizerImage)
@@ -118,24 +123,9 @@ describe("ruma", () => {
     expect(organizerUserDataAcc.image).toEqual(organizerImage);
 
     // default profile image
-    const shapeB = createAvatar(shapes, {
-      seed: organizer.publicKey.toBase58(),
-      flip: Math.random() >= 0.5,
-      rotate: Math.random() * 360,
-    });
-
-    const fileB = createGenericFile(
-      shapeB.toDataUri(),
-      "shapeB",
-      {
-        contentType: "image/svg+xml",
-      }
-    );
-
-    const [uriB] = await umi.uploader.upload([fileB]);
 
     const attendeeName = "Bob";
-    const attendeeImage = uriB;
+    const attendeeImage = await generateAvatarUri(shapes, "attendeeImage", attendee.publicKey.toBase58());
 
     await program.methods
       .createProfile(attendeeName, attendeeImage)
@@ -176,20 +166,6 @@ describe("ruma", () => {
 
   test("creates an event", async () => {
     // default event image
-    const icon = createAvatar(icons, {
-      flip: Math.random() >= 0.5,
-      rotate: Math.random() * 360,
-    })
-
-    const file = createGenericFile(
-      icon.toDataUri(),
-      "avatar",
-      {
-        contentType: "image/svg+xml",
-      }
-    )
-
-    const [image] = await umi.uploader.upload([file]);
 
     const isPublic = true;
     const needsApproval = true;
@@ -198,6 +174,7 @@ describe("ruma", () => {
     // 24 hours after start
     const endTimestamp = new BN(Date.now() + 1000 * 60 * 60 * 24);
     const name = "EventA";
+    const image = await generateAvatarUri(icons, "eventImage");
     const location = "Sunway University, Subang Jaya";
     const about = "This is a test event";
 
@@ -263,24 +240,11 @@ describe("ruma", () => {
 
   test("creates an event with optional values", async () => {
     // default event image
-    const icon = createAvatar(icons, {
-      flip: Math.random() >= 0.5,
-      rotate: Math.random() * 360,
-    })
-
-    const file = createGenericFile(
-      icon.toDataUri(),
-      "avatar",
-      {
-        contentType: "image/svg+xml",
-      }
-    )
-
-    const [image] = await umi.uploader.upload([file]);
 
     const isPublic = true;
     const needsApproval = true;
     const name = "EventB";
+    const image = await generateAvatarUri(icons, "eventImage");
 
     await program.methods
       .createEvent(
