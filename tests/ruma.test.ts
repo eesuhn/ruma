@@ -1,15 +1,16 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { Ruma } from "../target/types/ruma";
-import { ProgramTestContext, startAnchor } from "solana-bankrun";
+import { BanksClient, ProgramTestContext, startAnchor } from "solana-bankrun";
 import { BankrunProvider } from "anchor-bankrun";
 import { BN, Program, web3 } from "@coral-xyz/anchor";
 import IDL from "../target/idl/ruma.json";
 import { createAvatar, Style } from "@dicebear/core";
-import { icons, shapes } from "@dicebear/collection";
+import { icons, rings, shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
-import { createGenericFile } from "@metaplex-foundation/umi";
-import { MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
+import { createGenericFile, generateSigner } from "@metaplex-foundation/umi";
+import { findMasterEditionPda, findMetadataPda, MPL_TOKEN_METADATA_PROGRAM_ID, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 describe("ruma", () => {
   async function generateAvatarUri(style: Style<shapes.Options>, name: string, seed: string = ""): Promise<string> {
@@ -35,15 +36,17 @@ describe("ruma", () => {
   const organizer = web3.Keypair.generate();
   const attendee = web3.Keypair.generate();
 
-  // devnet connection is a placeholder, no devnet transactions will be made
+  // devnet connection is only used for uploading images
   const umi = createUmi(web3.clusterApiUrl("devnet"))
     .use(mockStorage())
 
   let context: ProgramTestContext;
   let provider: BankrunProvider;
+  let client: BanksClient;
   let program: Program<Ruma>;
   let organizerUserPDA: web3.PublicKey;
   let eventPDA: web3.PublicKey;
+  let optionalEventPDA: web3.PublicKey;
 
   beforeAll(async () => {
     context = await startAnchor("",
@@ -75,6 +78,7 @@ describe("ruma", () => {
       ]
     );
     provider = new BankrunProvider(context);
+    client = context.banksClient;
     program = new Program(IDL as Ruma, provider);
   })
 
@@ -264,7 +268,7 @@ describe("ruma", () => {
       .signers([organizer])
       .rpc();
 
-    const [eventPDA, eventBump] = web3.PublicKey.findProgramAddressSync(
+    const [pda, eventBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("event"),
         organizerUserPDA.toBuffer(),
@@ -273,7 +277,9 @@ describe("ruma", () => {
       program.programId
     );
 
-    const [eventDataPDA, eventDataBump] = web3.PublicKey.findProgramAddressSync(
+    optionalEventPDA = pda;
+
+    const [optionalEventDataPDA, optionalEventDataBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("event_data"),
         organizerUserPDA.toBuffer(),
@@ -282,17 +288,17 @@ describe("ruma", () => {
       program.programId
     );
 
-    const eventAcc = await program.account.event.fetch(eventPDA);
+    const eventAcc = await program.account.event.fetch(optionalEventPDA);
 
     expect(eventAcc.bump).toEqual(eventBump);
     expect(eventAcc.badge).toEqual(null);
     expect(eventAcc.organizer).toEqual(organizerUserPDA);
-    expect(eventAcc.data).toEqual(eventDataPDA);
+    expect(eventAcc.data).toEqual(optionalEventDataPDA);
     expect(eventAcc.attendees).toEqual([]);
 
-    const eventDataAcc = await program.account.eventData.fetch(eventDataPDA);
+    const eventDataAcc = await program.account.eventData.fetch(optionalEventDataPDA);
 
-    expect(eventDataAcc.bump).toEqual(eventDataBump);
+    expect(eventDataAcc.bump).toEqual(optionalEventDataBump);
     expect(eventDataAcc.isPublic).toEqual(isPublic);
     expect(eventDataAcc.needsApproval).toEqual(needsApproval);
     expect(eventDataAcc.name).toEqual(name);
@@ -302,5 +308,91 @@ describe("ruma", () => {
     expect(eventDataAcc.endTimestamp).toEqual(null);
     expect(eventDataAcc.location).toEqual(null);
     expect(eventDataAcc.about).toEqual(null);
+  })
+
+  test("creates a badge with max supply", async () => {
+    const badgeName = "BadgeA";
+    const badgeSymbol = "BDG";
+    const badgeUri = await generateAvatarUri(rings, "badgeUri");
+    // corresponds to capacity of event
+    const maxSupply = 100;
+
+    const umiMint = generateSigner(umi);
+    const web3Mint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+
+    const [metadata] = findMetadataPda(umi, { mint: umiMint.publicKey });
+    const [edition] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+
+    await program.methods
+      .createBadge(
+        badgeName,
+        badgeSymbol,
+        badgeUri,
+        maxSupply
+      )
+      .accounts({
+        payer: organizer.publicKey,
+        event: eventPDA,
+        mint: web3Mint.publicKey,
+        metadata,
+        edition,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([organizer, web3Mint])
+      .rpc();
+
+    const eventAcc = await program.account.event.fetch(eventPDA);
+
+    expect(eventAcc.badge.toBase58()).toEqual(edition);
+
+    const metadataAcc = await client.getAccount(new web3.PublicKey(metadata));
+    
+    expect(metadataAcc).not.toBeNull();
+    
+    const editionAcc = await client.getAccount(new web3.PublicKey(edition));
+    
+    expect(editionAcc).not.toBeNull();
+  })
+
+  test("creates a badge without max supply", async () => {
+    const badgeName = "BadgeB";
+    const badgeSymbol = "BDG";
+    const badgeUri = await generateAvatarUri(rings, "badgeUri");
+
+    const umiMint = generateSigner(umi);
+    const web3Mint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+
+    const [metadata] = findMetadataPda(umi, { mint: umiMint.publicKey });
+    const [edition] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+
+    await program.methods
+      .createBadge(
+        badgeName,
+        badgeSymbol,
+        badgeUri,
+        null
+      )
+      .accounts({
+        payer: organizer.publicKey,
+        event: optionalEventPDA,
+        mint: web3Mint.publicKey,
+        metadata,
+        edition,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([organizer, web3Mint])
+      .rpc();
+
+    const eventAcc = await program.account.event.fetch(optionalEventPDA);
+
+    expect(eventAcc.badge.toBase58()).toEqual(edition);
+
+    const metadataAcc = await client.getAccount(new web3.PublicKey(metadata));
+    
+    expect(metadataAcc).not.toBeNull();
+    
+    const editionAcc = await client.getAccount(new web3.PublicKey(edition));
+    
+    expect(editionAcc).not.toBeNull();
   })
 })
