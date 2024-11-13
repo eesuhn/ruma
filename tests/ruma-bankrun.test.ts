@@ -46,6 +46,7 @@ describe("ruma", () => {
   let participantPDA: web3.PublicKey;
   let eventPDA: web3.PublicKey;
   let optionalEventPDA: web3.PublicKey;
+  let attendeePDA: web3.PublicKey;
 
   const organizer = web3.Keypair.generate();
   const participant = web3.Keypair.generate();
@@ -422,7 +423,7 @@ describe("ruma", () => {
       .signers([masterWalletKeypair])
       .rpc();
 
-    const [attendeePDA, attendeeBump] = web3.PublicKey.findProgramAddressSync(
+    const [pda, attendeeBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("attendee"),
         participantPDA.toBuffer(),
@@ -430,6 +431,8 @@ describe("ruma", () => {
       ],
       program.programId
     )
+
+    attendeePDA = pda;
 
     const attendeeAcc = await program.account.attendee.fetch(attendeePDA);
 
@@ -439,5 +442,22 @@ describe("ruma", () => {
     const eventAcc = await program.account.event.fetch(eventPDA);
 
     expect(eventAcc.attendees[0]).toEqual(attendeePDA);
+  })
+
+  test("changing attendee status", async () => {
+    const newStatus = { approved: {} };
+
+    await program.methods
+      .changeAttendeeStatus(newStatus)
+      .accounts({
+        user: participantPDA,
+        event: eventPDA,
+      })
+      .signers([masterWalletKeypair])
+      .rpc();
+
+    const attendeeAcc = await program.account.attendee.fetch(attendeePDA);
+
+    expect(attendeeAcc.status).toEqual(newStatus);
   })
 })
