@@ -1,6 +1,7 @@
 use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
 use anchor_spl::{
+    associated_token::AssociatedToken,
     metadata::{
         mint_new_edition_from_master_edition_via_token, MasterEditionAccount, Metadata,
         MetadataAccount, MintNewEditionFromMasterEditionViaToken,
@@ -68,9 +69,17 @@ pub struct CheckIntoEvent<'info> {
     pub metadata_mint: InterfaceAccount<'info, Mint>,
     pub metadata: Account<'info, MetadataAccount>,
     pub master_edition: Account<'info, MasterEditionAccount>,
+    #[account(
+        init,
+        payer = payer,
+        associated_token::mint = new_mint,
+        associated_token::authority = payer,
+        associated_token::token_program = token_program,
+    )]
     pub token_account: InterfaceAccount<'info, TokenAccount>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
