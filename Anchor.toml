@@ -17,4 +17,4 @@ cluster = "Localnet"
 wallet = "ruma-wallet.json"
 
 [scripts]
-test = "bun test --timeout 1000000"
+test-bankrun = "bun test bankrun --timeout 1000000"

@@ -9,7 +9,7 @@ import { icons, rings, shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
 import { createGenericFile, generateSigner } from "@metaplex-foundation/umi";
-import { findMasterEditionPda, findMetadataPda, MPL_TOKEN_METADATA_PROGRAM_ID, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { findMasterEditionPda, findMetadataPda, MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 describe("ruma", () => {
@@ -33,9 +33,6 @@ describe("ruma", () => {
     return uri;
   }
 
-  const organizer = web3.Keypair.generate();
-  const attendee = web3.Keypair.generate();
-
   // devnet connection is only used for uploading images
   const umi = createUmi(web3.clusterApiUrl("devnet"))
     .use(mockStorage())
@@ -47,6 +44,9 @@ describe("ruma", () => {
   let organizerUserPDA: web3.PublicKey;
   let eventPDA: web3.PublicKey;
   let optionalEventPDA: web3.PublicKey;
+  
+  const organizer = web3.Keypair.generate();
+  const attendee = web3.Keypair.generate();
 
   beforeAll(async () => {
     context = await startAnchor("",
