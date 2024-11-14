@@ -43,11 +43,11 @@ describe("ruma", () => {
   let optionalEventPDA: web3.PublicKey;
 
   const organizer = web3.Keypair.generate();
-  const attendee = web3.Keypair.generate();
+  const registrant = web3.Keypair.generate();
 
   beforeAll(async () => {
     const sigA = await connection.requestAirdrop(organizer.publicKey, 5_000_000_000);
-    const sigB = await connection.requestAirdrop(attendee.publicKey, 5_000_000_000);
+    const sigB = await connection.requestAirdrop(registrant.publicKey, 5_000_000_000);
 
     const { blockhash, lastValidBlockHeight } = await programProvider.connection.getLatestBlockhash();
 
@@ -108,44 +108,44 @@ describe("ruma", () => {
     expect(organizerUserDataAcc.image).toEqual(organizerImage);
 
     // default profile image
-    const attendeeName = "Bob";
-    const attendeeImage = await generateAvatarUri(shapes, "attendeeImage", attendee.publicKey.toBase58());
+    const registrantName = "Bob";
+    const registrantImage = await generateAvatarUri(shapes, "registrantImage", registrant.publicKey.toBase58());
 
     await program.methods
-      .createProfile(attendeeName, attendeeImage)
+      .createProfile(registrantName, registrantImage)
       .accounts({
-        payer: attendee.publicKey,
+        payer: registrant.publicKey,
       })
-      .signers([attendee])
+      .signers([registrant])
       .rpc();
 
-    const [attendeeUserPDA, attendeeUserBump] = web3.PublicKey.findProgramAddressSync(
+    const [registrantUserPDA, registrantUserBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("user"),
-        attendee.publicKey.toBuffer()
+        registrant.publicKey.toBuffer()
       ],
       program.programId
     );
 
-    const [attendeeUserDataPDA, attendeeUserDataBump] = web3.PublicKey.findProgramAddressSync(
+    const [registrantUserDataPDA, registrantUserDataBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("user_data"),
-        attendee.publicKey.toBuffer()
+        registrant.publicKey.toBuffer()
       ],
       program.programId
     );
 
-    const attendeeUserAcc = await program.account.user.fetch(attendeeUserPDA);
+    const registrantUserAcc = await program.account.user.fetch(registrantUserPDA);
 
-    expect(attendeeUserAcc.bump).toEqual(attendeeUserBump);
-    expect(attendeeUserAcc.data).toEqual(attendeeUserDataPDA);
-    expect(attendeeUserAcc.badges).toEqual([]);
+    expect(registrantUserAcc.bump).toEqual(registrantUserBump);
+    expect(registrantUserAcc.data).toEqual(registrantUserDataPDA);
+    expect(registrantUserAcc.badges).toEqual([]);
 
-    const attendeeUserDataAcc = await program.account.userData.fetch(attendeeUserDataPDA);
+    const registrantUserDataAcc = await program.account.userData.fetch(registrantUserDataPDA);
 
-    expect(attendeeUserDataAcc.bump).toEqual(attendeeUserDataBump);
-    expect(attendeeUserDataAcc.name).toEqual(attendeeName);
-    expect(attendeeUserDataAcc.image).toEqual(attendeeImage);
+    expect(registrantUserDataAcc.bump).toEqual(registrantUserDataBump);
+    expect(registrantUserDataAcc.name).toEqual(registrantName);
+    expect(registrantUserDataAcc.image).toEqual(registrantImage);
   })
 
   test("creates an event", async () => {
