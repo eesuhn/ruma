@@ -5,7 +5,7 @@ import { createAvatar, Style } from "@dicebear/core";
 import { icons, rings, shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
-import { createGenericFile, generateSigner } from "@metaplex-foundation/umi";
+import { createGenericFile, generateSigner, PublicKey } from "@metaplex-foundation/umi";
 import { fetchMasterEdition, fetchMetadata, findMasterEditionPda, findMetadataPda, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
@@ -38,14 +38,25 @@ describe("ruma", () => {
   const programProvider = program.provider as AnchorProvider;
   const connection = programProvider.connection;
 
+  let masterWalletKeypair: web3.Keypair;
   let organizerUserPDA: web3.PublicKey;
+  let registrantUserPDA: web3.PublicKey;
   let eventPDA: web3.PublicKey;
   let optionalEventPDA: web3.PublicKey;
+  let masterMintA: web3.Keypair;
+  let masterMetadataA: PublicKey;
+  let masterEditionA: PublicKey;
+  let masterMintB: web3.Keypair;
+  let masterMetadataB: PublicKey;
+  let masterEditionB: PublicKey;
+  let attendeePDA: web3.PublicKey;
 
   const organizer = web3.Keypair.generate();
   const registrant = web3.Keypair.generate();
 
   beforeAll(async () => {
+    masterWalletKeypair = web3.Keypair.fromSecretKey(new Uint8Array(await Bun.file("ruma-wallet.json").json()));
+
     const sigA = await connection.requestAirdrop(organizer.publicKey, 5_000_000_000);
     const sigB = await connection.requestAirdrop(registrant.publicKey, 5_000_000_000);
 
@@ -77,7 +88,7 @@ describe("ruma", () => {
       .signers([organizer])
       .rpc();
 
-    const [pda, organizerUserBump] = web3.PublicKey.findProgramAddressSync(
+    const [pda1, organizerUserBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("user"),
         organizer.publicKey.toBuffer()
@@ -85,7 +96,7 @@ describe("ruma", () => {
       program.programId
     );
 
-    organizerUserPDA = pda;
+    organizerUserPDA = pda1;
 
     const [organizerUserDataPDA, organizerUserDataBump] = web3.PublicKey.findProgramAddressSync(
       [
@@ -119,13 +130,15 @@ describe("ruma", () => {
       .signers([registrant])
       .rpc();
 
-    const [registrantUserPDA, registrantUserBump] = web3.PublicKey.findProgramAddressSync(
+    const [pda2, registrantUserBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("user"),
         registrant.publicKey.toBuffer()
       ],
       program.programId
     );
+
+    registrantUserPDA = pda2;
 
     const [registrantUserDataPDA, registrantUserDataBump] = web3.PublicKey.findProgramAddressSync(
       [
@@ -293,13 +306,13 @@ describe("ruma", () => {
     const badgeSymbol = "BDG";
     const badgeUri = await generateAvatarUri(rings, "badgeUri");
     // corresponds to capacity of event
-    const maxSupply = 100;
+    const maxSupply = 1;
 
     const umiMint = generateSigner(umi);
-    const web3Mint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+    masterMintA = web3.Keypair.fromSecretKey(umiMint.secretKey);
 
-    const [metadata] = findMetadataPda(umi, { mint: umiMint.publicKey });
-    const [masterEdition] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+    [masterMetadataA] = findMetadataPda(umi, { mint: umiMint.publicKey });
+    [masterEditionA] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
 
     await program.methods
       .createBadge(
@@ -311,17 +324,17 @@ describe("ruma", () => {
       .accounts({
         payer: organizer.publicKey,
         event: eventPDA,
-        mint: web3Mint.publicKey,
+        mint: masterMintA.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([organizer, web3Mint])
+      .signers([organizer, masterMintA])
       .rpc();
 
     const eventAcc = await program.account.event.fetch(eventPDA);
 
-    expect(eventAcc.badge.toBase58()).toEqual(masterEdition);
+    expect(eventAcc.badge.toBase58()).toEqual(masterEditionA);
 
-    const metadataAcc = await fetchMetadata(umi, metadata);
+    const metadataAcc = await fetchMetadata(umi, masterMetadataA);
 
     const organizerUserAcc = web3.PublicKey.findProgramAddressSync(
       [
@@ -337,7 +350,7 @@ describe("ruma", () => {
     // @ts-ignore
     expect(metadataAcc.creators.value[0].address).toEqual(organizerUserAcc.toBase58());
 
-    const masterEditionAcc = await fetchMasterEdition(umi, masterEdition);
+    const masterEditionAcc = await fetchMasterEdition(umi, masterEditionA);
 
     // @ts-ignore
     expect(Number(masterEditionAcc.maxSupply.value)).toEqual(maxSupply);
@@ -350,10 +363,10 @@ describe("ruma", () => {
     const badgeUri = await generateAvatarUri(rings, "badgeUri");
 
     const umiMint = generateSigner(umi);
-    const web3Mint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+    masterMintB = web3.Keypair.fromSecretKey(umiMint.secretKey);
 
-    const [metadata] = findMetadataPda(umi, { mint: umiMint.publicKey });
-    const [masterEdition] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+    [masterMetadataB] = findMetadataPda(umi, { mint: umiMint.publicKey });
+    [masterEditionB] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
 
     await program.methods
       .createBadge(
@@ -365,17 +378,17 @@ describe("ruma", () => {
       .accounts({
         payer: organizer.publicKey,
         event: optionalEventPDA,
-        mint: web3Mint.publicKey,
+        mint: masterMintB.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([organizer, web3Mint])
+      .signers([organizer, masterMintB])
       .rpc();
 
     const eventAcc = await program.account.event.fetch(optionalEventPDA);
 
-    expect(eventAcc.badge.toBase58()).toEqual(masterEdition);
+    expect(eventAcc.badge.toBase58()).toEqual(masterEditionB);
 
-    const metadataAcc = await fetchMetadata(umi, metadata);
+    const metadataAcc = await fetchMetadata(umi, masterMetadataB);
 
     const organizerUserAcc = web3.PublicKey.findProgramAddressSync(
       [
@@ -391,10 +404,43 @@ describe("ruma", () => {
     // @ts-ignore
     expect(metadataAcc.creators.value[0].address).toEqual(organizerUserAcc.toBase58());
 
-    const masterEditionAcc = await fetchMasterEdition(umi, masterEdition);
+    const masterEditionAcc = await fetchMasterEdition(umi, masterEditionB);
 
     // @ts-ignore
     expect(masterEditionAcc.maxSupply.value).toEqual(undefined);
     expect(Number(masterEditionAcc.supply)).toEqual(0);
+  })
+
+  test("registers for an event", async () => {
+    const name = "EventA";
+
+    await program.methods
+      .registerForEvent(name)
+      .accounts({
+        organizer: organizerUserPDA,
+        registrant: registrantUserPDA,
+      })
+      .signers([masterWalletKeypair])
+      .rpc();
+
+    const [pda, attendeeBump] = web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("attendee"),
+        registrantUserPDA.toBuffer(),
+        eventPDA.toBuffer(),
+      ],
+      program.programId
+    )
+
+    attendeePDA = pda;
+
+    const attendeeAcc = await program.account.attendee.fetch(attendeePDA);
+
+    expect(attendeeAcc.bump).toEqual(attendeeBump);
+    expect(attendeeAcc.status).toEqual({ pending: {} });
+
+    const eventAcc = await program.account.event.fetch(eventPDA);
+
+    expect(eventAcc.attendees[0]).toEqual(attendeePDA);
   })
 })

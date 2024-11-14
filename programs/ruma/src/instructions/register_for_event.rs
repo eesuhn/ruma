@@ -29,7 +29,7 @@ pub struct RegisterForEvent<'info> {
     )]
     pub payer: Signer<'info>,
     pub organizer: Account<'info, User>,
-    pub user: Account<'info, User>,
+    pub registrant: Account<'info, User>,
     #[account(
         mut,
         seeds = [EVENT_SEED, organizer.key().as_ref(), name.as_bytes()],
@@ -42,7 +42,7 @@ pub struct RegisterForEvent<'info> {
     #[account(
         init,
         space = Attendee::MIN_SPACE,
-        seeds = [ATTENDEE_SEED, user.key().as_ref(), event.key().as_ref()],
+        seeds = [ATTENDEE_SEED, registrant.key().as_ref(), event.key().as_ref()],
         bump,
         payer = payer,
     )]
