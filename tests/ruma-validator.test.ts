@@ -443,4 +443,21 @@ describe("ruma", () => {
 
     expect(eventAcc.attendees[0]).toEqual(attendeePDA);
   })
+
+  test("changing attendee status", async () => {
+    const newStatus = { approved: {} };
+
+    await program.methods
+      .changeAttendeeStatus(newStatus)
+      .accounts({
+        user: registrantUserPDA,
+        event: eventPDA,
+      })
+      .signers([masterWalletKeypair])
+      .rpc();
+
+    const attendeeAcc = await program.account.attendee.fetch(attendeePDA);
+
+    expect(attendeeAcc.status).toEqual(newStatus);
+  })
 })
