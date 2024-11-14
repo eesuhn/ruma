@@ -311,9 +311,6 @@ describe("ruma", () => {
     const umiMint = generateSigner(umi);
     masterMintA = web3.Keypair.fromSecretKey(umiMint.secretKey);
 
-    [masterMetadataA] = findMetadataPda(umi, { mint: umiMint.publicKey });
-    [masterEditionA] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
-
     await program.methods
       .createBadge(
         badgeName,
@@ -330,9 +327,7 @@ describe("ruma", () => {
       .signers([organizer, masterMintA])
       .rpc();
 
-    const eventAcc = await program.account.event.fetch(eventPDA);
-
-    expect(eventAcc.badge.toBase58()).toEqual(masterEditionA);
+    [masterMetadataA] = findMetadataPda(umi, { mint: umiMint.publicKey });
 
     const metadataAcc = await fetchMetadata(umi, masterMetadataA);
 
@@ -350,11 +345,17 @@ describe("ruma", () => {
     // @ts-ignore
     expect(metadataAcc.creators.value[0].address).toEqual(organizerUserAcc.toBase58());
 
+    [masterEditionA] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+
     const masterEditionAcc = await fetchMasterEdition(umi, masterEditionA);
 
     // @ts-ignore
     expect(Number(masterEditionAcc.maxSupply.value)).toEqual(maxSupply);
     expect(Number(masterEditionAcc.supply)).toEqual(0);
+
+    const eventAcc = await program.account.event.fetch(eventPDA);
+
+    expect(eventAcc.badge.toBase58()).toEqual(masterEditionA);
   })
 
   test("creates a badge without max supply", async () => {
@@ -364,9 +365,6 @@ describe("ruma", () => {
 
     const umiMint = generateSigner(umi);
     masterMintB = web3.Keypair.fromSecretKey(umiMint.secretKey);
-
-    [masterMetadataB] = findMetadataPda(umi, { mint: umiMint.publicKey });
-    [masterEditionB] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
 
     await program.methods
       .createBadge(
@@ -384,9 +382,7 @@ describe("ruma", () => {
       .signers([organizer, masterMintB])
       .rpc();
 
-    const eventAcc = await program.account.event.fetch(optionalEventPDA);
-
-    expect(eventAcc.badge.toBase58()).toEqual(masterEditionB);
+    [masterMetadataB] = findMetadataPda(umi, { mint: umiMint.publicKey });
 
     const metadataAcc = await fetchMetadata(umi, masterMetadataB);
 
@@ -404,11 +400,17 @@ describe("ruma", () => {
     // @ts-ignore
     expect(metadataAcc.creators.value[0].address).toEqual(organizerUserAcc.toBase58());
 
+    [masterEditionB] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+
     const masterEditionAcc = await fetchMasterEdition(umi, masterEditionB);
 
     // @ts-ignore
     expect(masterEditionAcc.maxSupply.value).toEqual(undefined);
     expect(Number(masterEditionAcc.supply)).toEqual(0);
+
+    const eventAcc = await program.account.event.fetch(optionalEventPDA);
+
+    expect(eventAcc.badge.toBase58()).toEqual(masterEditionB);
   })
 
   test("registers for an event", async () => {
