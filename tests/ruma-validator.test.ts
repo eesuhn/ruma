@@ -321,10 +321,13 @@ describe("ruma", () => {
       .accounts({
         payer: organizer.publicKey,
         event: eventPDA,
-        mint: masterMintA.publicKey,
+        masterMint: masterMintA.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([organizer, masterMintA])
+      .preInstructions([
+        web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+      ], true)
       .rpc();
 
     [masterMetadataA] = findMetadataPda(umi, { mint: umiMint.publicKey });
@@ -356,6 +359,11 @@ describe("ruma", () => {
     const eventAcc = await program.account.event.fetch(eventPDA);
 
     expect(eventAcc.badge.toBase58()).toEqual(masterEditionA);
+
+    const masterTokenAccountPda = getAssociatedTokenAddressSync(masterMintA.publicKey, organizerUserPDA, true);
+    const masterTokenAccount = await getAccount(connection, masterTokenAccountPda);
+
+    expect(Number(masterTokenAccount.amount)).toEqual(1);
   })
 
   test("creates a badge without max supply", async () => {
@@ -376,10 +384,13 @@ describe("ruma", () => {
       .accounts({
         payer: organizer.publicKey,
         event: optionalEventPDA,
-        mint: masterMintB.publicKey,
+        masterMint: masterMintB.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([organizer, masterMintB])
+      .preInstructions([
+        web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+      ], true)
       .rpc();
 
     [masterMetadataB] = findMetadataPda(umi, { mint: umiMint.publicKey });
@@ -411,6 +422,11 @@ describe("ruma", () => {
     const eventAcc = await program.account.event.fetch(optionalEventPDA);
 
     expect(eventAcc.badge.toBase58()).toEqual(masterEditionB);
+
+    const masterTokenAccountPda = getAssociatedTokenAddressSync(masterMintB.publicKey, organizerUserPDA, true);
+    const masterTokenAccount = await getAccount(connection, masterTokenAccountPda);
+
+    expect(Number(masterTokenAccount.amount)).toEqual(1);
   })
 
   test("registers for an event", async () => {

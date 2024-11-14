@@ -4,7 +4,7 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     metadata::{
         mpl_token_metadata::{
-            instructions::CreateV1CpiBuilder,
+            instructions::{CreateV1CpiBuilder, MintV1CpiBuilder},
             types::{Creator, PrintSupply, TokenStandard},
         },
         Metadata,
@@ -25,9 +25,9 @@ pub fn create_badge(
 
     CreateV1CpiBuilder::new(&ctx.accounts.token_metadata_program.to_account_info())
         .payer(&ctx.accounts.payer.to_account_info())
-        .metadata(&ctx.accounts.metadata.to_account_info())
+        .metadata(&ctx.accounts.master_metadata.to_account_info())
         .master_edition(Some(&ctx.accounts.master_edition.to_account_info()))
-        .mint(&ctx.accounts.mint.to_account_info(), true)
+        .mint(&ctx.accounts.master_mint.to_account_info(), true)
         .authority(&ctx.accounts.organizer.to_account_info())
         .update_authority(&ctx.accounts.organizer.to_account_info(), true)
         .system_program(&ctx.accounts.system_program.to_account_info())
@@ -49,6 +49,24 @@ pub fn create_badge(
         } else {
             PrintSupply::Unlimited
         })
+        .invoke_signed(&[&[
+            USER_SEED,
+            ctx.accounts.payer.key().as_ref(),
+            &[ctx.accounts.organizer.bump],
+        ]])?;
+
+    MintV1CpiBuilder::new(&ctx.accounts.token_metadata_program.to_account_info())
+        .payer(&ctx.accounts.payer.to_account_info())
+        .mint(&ctx.accounts.master_mint.to_account_info())
+        .authority(&ctx.accounts.organizer.to_account_info())
+        .token(&ctx.accounts.master_token_account.to_account_info())
+        .token_owner(Some(&ctx.accounts.organizer.to_account_info()))
+        .metadata(&ctx.accounts.master_metadata.to_account_info())
+        .master_edition(Some(&ctx.accounts.master_edition.to_account_info()))
+        .spl_token_program(&ctx.accounts.token_program.to_account_info())
+        .spl_ata_program(&ctx.accounts.associated_token_program.to_account_info())
+        .system_program(&ctx.accounts.system_program.to_account_info())
+        .sysvar_instructions(&ctx.accounts.rent.to_account_info())
         .invoke_signed(&[&[
             USER_SEED,
             ctx.accounts.payer.key().as_ref(),
@@ -79,27 +97,27 @@ pub struct CreateBadge<'info> {
         mint::freeze_authority = organizer,
         mint::token_program = token_program,
     )]
-    pub mint: InterfaceAccount<'info, Mint>,
+    pub master_mint: InterfaceAccount<'info, Mint>,
     #[account(
         init,
         payer = payer,
-        associated_token::mint = mint,
+        associated_token::mint = master_mint,
         associated_token::authority = organizer,
         associated_token::token_program = token_program,
     )]
-    pub associated_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub master_token_account: InterfaceAccount<'info, TokenAccount>,
     /// CHECK: initialized by Metaplex Token Metadata program
     #[account(
         mut,
-        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint.key().as_ref()],
+        seeds = [b"metadata", token_metadata_program.key().as_ref(), master_mint.key().as_ref()],
         bump,
         seeds::program = token_metadata_program.key()
     )]
-    pub metadata: UncheckedAccount<'info>,
+    pub master_metadata: UncheckedAccount<'info>,
     /// CHECK: initialized by Metaplex Token Metadata program
     #[account(
         mut,
-        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint.key().as_ref(), b"edition"],
+        seeds = [b"metadata", token_metadata_program.key().as_ref(), master_mint.key().as_ref(), b"edition"],
         bump,
         seeds::program = token_metadata_program.key()
     )]
