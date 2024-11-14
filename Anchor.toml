@@ -18,3 +18,4 @@ wallet = "ruma-wallet.json"
 
 [scripts]
 test-bankrun = "bun test bankrun --timeout 1000000"
+test-validator = "bun test validator --timeout 1000000"

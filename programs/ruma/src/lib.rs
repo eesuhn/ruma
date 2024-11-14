@@ -47,7 +47,7 @@ pub mod ruma {
         badge_name: String,
         badge_symbol: String,
         badge_uri: String,
-        max_supply: Option<u32>,
+        max_supply: Option<u64>,
     ) -> Result<()> {
         instructions::create_badge(ctx, badge_name, badge_symbol, badge_uri, max_supply)
     }
@@ -63,7 +63,7 @@ pub mod ruma {
         instructions::change_attendee_status(ctx, status)
     }
 
-    pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition: u64) -> Result<()> {
-        instructions::check_into_event(ctx, edition)
+    pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Result<()> {
+        instructions::check_into_event(ctx, edition_number)
     }
 }
