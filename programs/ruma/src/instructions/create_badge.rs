@@ -73,7 +73,7 @@ pub fn create_badge(
             &[ctx.accounts.organizer.bump],
         ]])?;
 
-    ctx.accounts.event.badge = Some(ctx.accounts.master_edition.key());
+    ctx.accounts.event.badge = Some(ctx.accounts.master_mint.key());
 
     Ok(())
 }

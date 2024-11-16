@@ -358,7 +358,7 @@ describe("ruma", () => {
 
     const eventAcc = await program.account.event.fetch(eventPDA);
 
-    expect(eventAcc.badge.toBase58()).toEqual(masterEditionA);
+    expect(eventAcc.badge).toEqual(masterMintA.publicKey);
 
     const masterTokenAccountPda = getAssociatedTokenAddressSync(masterMintA.publicKey, organizerUserPDA, true);
     const masterTokenAccount = await getAccount(connection, masterTokenAccountPda);
@@ -421,7 +421,7 @@ describe("ruma", () => {
 
     const eventAcc = await program.account.event.fetch(optionalEventPDA);
 
-    expect(eventAcc.badge.toBase58()).toEqual(masterEditionB);
+    expect(eventAcc.badge).toEqual(masterMintB.publicKey);
 
     const masterTokenAccountPda = getAssociatedTokenAddressSync(masterMintB.publicKey, organizerUserPDA, true);
     const masterTokenAccount = await getAccount(connection, masterTokenAccountPda);
@@ -523,6 +523,6 @@ describe("ruma", () => {
 
     const registrantUserAcc = await program.account.user.fetch(registrantUserPDA);
 
-    expect(registrantUserAcc.badges[0].toBase58()).toEqual(edition);
+    expect(registrantUserAcc.badges[0]).toEqual(editionMint.publicKey);
   })
 })

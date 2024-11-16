@@ -58,7 +58,7 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Re
     ctx.accounts
         .registrant
         .badges
-        .push(ctx.accounts.edition.key());
+        .push(ctx.accounts.edition_mint.key());
 
     Ok(())
 }
