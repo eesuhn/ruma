@@ -5,9 +5,9 @@ import { createAvatar, Style } from "@dicebear/core";
 import { icons, rings, shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
-import { createGenericFile, generateSigner, PublicKey } from "@metaplex-foundation/umi";
-import { fetchMasterEdition, fetchMetadata, findMasterEditionPda, findMetadataPda, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { createGenericFile, generateSigner, publicKey, PublicKey } from "@metaplex-foundation/umi";
+import { fetchDigitalAsset, fetchMasterEdition, fetchMetadata, findEditionMarkerFromEditionNumberPda, findMasterEditionPda, findMetadataPda, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import { getAccount, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 describe("ruma", () => {
   async function generateAvatarUri(style: Style<shapes.Options>, name: string, seed: string = ""): Promise<string> {
@@ -306,7 +306,7 @@ describe("ruma", () => {
     const badgeSymbol = "BDG";
     const badgeUri = await generateAvatarUri(rings, "badgeUri");
     // corresponds to capacity of event
-    const maxSupply = 1;
+    const maxSupply = 5;
 
     const umiMint = generateSigner(umi);
     masterMintA = web3.Keypair.fromSecretKey(umiMint.secretKey);
@@ -477,5 +477,52 @@ describe("ruma", () => {
     const attendeeAcc = await program.account.attendee.fetch(attendeePDA);
 
     expect(attendeeAcc.status).toEqual(newStatus);
+  })
+
+  test("checking into an event", async () => {
+    const masterEditionAcc = await fetchMasterEdition(umi, masterEditionA);
+    const editionNumber = Number(masterEditionAcc.supply) + 1;
+
+    const umiMint = generateSigner(umi);
+    const editionMint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+
+    const [editionMarkerPda] = findEditionMarkerFromEditionNumberPda(umi, {
+      mint: publicKey(masterMintA.publicKey),
+      editionNumber
+    });
+
+    const masterTokenAccount = getAssociatedTokenAddressSync(masterMintA.publicKey, organizerUserPDA, true);
+
+    await program.methods
+      .checkIntoEvent(new BN(editionNumber))
+      .accounts({
+        host: organizer.publicKey,
+        registrant: registrantUserPDA,
+        editionMint: editionMint.publicKey,
+        editionMarkerPda,
+        masterMint: masterMintA.publicKey,
+        masterTokenAccount,
+        masterMetadata: masterMetadataA,
+        masterEdition: masterEditionA,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .preInstructions([
+        web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+      ], true)
+      .signers([masterWalletKeypair, editionMint, organizer])
+      .rpc()
+
+    // findMasterEditionPda is also used to derive pda of printed editions
+    const [edition] = findMasterEditionPda(umi, { mint: umiMint.publicKey });
+    const editionAcc = await fetchDigitalAsset(umi, umiMint.publicKey)
+
+    expect(editionAcc.edition.isOriginal).toEqual(false);
+    expect(editionAcc.edition.publicKey).toEqual(edition);
+    // @ts-ignore
+    expect(Number(editionAcc.edition.edition)).toEqual(editionNumber);
+
+    const registrantUserAcc = await program.account.user.fetch(registrantUserPDA);
+
+    expect(registrantUserAcc.badges[0].toBase58()).toEqual(edition);
   })
 })
