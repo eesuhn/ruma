@@ -17,5 +17,11 @@ cluster = "Localnet"
 wallet = "ruma-wallet.json"
 
 [scripts]
-test-bankrun = "bun test bankrun --timeout 1000000"
-test-validator = "bun test validator --timeout 1000000"
+test = "bun test --timeout 1000000"
+
+[test]
+upgradeable = true
+
+[[test.genesis]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+program = "tests/fixtures/mpl_token_metadata.so"
