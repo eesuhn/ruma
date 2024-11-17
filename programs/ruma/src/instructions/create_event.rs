@@ -36,7 +36,6 @@ pub fn create_event(
     let event = &mut ctx.accounts.event;
 
     event.bump = ctx.bumps.event;
-    event.organizer = ctx.accounts.organizer.key();
     event.data = ctx.accounts.event_data.key();
     event.badge = None;
     event.attendees = Vec::new();

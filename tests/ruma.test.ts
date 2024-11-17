@@ -225,7 +225,6 @@ describe("ruma", () => {
 
     expect(eventAcc.bump).toEqual(eventBump);
     expect(eventAcc.badge).toEqual(null);
-    expect(eventAcc.organizer).toEqual(organizerUserPDA);
     expect(eventAcc.data).toEqual(eventDataPDA);
     expect(eventAcc.attendees).toEqual([]);
 
@@ -292,7 +291,6 @@ describe("ruma", () => {
 
     expect(eventAcc.bump).toEqual(eventBump);
     expect(eventAcc.badge).toEqual(null);
-    expect(eventAcc.organizer).toEqual(organizerUserPDA);
     expect(eventAcc.data).toEqual(optionalEventDataPDA);
     expect(eventAcc.attendees).toEqual([]);
 
