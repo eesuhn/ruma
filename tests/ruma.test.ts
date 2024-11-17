@@ -179,7 +179,7 @@ describe("ruma", () => {
     // 24 hours after start
     const endTimestamp = new BN(Date.now() + 1000 * 60 * 60 * 24);
     const name = "EventA";
-    const image = await generateAvatarUri(icons, "eventImage");
+    const image = await generateAvatarUri(icons, "eventAImage");
     const location = "Sunway University, Subang Jaya";
     const about = "This is a test event";
 
@@ -247,7 +247,7 @@ describe("ruma", () => {
     const isPublic = true;
     const needsApproval = true;
     const name = "EventB";
-    const image = await generateAvatarUri(icons, "eventImage");
+    const image = await generateAvatarUri(icons, "eventBImage");
 
     await program.methods
       .createEvent(
@@ -533,53 +533,70 @@ describe("ruma", () => {
     expect(registrantUserAcc.badges[0]).toEqual(editionMint.publicKey);
   });
 
-  test("throws when checking into a full event", async () => {
-    const masterEditionAcc = await fetchMasterEdition(umi, masterEditionA);
-    const editionNumber = Number(masterEditionAcc.supply) + 1;
+  test("throws when registering for the same event again", async () => {
+    try {
+      await program.methods
+        .registerForEvent("EventA")
+        .accounts({
+          organizer: organizerUserPDA,
+          registrant: registrantUserPDA,
+        })
+        .signers([masterWalletKeypair])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(web3.SendTransactionError);
+      expect(err.logs).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(/Allocate: account Address \{[^}]+\} already in use/)
+        ])
+      );
+    }
+  });
 
-    const umiMint = generateSigner(umi);
-    const editionMint = web3.Keypair.fromSecretKey(umiMint.secretKey);
-
-    const [editionMarkerPda] = findEditionMarkerFromEditionNumberPda(umi, {
-      mint: publicKey(masterMintA.publicKey),
-      editionNumber
-    });
+  test("throws when changing status of user that has not registered", async () => {
+    const name = "EventC";
 
     await program.methods
-      .createProfile(
-        "Jack",
-        await generateAvatarUri(shapes, "registrantBImage", organizer.publicKey.toBase58())
+      .createEvent(
+        true,
+        true,
+        name,
+        await generateAvatarUri(icons, "eventCImage"),
+        100,
+        new BN(Date.now()),
+        new BN(Date.now() + 1000 * 60 * 60 * 24),
+        "Sunway University, Subang Jaya",
+        "This is a test event"
       )
       .accounts({
-        payer: registrantB.publicKey,
+        payer: organizer.publicKey,
       })
-      .signers([registrantB])
+      .signers([organizer])
       .rpc();
 
-    const masterTokenAccount = getAssociatedTokenAddressSync(masterMintA.publicKey, organizerUserPDA, true);
+    const [pda] = web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("event"),
+        organizerUserPDA.toBuffer(),
+        Buffer.from(name)
+      ],
+      program.programId
+    );
 
     try {
       await program.methods
-        .checkIntoEvent(new BN(editionNumber))
-        .accountsPartial({
-          host: organizer.publicKey,
-          registrant: registrantUserPDA,
-          editionMint: editionMint.publicKey,
-          editionMarkerPda,
-          masterMint: masterMintA.publicKey,
-          masterTokenAccount,
-          masterMetadata: masterMetadataA,
-          masterEdition: masterEditionA,
-          tokenProgram: TOKEN_PROGRAM_ID,
+        .changeAttendeeStatus({ approved: {} })
+        .accounts({
+          user: registrantUserPDA,
+          event: pda,
         })
-        .preInstructions([
-          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
-        ], true)
-        .signers([masterWalletKeypair, editionMint, organizer])
-        .rpc()
+        .signers([masterWalletKeypair])
+        .rpc();
     } catch (err) {
-      expect(err).toBeInstanceOf(web3.SendTransactionError);
-      expect(err.logs).toContain("Program log: Edition Number greater than max supply");
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("AccountNotInitialized");
+      expect(err.error.errorCode.number).toEqual(3012);
+      expect(err.error.origin).toEqual("attendee");
     }
-  })
+  });
 })
