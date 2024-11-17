@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { Ruma } from "../target/types/ruma";
-import { AnchorProvider, BN, Program, web3, workspace } from "@coral-xyz/anchor";
+import { AnchorError, AnchorProvider, BN, Program, web3, workspace } from "@coral-xyz/anchor";
 import { createAvatar, Style } from "@dicebear/core";
 import { icons, rings, shapes } from "@dicebear/collection";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -8,6 +8,7 @@ import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
 import { createGenericFile, generateSigner, publicKey, PublicKey } from "@metaplex-foundation/umi";
 import { fetchDigitalAsset, fetchMasterEdition, fetchMetadata, findEditionMarkerFromEditionNumberPda, findMasterEditionPda, findMetadataPda, mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { getAccount, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { rpc } from "@coral-xyz/anchor/dist/cjs/utils";
 
 describe("ruma", () => {
   async function generateAvatarUri(style: Style<shapes.Options>, name: string, seed: string = ""): Promise<string> {
@@ -52,15 +53,17 @@ describe("ruma", () => {
   let attendeePDA: web3.PublicKey;
 
   const organizer = web3.Keypair.generate();
-  const registrant = web3.Keypair.generate();
+  const registrantA = web3.Keypair.generate();
+  const registrantB = web3.Keypair.generate();
 
   beforeAll(async () => {
     masterWalletKeypair = web3.Keypair.fromSecretKey(new Uint8Array(await Bun.file("ruma-wallet.json").json()));
 
     const sigA = await connection.requestAirdrop(organizer.publicKey, 5_000_000_000);
-    const sigB = await connection.requestAirdrop(registrant.publicKey, 5_000_000_000);
+    const sigB = await connection.requestAirdrop(registrantA.publicKey, 5_000_000_000);
+    const sigC = await connection.requestAirdrop(registrantB.publicKey, 5_000_000_000);
 
-    const { blockhash, lastValidBlockHeight } = await programProvider.connection.getLatestBlockhash();
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
     await connection.confirmTransaction({
       blockhash,
@@ -72,6 +75,12 @@ describe("ruma", () => {
       blockhash,
       lastValidBlockHeight,
       signature: sigB,
+    });
+
+    await connection.confirmTransaction({
+      blockhash,
+      lastValidBlockHeight,
+      signature: sigC,
     });
   });
 
@@ -120,20 +129,20 @@ describe("ruma", () => {
 
     // default profile image
     const registrantName = "Bob";
-    const registrantImage = await generateAvatarUri(shapes, "registrantImage", registrant.publicKey.toBase58());
+    const registrantImage = await generateAvatarUri(shapes, "registrantAImage", registrantA.publicKey.toBase58());
 
     await program.methods
       .createProfile(registrantName, registrantImage)
       .accounts({
-        payer: registrant.publicKey,
+        payer: registrantA.publicKey,
       })
-      .signers([registrant])
+      .signers([registrantA])
       .rpc();
 
     const [pda2, registrantUserBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("user"),
-        registrant.publicKey.toBuffer()
+        registrantA.publicKey.toBuffer()
       ],
       program.programId
     );
@@ -143,7 +152,7 @@ describe("ruma", () => {
     const [registrantUserDataPDA, registrantUserDataBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("user_data"),
-        registrant.publicKey.toBuffer()
+        registrantA.publicKey.toBuffer()
       ],
       program.programId
     );
@@ -306,7 +315,7 @@ describe("ruma", () => {
     const badgeSymbol = "BDG";
     const badgeUri = await generateAvatarUri(rings, "badgeUri");
     // corresponds to capacity of event
-    const maxSupply = 5;
+    const maxSupply = 1;
 
     const umiMint = generateSigner(umi);
     masterMintA = web3.Keypair.fromSecretKey(umiMint.secretKey);
@@ -524,5 +533,55 @@ describe("ruma", () => {
     const registrantUserAcc = await program.account.user.fetch(registrantUserPDA);
 
     expect(registrantUserAcc.badges[0]).toEqual(editionMint.publicKey);
+  });
+
+  test("throws when checking into a full event", async () => {
+    const masterEditionAcc = await fetchMasterEdition(umi, masterEditionA);
+    const editionNumber = Number(masterEditionAcc.supply) + 1;
+
+    const umiMint = generateSigner(umi);
+    const editionMint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+
+    const [editionMarkerPda] = findEditionMarkerFromEditionNumberPda(umi, {
+      mint: publicKey(masterMintA.publicKey),
+      editionNumber
+    });
+
+    await program.methods
+      .createProfile(
+        "Jack",
+        await generateAvatarUri(shapes, "registrantBImage", organizer.publicKey.toBase58())
+      )
+      .accounts({
+        payer: registrantB.publicKey,
+      })
+      .signers([registrantB])
+      .rpc();
+
+    const masterTokenAccount = getAssociatedTokenAddressSync(masterMintA.publicKey, organizerUserPDA, true);
+
+    try {
+      await program.methods
+        .checkIntoEvent(new BN(editionNumber))
+        .accountsPartial({
+          host: organizer.publicKey,
+          registrant: registrantUserPDA,
+          editionMint: editionMint.publicKey,
+          editionMarkerPda,
+          masterMint: masterMintA.publicKey,
+          masterTokenAccount,
+          masterMetadata: masterMetadataA,
+          masterEdition: masterEditionA,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .signers([masterWalletKeypair, editionMint, organizer])
+        .rpc()
+    } catch (err) {
+      expect(err).toBeInstanceOf(web3.SendTransactionError);
+      expect(err.logs).toContain("Program log: Edition Number greater than max supply");
+    }
   })
 })
