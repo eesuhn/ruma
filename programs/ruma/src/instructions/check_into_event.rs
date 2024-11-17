@@ -120,9 +120,9 @@ pub struct CheckIntoEvent<'info> {
     /// CHECK: initialized by Metaplex Token Metadata program
     #[account(
         mut,
-        // seeds = [b"metadata", token_metadata_program.key().as_ref(), master_mint.key().as_ref(), b"edition", (edition_number / EDITION_MARKER_BIT_SIZE).to_le_bytes().as_ref()],
-        // bump,
-        // seeds::program = token_metadata_program.key(),
+        seeds = [b"metadata", token_metadata_program.key().as_ref(), master_mint.key().as_ref(), b"edition", edition_number.checked_div(EDITION_MARKER_BIT_SIZE).unwrap().to_string().as_bytes()],
+        bump,
+        seeds::program = token_metadata_program.key(),
     )]
     pub edition_marker_pda: UncheckedAccount<'info>,
     pub master_mint: Box<InterfaceAccount<'info, Mint>>,

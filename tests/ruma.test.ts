@@ -495,7 +495,7 @@ describe("ruma", () => {
 
     await program.methods
       .checkIntoEvent(new BN(editionNumber))
-      .accounts({
+      .accountsPartial({
         host: organizer.publicKey,
         registrant: registrantUserPDA,
         editionMint: editionMint.publicKey,
