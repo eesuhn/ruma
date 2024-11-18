@@ -1,4 +1,4 @@
-use crate::{constants::*, error::RumaError, state::*};
+use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
 
 pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) -> Result<()> {
@@ -7,7 +7,11 @@ pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) 
         name.len() <= MAX_USER_NAME_LENGTH,
         RumaError::UserNameTooLong
     );
-    require!(!image.is_empty(), RumaError::EventImageRequired);
+    require!(!image.is_empty(), RumaError::UserImageRequired);
+    require!(
+        image.len() <= MAX_USER_IMAGE_LENGTH,
+        RumaError::UserImageTooLong
+    );
 
     let user_data = &mut ctx.accounts.user_data;
 

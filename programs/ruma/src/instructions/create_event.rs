@@ -1,6 +1,7 @@
 use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
 
+#[access_control(CreateEvent::assert_name_length(&name))]
 pub fn create_event(
     ctx: Context<CreateEvent>,
     is_public: bool,
@@ -14,10 +15,6 @@ pub fn create_event(
     about: Option<String>,
 ) -> Result<()> {
     require!(!name.is_empty(), RumaError::EventNameRequired);
-    require!(
-        name.len() <= MAX_EVENT_NAME_LENGTH,
-        RumaError::EventNameTooLong
-    );
     require!(!image.is_empty(), RumaError::EventImageRequired);
     require!(
         image.len() <= MAX_EVENT_IMAGE_LENGTH,
@@ -84,4 +81,15 @@ pub struct CreateEvent<'info> {
     )]
     pub event_data: Account<'info, EventData>,
     pub system_program: Program<'info, System>,
+}
+
+impl<'info> CreateEvent<'info> {
+    pub fn assert_name_length(name: &String) -> Result<()> {
+        require!(
+            name.len() <= MAX_EVENT_NAME_LENGTH,
+            RumaError::EventNameTooLong
+        );
+
+        Ok(())
+    }
 }

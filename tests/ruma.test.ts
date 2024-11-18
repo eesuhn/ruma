@@ -49,8 +49,6 @@ describe("ruma", () => {
   let eventBump: number;
   let optionalEventPda: web3.PublicKey;
   let optionalEventBump: number;
-  let testEventPda: web3.PublicKey;
-  let testMasterMint: web3.Keypair;
   let masterMintA: web3.Keypair;
   let masterMetadataA: PublicKey;
   let masterEditionA: PublicKey;
@@ -59,10 +57,14 @@ describe("ruma", () => {
   let masterEditionB: PublicKey;
   let attendeePda: web3.PublicKey;
   let attendeeBump: number;
+  let testOrganizerUserPda: web3.PublicKey;
+  let testEventPda: web3.PublicKey;
+  let testMasterMint: web3.Keypair;
 
   const organizer = web3.Keypair.generate();
   const registrantA = web3.Keypair.generate();
   const registrantB = web3.Keypair.generate();
+  const testOrganizer = web3.Keypair.generate();
 
   beforeAll(async () => {
     masterWalletKeypair = web3.Keypair.fromSecretKey(new Uint8Array(await Bun.file("ruma-wallet.json").json()));
@@ -109,18 +111,6 @@ describe("ruma", () => {
       program.programId
     );
 
-    [testEventPda] = web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("event"),
-        organizerUserPda.toBuffer(),
-        Buffer.from("TestEvent")
-      ],
-      program.programId
-    );
-
-    const umiMint = generateSigner(umi);
-    testMasterMint = web3.Keypair.fromSecretKey(umiMint.secretKey);
-
     [attendeePda, attendeeBump] = web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("attendee"),
@@ -130,9 +120,30 @@ describe("ruma", () => {
       program.programId
     );
 
+    [testOrganizerUserPda] = web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("user"),
+        testOrganizer.publicKey.toBuffer()
+      ],
+      program.programId
+    );
+
+    [testEventPda] = web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("event"),
+        testOrganizerUserPda.toBuffer(),
+        Buffer.from("TestEvent")
+      ],
+      program.programId
+    );
+
+    const umiMint = generateSigner(umi);
+    testMasterMint = web3.Keypair.fromSecretKey(umiMint.secretKey);
+
     const sigA = await connection.requestAirdrop(organizer.publicKey, 5_000_000_000);
     const sigB = await connection.requestAirdrop(registrantA.publicKey, 5_000_000_000);
     const sigC = await connection.requestAirdrop(registrantB.publicKey, 5_000_000_000);
+    const sigD = await connection.requestAirdrop(testOrganizer.publicKey, 5_000_000_000);
 
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
@@ -152,6 +163,12 @@ describe("ruma", () => {
       blockhash,
       lastValidBlockHeight,
       signature: sigC,
+    });
+
+    await connection.confirmTransaction({
+      blockhash,
+      lastValidBlockHeight,
+      signature: sigD,
     });
   });
 
@@ -535,7 +552,99 @@ describe("ruma", () => {
     expect(registrantUserAcc.badges[0]).toEqual(editionMint.publicKey);
   });
 
+  test("throws when creating a profile with empty name", async () => {
+    try {
+      await program.methods
+        .createProfile(
+          "",
+          await generateAvatarUri(shapes, "testProfileImage")
+        )
+        .accounts({
+          payer: testOrganizer.publicKey,
+        })
+        .signers([testOrganizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("UserNameRequired");
+      expect(err.error.errorCode.number).toEqual(6000);
+    }
+  })
+
+  test("throws when creating a profile with name that exceeds max length", async () => {
+    const userNameMaxLength = 32;
+
+    try {
+      await program.methods
+        .createProfile(
+          "_".repeat(userNameMaxLength + 1),
+          await generateAvatarUri(shapes, "testProfileImage")
+        )
+        .accounts({
+          payer: testOrganizer.publicKey,
+        })
+        .signers([testOrganizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("UserNameTooLong");
+      expect(err.error.errorCode.number).toEqual(6001);
+    }
+  })
+
+  test("throws when creating a profile with empty image", async () => {
+    try {
+      await program.methods
+        .createProfile(
+          "Xavier",
+          "",
+        )
+        .accounts({
+          payer: testOrganizer.publicKey,
+        })
+        .signers([testOrganizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("UserImageRequired");
+      expect(err.error.errorCode.number).toEqual(6002);
+    }
+  })
+
+  test("throws when creating a profile with empty image", async () => {
+    const userImageMaxLength = 200;
+
+    try {
+      await program.methods
+        .createProfile(
+          "Steve",
+          "_".repeat(userImageMaxLength + 1),
+        )
+        .accounts({
+          payer: testOrganizer.publicKey,
+        })
+        .signers([testOrganizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("UserImageTooLong");
+      expect(err.error.errorCode.number).toEqual(6003);
+    }
+  })
+
   test("throws when creating an event with empty name", async () => {
+    // sets up User account for the following test cases
+    await program.methods
+      .createProfile(
+        "TestOrganizer",
+        await generateAvatarUri(shapes, "testOrganizerImage", testOrganizer.publicKey.toBase58())
+      )
+      .accounts({
+        payer: testOrganizer.publicKey,
+      })
+      .signers([testOrganizer])
+      .rpc();
+
     try {
       await program.methods
         .createEvent(
@@ -550,21 +659,21 @@ describe("ruma", () => {
           "This is a test event",
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
         })
-        .signers([organizer])
+        .signers([testOrganizer])
         .rpc();
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("EventNameRequired");
-      expect(err.error.errorCode.number).toEqual(6002);
+      expect(err.error.errorCode.number).toEqual(6004);
     }
   });
 
   test("throws when creating an event with a name that exceeds max length", async () => {
     const eventNameMaxLength = 128;
 
-    try { // TODO: wrong error thrown
+    try {
       await program.methods
         .createEvent(
           true,
@@ -578,14 +687,14 @@ describe("ruma", () => {
           "This is a test event",
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
         })
-        .signers([organizer])
+        .signers([testOrganizer])
         .rpc();
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("EventNameTooLong");
-      expect(err.error.errorCode.number).toEqual(6003);
+      expect(err.error.errorCode.number).toEqual(6005);
     }
   })
 
@@ -604,14 +713,14 @@ describe("ruma", () => {
           "This is a test event",
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
         })
-        .signers([organizer])
+        .signers([testOrganizer])
         .rpc();
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("EventImageRequired");
-      expect(err.error.errorCode.number).toEqual(6004);
+      expect(err.error.errorCode.number).toEqual(6006);
     }
   })
 
@@ -632,14 +741,14 @@ describe("ruma", () => {
           "This is a test event",
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
         })
-        .signers([organizer])
+        .signers([testOrganizer])
         .rpc();
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("EventImageTooLong");
-      expect(err.error.errorCode.number).toEqual(6005);
+      expect(err.error.errorCode.number).toEqual(6007);
     }
   })
 
@@ -658,9 +767,9 @@ describe("ruma", () => {
         "This is a test event",
       )
       .accounts({
-        payer: organizer.publicKey,
+        payer: testOrganizer.publicKey,
       })
-      .signers([organizer])
+      .signers([testOrganizer])
       .rpc();
 
     try {
@@ -672,12 +781,12 @@ describe("ruma", () => {
           null
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
           event: testEventPda,
           masterMint: testMasterMint.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([organizer, testMasterMint])
+        .signers([testOrganizer, testMasterMint])
         .preInstructions([
           web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
         ], true)
@@ -685,7 +794,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("BadgeNameRequired");
-      expect(err.error.errorCode.number).toEqual(6006);
+      expect(err.error.errorCode.number).toEqual(6008);
     }
   })
 
@@ -701,12 +810,12 @@ describe("ruma", () => {
           null
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
           event: testEventPda,
           masterMint: testMasterMint.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([organizer, testMasterMint])
+        .signers([testOrganizer, testMasterMint])
         .preInstructions([
           web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
         ], true)
@@ -714,7 +823,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("BadgeNameTooLong");
-      expect(err.error.errorCode.number).toEqual(6007);
+      expect(err.error.errorCode.number).toEqual(6009);
     }
   })
 
@@ -728,12 +837,12 @@ describe("ruma", () => {
           null
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
           event: testEventPda,
           masterMint: testMasterMint.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([organizer, testMasterMint])
+        .signers([testOrganizer, testMasterMint])
         .preInstructions([
           web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
         ], true)
@@ -741,7 +850,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("BadgeSymbolRequired");
-      expect(err.error.errorCode.number).toEqual(6008);
+      expect(err.error.errorCode.number).toEqual(6010);
     }
   })
 
@@ -757,12 +866,12 @@ describe("ruma", () => {
           null
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
           event: testEventPda,
           masterMint: testMasterMint.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([organizer, testMasterMint])
+        .signers([testOrganizer, testMasterMint])
         .preInstructions([
           web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
         ], true)
@@ -770,7 +879,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("BadgeSymbolTooLong");
-      expect(err.error.errorCode.number).toEqual(6009);
+      expect(err.error.errorCode.number).toEqual(6011);
     }
   })
 
@@ -784,12 +893,12 @@ describe("ruma", () => {
           null
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
           event: testEventPda,
           masterMint: testMasterMint.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([organizer, testMasterMint])
+        .signers([testOrganizer, testMasterMint])
         .preInstructions([
           web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
         ], true)
@@ -797,7 +906,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("BadgeUriRequired");
-      expect(err.error.errorCode.number).toEqual(6010);
+      expect(err.error.errorCode.number).toEqual(6012);
     }
   })
 
@@ -813,12 +922,12 @@ describe("ruma", () => {
           null
         )
         .accounts({
-          payer: organizer.publicKey,
+          payer: testOrganizer.publicKey,
           event: testEventPda,
           masterMint: testMasterMint.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([organizer, testMasterMint])
+        .signers([testOrganizer, testMasterMint])
         .preInstructions([
           web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
         ], true)
@@ -826,7 +935,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("BadgeUriTooLong");
-      expect(err.error.errorCode.number).toEqual(6011);
+      expect(err.error.errorCode.number).toEqual(6013);
     }
   })
 
@@ -876,7 +985,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("EventCapacityMaxReached");
-      expect(err.error.errorCode.number).toEqual(6013);
+      expect(err.error.errorCode.number).toEqual(6015);
     }
   });
 
