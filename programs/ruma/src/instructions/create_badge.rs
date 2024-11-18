@@ -6,6 +6,7 @@ use anchor_spl::{
         mpl_token_metadata::{
             instructions::{CreateV1CpiBuilder, MintV1CpiBuilder},
             types::{Creator, PrintSupply, TokenStandard},
+            MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH, MAX_URI_LENGTH,
         },
         Metadata,
     },
@@ -20,8 +21,20 @@ pub fn create_badge(
     max_supply: Option<u64>,
 ) -> Result<()> {
     require!(!badge_name.is_empty(), RumaError::BadgeNameRequired);
+    require!(
+        badge_name.len() <= MAX_NAME_LENGTH,
+        RumaError::BadgeNameTooLong
+    );
     require!(!badge_symbol.is_empty(), RumaError::BadgeSymbolRequired);
+    require!(
+        badge_symbol.len() <= MAX_SYMBOL_LENGTH,
+        RumaError::BadgeSymbolTooLong
+    );
     require!(!badge_uri.is_empty(), RumaError::BadgeUriRequired);
+    require!(
+        badge_uri.len() <= MAX_URI_LENGTH,
+        RumaError::BadgeUriTooLong
+    );
 
     CreateV1CpiBuilder::new(&ctx.accounts.token_metadata_program.to_account_info())
         .payer(&ctx.accounts.payer.to_account_info())

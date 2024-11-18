@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Result<()> {
     require!(!name.is_empty(), RumaError::EventNameRequired);
     require!(
-        name.len() <= MAX_EVENT_NAME_LEN,
+        name.len() <= MAX_EVENT_NAME_LENGTH,
         RumaError::EventNameTooLong
     );
     require!(

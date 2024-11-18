@@ -3,8 +3,11 @@ use anchor_lang::prelude::*;
 
 pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) -> Result<()> {
     require!(!name.is_empty(), RumaError::UserNameRequired);
-    require!(name.len() <= MAX_USER_NAME_LEN, RumaError::UserNameTooLong);
-    require!(!image.is_empty(), RumaError::ImageRequired);
+    require!(
+        name.len() <= MAX_USER_NAME_LENGTH,
+        RumaError::UserNameTooLong
+    );
+    require!(!image.is_empty(), RumaError::EventImageRequired);
 
     let user_data = &mut ctx.accounts.user_data;
 

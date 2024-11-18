@@ -49,6 +49,8 @@ describe("ruma", () => {
   let eventBump: number;
   let optionalEventPda: web3.PublicKey;
   let optionalEventBump: number;
+  let testEventPda: web3.PublicKey;
+  let testMasterMint: web3.Keypair;
   let masterMintA: web3.Keypair;
   let masterMetadataA: PublicKey;
   let masterEditionA: PublicKey;
@@ -106,6 +108,18 @@ describe("ruma", () => {
       ],
       program.programId
     );
+
+    [testEventPda] = web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("event"),
+        organizerUserPda.toBuffer(),
+        Buffer.from("TestEvent")
+      ],
+      program.programId
+    );
+
+    const umiMint = generateSigner(umi);
+    testMasterMint = web3.Keypair.fromSecretKey(umiMint.secretKey);
 
     [attendeePda, attendeeBump] = web3.PublicKey.findProgramAddressSync(
       [
@@ -521,6 +535,301 @@ describe("ruma", () => {
     expect(registrantUserAcc.badges[0]).toEqual(editionMint.publicKey);
   });
 
+  test("throws when creating an event with empty name", async () => {
+    try {
+      await program.methods
+        .createEvent(
+          true,
+          true,
+          "",
+          await generateAvatarUri(icons, "eventImage"),
+          1,
+          new BN(Date.now()),
+          new BN(Date.now() + 1000 * 60 * 60 * 24),
+          "Sunway University, Subang Jaya",
+          "This is a test event",
+        )
+        .accounts({
+          payer: organizer.publicKey,
+        })
+        .signers([organizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("EventNameRequired");
+      expect(err.error.errorCode.number).toEqual(6002);
+    }
+  });
+
+  test("throws when creating an event with a name that exceeds max length", async () => {
+    const eventNameMaxLength = 128;
+
+    try { // TODO: wrong error thrown
+      await program.methods
+        .createEvent(
+          true,
+          true,
+          "_".repeat(eventNameMaxLength + 1),
+          await generateAvatarUri(icons, "eventImage"),
+          1,
+          new BN(Date.now()),
+          new BN(Date.now() + 1000 * 60 * 60 * 24),
+          "Sunway University, Subang Jaya",
+          "This is a test event",
+        )
+        .accounts({
+          payer: organizer.publicKey,
+        })
+        .signers([organizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("EventNameTooLong");
+      expect(err.error.errorCode.number).toEqual(6003);
+    }
+  })
+
+  test("throws when creating an event with empty image", async () => {
+    try {
+      await program.methods
+        .createEvent(
+          true,
+          true,
+          "Event",
+          "",
+          1,
+          new BN(Date.now()),
+          new BN(Date.now() + 1000 * 60 * 60 * 24),
+          "Sunway University, Subang Jaya",
+          "This is a test event",
+        )
+        .accounts({
+          payer: organizer.publicKey,
+        })
+        .signers([organizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("EventImageRequired");
+      expect(err.error.errorCode.number).toEqual(6004);
+    }
+  })
+
+  test("throws when creating an event with a image that exceeds max length", async () => {
+    const eventImageMaxLength = 200;
+
+    try {
+      await program.methods
+        .createEvent(
+          true,
+          true,
+          "Event",
+          "_".repeat(eventImageMaxLength + 1),
+          1,
+          new BN(Date.now()),
+          new BN(Date.now() + 1000 * 60 * 60 * 24),
+          "Sunway University, Subang Jaya",
+          "This is a test event",
+        )
+        .accounts({
+          payer: organizer.publicKey,
+        })
+        .signers([organizer])
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("EventImageTooLong");
+      expect(err.error.errorCode.number).toEqual(6005);
+    }
+  })
+
+  test("throws when creating a badge with empty name", async () => {
+    // sets up Event account for the following test cases
+    await program.methods
+      .createEvent(
+        true,
+        true,
+        "TestEvent",
+        await generateAvatarUri(icons, "testEventImage"),
+        1,
+        new BN(Date.now()),
+        new BN(Date.now() + 1000 * 60 * 60 * 24),
+        "Sunway University, Subang Jaya",
+        "This is a test event",
+      )
+      .accounts({
+        payer: organizer.publicKey,
+      })
+      .signers([organizer])
+      .rpc();
+
+    try {
+      await program.methods
+        .createBadge(
+          "",
+          "BDG",
+          await generateAvatarUri(rings, "badgeUri"),
+          null
+        )
+        .accounts({
+          payer: organizer.publicKey,
+          event: testEventPda,
+          masterMint: testMasterMint.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([organizer, testMasterMint])
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("BadgeNameRequired");
+      expect(err.error.errorCode.number).toEqual(6006);
+    }
+  })
+
+  test("throws when creating a badge with a name that exceeds max length", async () => {
+    const badgeNameMaxLength = 32;
+
+    try {
+      await program.methods
+        .createBadge(
+          "_".repeat(badgeNameMaxLength + 1),
+          "BDG",
+          await generateAvatarUri(rings, "badgeUri"),
+          null
+        )
+        .accounts({
+          payer: organizer.publicKey,
+          event: testEventPda,
+          masterMint: testMasterMint.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([organizer, testMasterMint])
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("BadgeNameTooLong");
+      expect(err.error.errorCode.number).toEqual(6007);
+    }
+  })
+
+  test("throws when creating a badge with empty symbol", async () => {
+    try {
+      await program.methods
+        .createBadge(
+          "TestBadge",
+          "",
+          await generateAvatarUri(rings, "badgeUri"),
+          null
+        )
+        .accounts({
+          payer: organizer.publicKey,
+          event: testEventPda,
+          masterMint: testMasterMint.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([organizer, testMasterMint])
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("BadgeSymbolRequired");
+      expect(err.error.errorCode.number).toEqual(6008);
+    }
+  })
+
+  test("throws when creating a badge with a symbol that exceeds max length", async () => {
+    const badgeSymbolMaxLength = 10;
+
+    try {
+      await program.methods
+        .createBadge(
+          "TestBadge",
+          "_".repeat(badgeSymbolMaxLength + 1),
+          await generateAvatarUri(rings, "badgeUri"),
+          null
+        )
+        .accounts({
+          payer: organizer.publicKey,
+          event: testEventPda,
+          masterMint: testMasterMint.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([organizer, testMasterMint])
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("BadgeSymbolTooLong");
+      expect(err.error.errorCode.number).toEqual(6009);
+    }
+  })
+
+  test("throws when creating a badge with empty URI", async () => {
+    try {
+      await program.methods
+        .createBadge(
+          "TestBadge",
+          "BDG",
+          "",
+          null
+        )
+        .accounts({
+          payer: organizer.publicKey,
+          event: testEventPda,
+          masterMint: testMasterMint.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([organizer, testMasterMint])
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("BadgeUriRequired");
+      expect(err.error.errorCode.number).toEqual(6010);
+    }
+  })
+
+  test("throws when creating a badge with a URI that exceeds max length", async () => {
+    const badgeUriMaxLength = 200;
+
+    try {
+      await program.methods
+        .createBadge(
+          "TestBadge",
+          "BDG",
+          "_".repeat(badgeUriMaxLength + 1),
+          null
+        )
+        .accounts({
+          payer: organizer.publicKey,
+          event: testEventPda,
+          masterMint: testMasterMint.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([organizer, testMasterMint])
+        .preInstructions([
+          web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 400000 }),
+        ], true)
+        .rpc();
+    } catch (err) {
+      expect(err).toBeInstanceOf(AnchorError);
+      expect(err.error.errorCode.code).toEqual("BadgeUriTooLong");
+      expect(err.error.errorCode.number).toEqual(6011);
+    }
+  })
+
   test("throws when registering for the same event again", async () => {
     try {
       await program.methods
@@ -567,7 +876,7 @@ describe("ruma", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual("EventCapacityMaxReached");
-      expect(err.error.errorCode.number).toEqual(6009);
+      expect(err.error.errorCode.number).toEqual(6013);
     }
   });
 

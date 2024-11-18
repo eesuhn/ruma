@@ -15,10 +15,14 @@ pub fn create_event(
 ) -> Result<()> {
     require!(!name.is_empty(), RumaError::EventNameRequired);
     require!(
-        name.len() <= MAX_EVENT_NAME_LEN,
+        name.len() <= MAX_EVENT_NAME_LENGTH,
         RumaError::EventNameTooLong
     );
-    require!(!image.is_empty(), RumaError::ImageRequired);
+    require!(!image.is_empty(), RumaError::EventImageRequired);
+    require!(
+        image.len() <= MAX_EVENT_IMAGE_LENGTH,
+        RumaError::EventImageTooLong
+    );
 
     let event_data = &mut ctx.accounts.event_data;
 

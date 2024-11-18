@@ -11,13 +11,21 @@ pub enum RumaError {
     #[msg("Event name can not be longer than 128 characters")]
     EventNameTooLong,
     #[msg("Image is required")]
-    ImageRequired,
+    EventImageRequired,
+    #[msg("Image can not be longer than 200 characters")]
+    EventImageTooLong,
     #[msg("Badge name is required")]
     BadgeNameRequired,
+    #[msg("Badge name can not be longer than 32 characters")]
+    BadgeNameTooLong,
     #[msg("Badge symbol is required")]
     BadgeSymbolRequired,
+    #[msg("Badge symbol can not be longer than 10 characters")]
+    BadgeSymbolTooLong,
     #[msg("Badge URI is required")]
     BadgeUriRequired,
+    #[msg("Badge URI can not be longer than 200 characters")]
+    BadgeUriTooLong,
     #[msg("Signer not authorized")]
     UnauthorizedMasterWallet,
     #[msg("Event capacity has reached maximum")]
