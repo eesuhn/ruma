@@ -20,4 +20,6 @@ pub enum RumaError {
     BadgeUriRequired,
     #[msg("Signer not authorized")]
     UnauthorizedMasterWallet,
+    #[msg("Event capacity has reached maximum")]
+    EventCapacityMaxReached,
 }

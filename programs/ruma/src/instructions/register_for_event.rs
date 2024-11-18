@@ -7,6 +7,11 @@ pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Resul
         name.len() <= MAX_EVENT_NAME_LEN,
         RumaError::EventNameTooLong
     );
+    require!(
+        (ctx.accounts.event.attendees.len() as i32)
+            < ctx.accounts.event_data.capacity.unwrap_or(i32::MAX),
+        RumaError::EventCapacityMaxReached
+    );
 
     let attendee = &mut ctx.accounts.attendee;
 
@@ -39,6 +44,11 @@ pub struct RegisterForEvent<'info> {
         realloc::zero = false,
     )]
     pub event: Account<'info, Event>,
+    #[account(
+        seeds = [EVENT_DATA_SEED, organizer.key().as_ref(), name.as_bytes()],
+        bump,
+    )]
+    pub event_data: Account<'info, EventData>,
     #[account(
         init,
         space = Attendee::MIN_SPACE,
