@@ -75,7 +75,7 @@ pub struct CreateEvent<'info> {
     #[account(
         init,
         space = EventData::MIN_SPACE + name.len() + image.len() + location.map(|s| s.len()).unwrap_or(0) + about.map(|s| s.len()).unwrap_or(0),
-        seeds = [EVENT_DATA_SEED, organizer.key().as_ref(), name.as_bytes()],
+        seeds = [EVENT_DATA_SEED, event.key().as_ref()],
         bump,
         payer = payer,
     )]

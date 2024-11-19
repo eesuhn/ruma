@@ -44,7 +44,7 @@ pub struct CreateProfile<'info> {
     #[account(
         init,
         space = UserData::MIN_SPACE + name.len() + image.len(),
-        seeds = [USER_DATA_SEED, payer.key().as_ref()],
+        seeds = [USER_DATA_SEED, user.key().as_ref()],
         bump,
         payer = payer,
     )]

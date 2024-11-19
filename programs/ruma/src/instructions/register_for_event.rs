@@ -45,7 +45,7 @@ pub struct RegisterForEvent<'info> {
     )]
     pub event: Account<'info, Event>,
     #[account(
-        seeds = [EVENT_DATA_SEED, organizer.key().as_ref(), name.as_bytes()],
+        seeds = [EVENT_DATA_SEED, event.key().as_ref()],
         bump,
     )]
     pub event_data: Account<'info, EventData>,
