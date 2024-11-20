@@ -1,69 +1,91 @@
 use anchor_lang::prelude::*;
-use {instructions::*, state::*};
-
-pub mod constants;
-pub mod error;
-pub mod instructions;
-pub mod state;
-
-declare_id!("RUMAjHRSEoL4TQB5SZ8KJnxMUui7QzmzzznZU7qPXgn");\
+declare_id!("E2iAM2RNDLgMAY5jBsr2WiTqL6umZ4wkZhBBvmEBGWJ5");
 
 #[program]
 pub mod ruma {
     use super::*;
 
-    pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) -> Result<()> {
-        instructions::create_profile(ctx, name, image)
+    pub fn create_profile(ctx: Context<CreateProfile>) -> Result<()> {
+        Ok(())
     }
 
-    pub fn create_event(
-        ctx: Context<CreateEvent>,
-        is_public: bool,
-        needs_approval: bool,
-        name: String,
-        image: String,
-        capacity: Option<i32>,
-        start_timestamp: Option<i64>,
-        end_timestamp: Option<i64>,
-        location: Option<String>,
-        about: Option<String>,
-    ) -> Result<()> {
-        instructions::create_event(
-            ctx,
-            is_public,
-            needs_approval,
-            name,
-            image,
-            capacity,
-            start_timestamp,
-            end_timestamp,
-            location,
-            about,
-        )
+    pub fn create_event(ctx: Context<CreateEvent>) -> Result<()> {
+        Ok(())
     }
 
-    pub fn create_badge(
-        ctx: Context<CreateBadge>,
-        badge_name: String,
-        badge_symbol: String,
-        badge_uri: String,
-        max_supply: Option<u64>,
-    ) -> Result<()> {
-        instructions::create_badge(ctx, badge_name, badge_symbol, badge_uri, max_supply)
+    pub fn register_for_event(ctx: Context<RegisterForEvent>) -> Result<()> {
+        Ok(())
     }
 
-    pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Result<()> {
-        instructions::register_for_event(ctx, name)
+    pub fn approve_attendee(ctx: Context<ApproveAttendee>) -> Result<()> {
+        Ok(())
     }
 
-    pub fn change_attendee_status(
-        ctx: Context<ChangeAttendeeStatus>,
-        status: AttendeeStatus,
-    ) -> Result<()> {
-        instructions::change_attendee_status(ctx, status)
+    pub fn reject_attendee(ctx: Context<RejectAttendee>) -> Result<()> {
+        Ok(())
     }
 
-    pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Result<()> {
-        instructions::check_into_event(ctx, edition_number)
+    pub fn check_into_event(ctx: Context<CheckIntoEvent>) -> Result<()> {
+        Ok(())
     }
+}
+
+#[derive(Accounts)]
+pub struct CreateProfile {}
+
+#[derive(Accounts)]
+pub struct CreateEvent {}
+
+#[derive(Accounts)]
+pub struct RegisterForEvent {}
+
+#[derive(Accounts)]
+pub struct ApproveAttendee {}
+
+#[derive(Accounts)]
+pub struct RejectAttendee {}
+
+#[derive(Accounts)]
+pub struct CheckIntoEvent {}
+
+#[account]
+pub struct User {
+    pub pubkey: Pubkey,
+    pub data: UserData,
+    pub badges: Vec<Pubkey>,
+}
+
+#[account]
+pub struct UserData {
+    name: String,
+    image: String,
+}
+
+#[account]
+pub struct Event {
+    organizer: User,
+    data: EventData,
+    badge: Pubkey,
+    attendees: Vec<Attendee>,
+}
+
+#[account]
+pub struct EventData {
+    name: String,
+    start_date: Option<String>,
+    end_date: Option<String>,
+    start_time: Option<String>,
+    end_time: Option<String>,
+    location: Option<String>,
+    about: Option<String>,
+    image: Option<String>,
+    is_public: bool,
+    needs_approval: bool,
+    capacity: Option<i8>,
+}
+
+#[account]
+pub struct Attendee {
+    user: User,
+    qr_hash: String,
 }
