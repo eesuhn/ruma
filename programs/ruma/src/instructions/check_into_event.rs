@@ -13,6 +13,11 @@ use anchor_spl::{
 };
 
 pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Result<()> {
+    require!(
+        ctx.accounts.attendee.status == AttendeeStatus::Approved,
+        RumaError::AttendeeNotApproved
+    );
+
     mint_to(
         CpiContext::new(
             ctx.accounts.token_program.to_account_info(),
@@ -84,6 +89,7 @@ pub struct CheckIntoEvent<'info> {
         realloc::zero = false,
     )]
     pub registrant: Box<Account<'info, User>>,
+    pub attendee: Account<'info, Attendee>,
     #[account(
         init,
         payer = payer,

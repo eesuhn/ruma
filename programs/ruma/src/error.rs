@@ -34,8 +34,6 @@ pub enum RumaError {
     UnauthorizedMasterWallet,
     #[msg("Event capacity has reached maximum")]
     EventCapacityMaxReached,
-    #[msg("Badge already exists for this event")]
-    BadgeAlreadyExists,
     #[msg("Attendee is not approved for this event")]
     AttendeeNotApproved,
 }

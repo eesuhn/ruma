@@ -1,7 +1,6 @@
 use crate::{constants::*, error::*, state::*};
 use anchor_lang::prelude::*;
 
-#[access_control(CreateEvent::assert_name_length(&name))]
 pub fn create_event(
     ctx: Context<CreateEvent>,
     is_public: bool,
@@ -15,6 +14,8 @@ pub fn create_event(
     about: Option<String>,
 ) -> Result<()> {
     require!(!name.is_empty(), RumaError::EventNameRequired);
+    // name length is not validated here because it is used to derive seed for Event account,
+    // which would throw when name is longer than 32 bytes
     require!(!image.is_empty(), RumaError::EventImageRequired);
     require!(
         image.len() <= MAX_EVENT_IMAGE_LENGTH,
@@ -65,6 +66,7 @@ pub struct CreateEvent<'info> {
     )]
     pub organizer: Account<'info, User>,
     #[account(
+        constraint = name.len() <= MAX_EVENT_NAME_LENGTH @ RumaError::EventNameTooLong,
         init,
         space = Event::MIN_SPACE,
         seeds = [EVENT_SEED, organizer.key().as_ref(), name.as_bytes()],
@@ -81,15 +83,4 @@ pub struct CreateEvent<'info> {
     )]
     pub event_data: Account<'info, EventData>,
     pub system_program: Program<'info, System>,
-}
-
-impl<'info> CreateEvent<'info> {
-    pub fn assert_name_length(name: &String) -> Result<()> {
-        require!(
-            name.len() <= MAX_EVENT_NAME_LENGTH,
-            RumaError::EventNameTooLong
-        );
-
-        Ok(())
-    }
 }
