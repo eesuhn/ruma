@@ -1,8 +1,13 @@
 {
   "license": "ISC",
   "scripts": {
-    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "postinstall": "bun install --cwd next-app",
+    "format": "prettier . -w",
+    "format:check": "prettier . --check",
+    "dev": "bun run --cwd next-app dev",
+    "build": "bun run --cwd next-app build",
+    "start": "bun run --cwd next-app start",
+    "lint": "bun run --cwd next-app lint"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.30.1",
@@ -20,8 +25,11 @@
     "anchor-bankrun": "^0.5.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
-    "prettier": "^2.6.2",
+    "prettier": "^3.3.3",
     "solana-bankrun": "^0.4.0",
     "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "prettier-plugin-tailwindcss": "^0.6.9"
   }
 }
