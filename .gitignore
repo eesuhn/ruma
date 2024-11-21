@@ -6,3 +6,6 @@ node_modules
 test-ledger
 .yarn
 *wallet.json
+tests/fixtures
+.env
+.next
