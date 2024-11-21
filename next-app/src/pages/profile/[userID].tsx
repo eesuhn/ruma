@@ -29,16 +29,16 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container max-w-3xl mx-auto p-4">
-      <div className="flex flex-col items-center mb-8">
-        <div className="relative w-24 h-24 mb-4">
-          <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
-            <User className="w-12 h-12 text-muted-foreground" />
+    <div className="container mx-auto max-w-3xl p-4">
+      <div className="mb-8 flex flex-col items-center">
+        <div className="relative mb-4 h-24 w-24">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
+            <User className="h-12 w-12 text-muted-foreground" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold mb-1">{name}</h1>
-        <p className="text-muted-foreground mb-4">Joined September 2022</p>
-        <div className="flex gap-8 mb-6">
+        <h1 className="mb-1 text-2xl font-bold">{name}</h1>
+        <p className="mb-4 text-muted-foreground">Joined September 2022</p>
+        <div className="mb-6 flex gap-8">
           <div className="text-center">
             <div className="font-bold">10</div>
             <div className="text-muted-foreground">Hosted</div>
@@ -51,7 +51,7 @@ export default function ProfilePage() {
         <div className="flex gap-4">
           <Button
             asChild
-            className="bg-blue-600 hover:bg-blue-600 text-white hover:scale-105 transition ease-in-out"
+            className="bg-blue-600 text-white transition ease-in-out hover:scale-105 hover:bg-blue-600"
           >
             <Link href="/events/create">
               <CalendarPlus className="mr-2 h-4 w-4" />
@@ -61,7 +61,7 @@ export default function ProfilePage() {
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="text-black bg-white hover:bg-white hover:scale-105 transition ease-in-out">
+              <Button className="bg-white text-black transition ease-in-out hover:scale-105 hover:bg-white">
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Profile
               </Button>
@@ -118,14 +118,14 @@ export default function ProfilePage() {
             {[1, 2].map((i) => (
               <Card key={i}>
                 <CardContent className="flex gap-4 p-4">
-                  <div className="w-20 h-20 bg-muted flex-shrink-0" />
+                  <div className="h-20 w-20 flex-shrink-0 bg-muted" />
                   <div className="flex-grow">
                     <h3 className="font-semibold">Tech Conference 2023</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="w-4 h-4" />
+                      <User className="h-4 w-4" />
                       <span>By {name}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Mon, Oct 28, 5:00 PM - XYZ Tower
                     </p>
                   </div>
@@ -139,14 +139,14 @@ export default function ProfilePage() {
             {[1, 2].map((i) => (
               <Card key={i}>
                 <CardContent className="flex gap-4 p-4">
-                  <div className="w-20 h-20 bg-muted flex-shrink-0" />
+                  <div className="h-20 w-20 flex-shrink-0 bg-muted" />
                   <div className="flex-grow">
                     <h3 className="font-semibold">Tech Conference 2024</h3>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="w-4 h-4" />
+                      <User className="h-4 w-4" />
                       <span>By {name}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Mon, Oct 28, 5:00 PM - XYZ Tower
                     </p>
                   </div>

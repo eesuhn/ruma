@@ -1,15 +1,15 @@
 import Image from 'next/image';
 export default function Home() {
   return (
-    <div className="flex items-center place-content-center justify-items-center flex-1  font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-row  items-center mb-10  items-center">
-        <div className="flex flex-col mr-8">
+    <div className="flex flex-1 place-content-center items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
+      <main className="mb-10 flex flex-row items-center">
+        <div className="mr-8 flex flex-col">
           <h1 className="text-[42px] font-bold">Ruma</h1>
-          <p className="text-[24px] font-[family-name:var(--font-geist-mono)]">
+          <p className="font-[family-name:var(--font-geist-mono)] text-[24px]">
             Start joining events on the chain and get some cool NFTs
           </p>
           <a
-            className="rounded-full w-[25%] text-[24px] mt-4 border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc]  sm:text-base h-10 sm:h-12 px-4 sm:px-5"
+            className="mt-4 flex h-10 w-[25%] items-center justify-center gap-2 rounded-full border border-solid border-transparent bg-foreground px-4 text-[24px] text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:h-12 sm:px-5 sm:text-base"
             href="/events"
           >
             <p className="text-[24px]">Events</p>
@@ -17,7 +17,7 @@ export default function Home() {
           </a>
         </div>
         <Image
-          className="dark:invert rounded-md shadow-lg"
+          className="rounded-md shadow-lg dark:invert"
           src={'/landingimg.jpg'}
           alt="Landing Image"
           width={360}

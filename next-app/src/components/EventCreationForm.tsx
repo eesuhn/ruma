@@ -22,26 +22,26 @@ export function EventCreationForm() {
   const [isUnlimited, setIsUnlimited] = useState(true);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-12 p-8">
+    <div className="flex flex-col gap-12 p-8 lg:flex-row">
       <div className="lg:w-1/2">
-        <div className="relative w-full h-[400px] overflow-hidden rounded-lg mt-[8px]">
+        <div className="relative mt-[8px] h-[400px] w-full overflow-hidden rounded-lg">
           <img
             src="/landingimg.jpg?height=400&width=600"
             alt="Event cover"
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
             <Button
               variant="outline"
-              className="text-black border-white hover:bg-white hover:scale-105 transition-colors"
+              className="border-white text-black transition-colors hover:scale-105 hover:bg-white"
             >
               <Camera className="mr-2 h-4 w-4" /> Choose event cover
             </Button>
           </div>
         </div>
       </div>
-      <div className="lg:w-1/2 bg-transparent">
-        <Card className="shadow-none border-none bg-transparent">
+      <div className="bg-transparent lg:w-1/2">
+        <Card className="border-none bg-transparent shadow-none">
           <CardContent className="space-y-6 px-0">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2 sm:space-y-4">
@@ -75,10 +75,10 @@ export function EventCreationForm() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md w-fit">
+            <div className="flex w-fit items-center gap-2 rounded-md bg-muted/50 p-2">
               <Globe className="h-4 w-4" />
               <span className="text-xs sm:text-sm">GMT +08:00</span>
-              <span className="text-xs sm:text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground sm:text-sm">
                 Singapore
               </span>
             </div>
@@ -132,7 +132,7 @@ export function EventCreationForm() {
                   checked={isUnlimited}
                   onCheckedChange={setIsUnlimited}
                 />
-                <span className="text-xs sm:text-sm text-muted-foreground">
+                <span className="text-xs text-muted-foreground sm:text-sm">
                   Unlimited
                 </span>
               </div>

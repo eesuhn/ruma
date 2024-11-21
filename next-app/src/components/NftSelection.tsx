@@ -42,14 +42,14 @@ export function NftSelection() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Select Event NFT</h1>
+      <h1 className="mb-6 text-3xl font-bold">Select Event NFT</h1>
       <p className="mb-8 text-muted-foreground">
         Choose or upload an NFT image for your event attendees.
       </p>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-8">
+      <div className="mb-8 grid gap-8 md:grid-cols-2">
         <div>
-          <Label htmlFor="nft-upload" className="block mb-2">
+          <Label htmlFor="nft-upload" className="mb-2 block">
             Upload Custom NFT
           </Label>
           <Input
@@ -57,7 +57,7 @@ export function NftSelection() {
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            className="cursor-pointer mb-4"
+            className="mb-4 cursor-pointer"
           />
           <Button onClick={handleConfirm} className="w-60">
             <Check className="mr-2 h-4 w-4" /> Confirm NFT Selection
@@ -66,19 +66,19 @@ export function NftSelection() {
 
         {selectedNFT && (
           <div className="mt-[-120px]">
-            <h2 className="text-xl font-semibold mb-4">Selected NFT Preview</h2>
+            <h2 className="mb-4 text-xl font-semibold">Selected NFT Preview</h2>
             <img
               src={selectedNFT}
               alt="Selected NFT"
-              className="max-w-full h-auto"
+              className="h-auto max-w-full"
             />
           </div>
         )}
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4">NFT Collection</h2>
+      <h2 className="mb-4 text-2xl font-semibold">NFT Collection</h2>
       <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {sampleNFTs.map((nft, index) => (
             <Card
               key={index}
@@ -91,7 +91,7 @@ export function NftSelection() {
                 <img
                   src={nft}
                   alt={`Sample NFT ${index + 1}`}
-                  className="w-full h-auto"
+                  className="h-auto w-full"
                 />
               </CardContent>
             </Card>

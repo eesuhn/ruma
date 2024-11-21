@@ -7,7 +7,7 @@ import type { AppProps } from 'next/app';
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-fixed">
+      <div className="flex min-h-screen flex-col bg-fixed">
         <Navbar />
         {/* <div className="flex items-center place-content-center justify-items-center flex-1"> */}
         <Component {...pageProps} />

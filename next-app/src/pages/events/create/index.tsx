@@ -35,23 +35,23 @@ export default function Component() {
 
   return (
     <div className="container max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold mb-6">Create a new event</h1>
+      <h1 className="mb-6 text-2xl font-bold">Create a new event</h1>
       <form className="space-y-6 sm:space-y-8">
         <div className="space-y-2">
           <Label htmlFor="event-image">Event Banner</Label>
-          <Card className="aspect-video w-full bg-muted flex items-center justify-center overflow-hidden relative">
+          <Card className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-muted">
             {imagePreview ? (
               <>
                 <img
                   src={imagePreview}
                   alt="Event banner preview"
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-2 right-2"
+                  className="absolute right-2 top-2"
                   onClick={handleRemoveImage}
                   aria-label="Remove image"
                 >
@@ -60,7 +60,7 @@ export default function Component() {
               </>
             ) : (
               <div className="flex flex-col items-center text-muted-foreground">
-                <ImageIcon className="h-12 w-12 sm:h-16 sm:w-16 mb-2" />
+                <ImageIcon className="mb-2 h-12 w-12 sm:h-16 sm:w-16" />
                 <span className="text-sm sm:text-base">No image uploaded</span>
               </div>
             )}
@@ -110,10 +110,10 @@ export default function Component() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-muted/50 p-2 rounded-md w-fit">
+          <div className="flex w-fit items-center gap-2 rounded-md bg-muted/50 p-2">
             <Globe className="h-4 w-4" />
             <span className="text-xs sm:text-sm">GMT +08:00</span>
-            <span className="text-xs sm:text-sm text-muted-foreground">
+            <span className="text-xs text-muted-foreground sm:text-sm">
               Singapore
             </span>
           </div>
@@ -167,7 +167,7 @@ export default function Component() {
                   checked={isUnlimited}
                   onCheckedChange={setIsUnlimited}
                 />
-                <span className="text-xs sm:text-sm text-muted-foreground">
+                <span className="text-xs text-muted-foreground sm:text-sm">
                   Unlimited
                 </span>
               </div>

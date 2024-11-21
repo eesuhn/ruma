@@ -19,7 +19,7 @@ export function WhenAndWhere() {
       <CardHeader>
         <CardTitle className="text-2xl">Tech Innovation Summit 2024</CardTitle>
         <div className="flex items-center text-sm text-muted-foreground">
-          <Tag className="h-4 w-4 mr-1" />
+          <Tag className="mr-1 h-4 w-4" />
           <span>Technology, Innovation, Future</span>
         </div>
       </CardHeader>
@@ -38,7 +38,7 @@ export function WhenAndWhere() {
             <span>123 Main St, Anytown, USA</span>
           </div>
         </div>
-        <Button className="w-60 float-right mb-6">
+        <Button className="float-right mb-6 w-60">
           <QrCode className="mr-2 h-5 w-5" /> Check In Guest
         </Button>
       </CardContent>

@@ -127,45 +127,45 @@ export default function EventDetail() {
         <img
           src={event.event_img}
           alt={event.title}
-          className="w-full h-80 object-contain mb-2"
+          className="mb-2 h-80 w-full object-contain"
         />
-        <p className="font-bold text-[14px]">Hosted by:</p>
-        <div className="flex flex-row items-center ml-2">
-          <Avatar className="w-12 h-12 mr-2">
+        <p className="text-[14px] font-bold">Hosted by:</p>
+        <div className="ml-2 flex flex-row items-center">
+          <Avatar className="mr-2 h-12 w-12">
             <AvatarImage src={event.organizerimg} alt={event.organizer} />
             <AvatarFallback>{event.organizer}</AvatarFallback>
           </Avatar>
-          <p className="font-semibold text-[18px]">{event.organizer}</p>
+          <p className="text-[18px] font-semibold">{event.organizer}</p>
         </div>
       </div>
-      <div className="p-8 w-[600px]">
-        <h1 className="text-4xl font-bold mb-4">{event.title}</h1>
-        <div className="flex flex-row items-center ml-4 mb-2">
-          <IoCalendarOutline className="text-[35px] mr-3 " />
-          <div className="leading-6 ">
+      <div className="w-[600px] p-8">
+        <h1 className="mb-4 text-4xl font-bold">{event.title}</h1>
+        <div className="mb-2 ml-4 flex flex-row items-center">
+          <IoCalendarOutline className="mr-3 text-[35px]" />
+          <div className="leading-6">
             <p className="text-[24px] font-semibold">
               {event.date.toDateString()}
             </p>
-            <p className="text-[16px] font-light ">{event.time}</p>
+            <p className="text-[16px] font-light">{event.time}</p>
           </div>
         </div>
-        <div className="flex flex-row items-center ml-4 mb-2 ">
-          <IoLocationOutline className="text-[35px] mr-3 " />
-          <div className="leading-6 ">
+        <div className="mb-2 ml-4 flex flex-row items-center">
+          <IoLocationOutline className="mr-3 text-[35px]" />
+          <div className="leading-6">
             <p className="text-[24px] font-semibold">{event.venue}</p>
-            <p className="text-[16px] font-light ">{event.address}</p>
+            <p className="text-[16px] font-light">{event.address}</p>
           </div>
         </div>
 
-        <div className=" p-4 rounded-lg shadow-lg mb-2">
-          <div className="bg-[#545454]/10 rounded-t-lg ">
-            <p className="font-semibold p-2">Registration</p>
+        <div className="mb-2 rounded-lg p-4 shadow-lg">
+          <div className="rounded-t-lg bg-[#545454]/10">
+            <p className="p-2 font-semibold">Registration</p>
           </div>
-          <p className="p-2 my-2">
+          <p className="my-2 p-2">
             Welcome! To join the event, please register below.
           </p>
-          <div className="bg-[#00A9DD] rounded-xl w-[60%] justify-self-center p-2 text-center hover:bg-blue-500 hover:cursor-pointer hover:scale-105">
-            <p className="text-white font-semibold">Request to join!</p>
+          <div className="w-[60%] justify-self-center rounded-xl bg-[#00A9DD] p-2 text-center hover:scale-105 hover:cursor-pointer hover:bg-blue-500">
+            <p className="font-semibold text-white">Request to join!</p>
           </div>
         </div>
         <p className="font-semibold">About Event:</p>

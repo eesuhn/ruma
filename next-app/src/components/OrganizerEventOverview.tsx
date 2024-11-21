@@ -7,8 +7,8 @@ import { GuestManagement } from './GuestManagement';
 
 export function OrganizerEventOverview() {
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <h1 className="text-4xl font-bold mb-6">Event Overview</h1>
+    <div className="container mx-auto space-y-8 p-6">
+      <h1 className="mb-6 text-4xl font-bold">Event Overview</h1>
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="overview">Overview</TabsTrigger>
