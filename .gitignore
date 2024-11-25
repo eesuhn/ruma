@@ -1,11 +1,23 @@
-.anchor
+# System files
 .DS_Store
-target
+
+# Build artifacts
+target/
+.next/
+
+# Backup files
 **/*.rs.bk
-node_modules
-test-ledger
-.yarn
+
+# Node.js dependencies
+node_modules/
+
+# Test-related files
+test-ledger/
+tests/fixtures/
+
+# Yarn files
+.yarn/
+
+# Sensitive files
 *wallet.json
-tests/fixtures
 .env
-.next

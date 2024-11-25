@@ -20,6 +20,8 @@ wallet = "ruma-wallet.json"
 test = "bun test --timeout 1000000"
 
 [test]
+startup_wait = 5000
+shutdown_wait = 2000
 upgradeable = true
 
 [[test.genesis]]
