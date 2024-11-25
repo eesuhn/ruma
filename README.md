@@ -4,7 +4,7 @@
 
 1. Install [Solana CLI](https://solana.com/docs/intro/installation)
 
-   > Install with `sh -c "$(curl -sSfL https://release.solana.com/v1.8.17/install)"`, instead of `sh -c "$(curl -sSfL https://release.solana.com/stable/install)"`
+   > Install with `sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"`, instead of `sh -c "$(curl -sSfL https://release.solana.com/stable/install)"`
 
 2. Set cluster to local network:
 
@@ -74,7 +74,7 @@
 5. Deploy the program to the local network:
 
    ```bash
-   anchor deploy -p ruma –-program-keypair target/deploy/ruma-keypair.json
+   anchor deploy -p ruma --program-keypair target/deploy/ruma-keypair.json
    ```
 
 6. Run tests for Solana program:
@@ -86,8 +86,10 @@
 7. In root directory, run these commands to sync IDL and program types:
 
    ```bash
-   cp target/idl/ruma.json next-app/idl/
-   cp target/types/ruma.ts next-app/src/types/
+   mkdir -p next-app/idl/ && cp target/idl/ruma.json next-app/idl/
+   ```
+   ```bash
+   mkdir -p next-app/src/types/ && cp target/types/ruma.ts next-app/src/types/
    ```
 
    > You need to run these commands every time you update the IDL or program types.
