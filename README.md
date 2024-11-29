@@ -57,18 +57,18 @@
    > ANCHOR_WALLET="ruma-wallet.json"
    > ```
 
-3. Build the program, and sync the program IDs:
-
-   ```bash
-   anchor build
-   anchor keys sync
-   ```
-
-4. Configure wallet to `ruma-wallet.json`, and airdrop some tokens:
+3. Configure wallet to `ruma-wallet.json`, and airdrop some tokens:
 
    ```bash
    solana config set -k ruma-wallet.json
    solana airdrop 100
+   ```
+
+4. Build the program, and sync the program IDs:
+
+   ```bash
+   anchor build
+   anchor keys sync
    ```
 
 5. Deploy the program to the local network:
