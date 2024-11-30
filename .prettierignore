@@ -1,8 +1,8 @@
-.anchor
 .DS_Store
-target
-node_modules
-dist
+.anchor
 build
-test-ledger
+dist
 .next
+node_modules
+target
+test-ledger
