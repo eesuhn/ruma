@@ -4,9 +4,9 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen items-center justify-center">
       {/* Hero Section */}
-      <section className="container flex flex-col-reverse items-center gap-8 px-24 py-12 md:flex-row md:py-24">
+      <section className="container flex w-[86%] flex-col-reverse items-center gap-8 px-24 py-12 md:flex-row md:py-24">
         <div className="flex flex-col items-center space-y-6 text-center md:w-1/2 md:items-start md:text-left">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
             Collect Memories as NFTs
