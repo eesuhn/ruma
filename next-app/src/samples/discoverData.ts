@@ -1,4 +1,4 @@
-export interface EventDetails {
+interface EventDetails {
   id: number;
   title: string;
   event_img: string;
