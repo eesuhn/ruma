@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import Image from 'next/image';
 
 const sampleNFTs = Array(20).fill('/sample-nft.svg?height=150&width=150');
 
@@ -20,6 +21,7 @@ export function NftSelection() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setUploadedImage(e.target?.result as string);
+        console.log(uploadedImage);
         setSelectedNFT(e.target?.result as string);
       };
       reader.readAsDataURL(file);
@@ -33,7 +35,6 @@ export function NftSelection() {
   const handleConfirm = () => {
     if (selectedNFT) {
       console.log('Selected NFT:', selectedNFT);
-      // Here you would typically send this to your backend or NFT minting service
       alert('NFT selected and ready for minting!');
     } else {
       alert('Please select an NFT image first.');
@@ -67,9 +68,11 @@ export function NftSelection() {
         {selectedNFT && (
           <div className="mt-[-120px]">
             <h2 className="mb-4 text-xl font-semibold">Selected NFT Preview</h2>
-            <img
+            <Image
               src={selectedNFT}
               alt="Selected NFT"
+              width={300}
+              height={300}
               className="h-auto max-w-full"
             />
           </div>
@@ -88,9 +91,11 @@ export function NftSelection() {
               onClick={() => handleNFTSelect(nft)}
             >
               <CardContent className="p-2">
-                <img
+                <Image
                   src={nft}
                   alt={`Sample NFT ${index + 1}`}
+                  width={150}
+                  height={150}
                   className="h-auto w-full"
                 />
               </CardContent>

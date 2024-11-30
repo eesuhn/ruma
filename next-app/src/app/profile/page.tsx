@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CalendarPlus, Edit, User } from 'lucide-react';
 
-export default function ProfilePage() {
+export default function Page() {
   const [name, setName] = useState('Tech XYZ');
   const [username, setUsername] = useState('@techxyz');
 
@@ -70,7 +70,7 @@ export default function ProfilePage() {
               <DialogHeader>
                 <DialogTitle>Edit profile</DialogTitle>
                 <DialogDescription>
-                  Make changes to your profile here. Click save when you're
+                  Make changes to your profile here. Click save when you&apos;re
                   done.
                 </DialogDescription>
               </DialogHeader>

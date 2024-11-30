@@ -1,6 +1,6 @@
 import { NftSelection } from '@/components/NftSelection';
 
-export default function CreateNFT() {
+export default function Page() {
   return (
     <>
       <NftSelection />
