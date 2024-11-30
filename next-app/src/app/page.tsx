@@ -2,8 +2,8 @@ import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="flex flex-1 place-content-center items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
-      <main className="mb-10 flex flex-row items-center">
+    <div className="min-h-screen flex flex-1 place-content-center items-center justify-items-center font-[family-name:var(--font-geist-sans)]">
+      <main className=" flex flex-row items-center ">
         <div className="mr-8 flex flex-col">
           <h1 className="text-[42px] font-bold">Ruma</h1>
           <p className="font-[family-name:var(--font-geist-mono)] text-[24px]">
@@ -24,7 +24,9 @@ export default function Home() {
           height={38}
           priority
         />
+        
       </main>
+      
     </div>
   );
 }
