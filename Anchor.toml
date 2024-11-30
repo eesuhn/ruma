@@ -7,7 +7,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-ruma = "RUMAjHRSEoL4TQB5SZ8KJnxMUui7QzmzzznZU7qPXgn"
+ruma = "6ESyDq5JFThughGtRRn3cepWPEX1ZXDfMqQCGc6v1N2b"
 
 [registry]
 url = "https://api.apr.dev"
@@ -20,6 +20,8 @@ wallet = "ruma-wallet.json"
 test = "bun test --timeout 1000000"
 
 [test]
+startup_wait = 5000
+shutdown_wait = 2000
 upgradeable = true
 
 [[test.genesis]]
