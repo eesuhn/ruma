@@ -1,0 +1,3 @@
+### Setting it up...
+
+Check out [`SETUP.md`](docs/SETUP.md) for detailed instructions on setting up Solana and deploying Anchor to a local network.
