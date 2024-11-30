@@ -15,6 +15,12 @@ import { MenuSquareIcon } from 'lucide-react';
 import WalletAdapter from '@/components/WalletAdapter';
 import Image from 'next/image';
 
+const navItems = [
+  { name: 'Events', href: '/events' },
+  { name: 'Discover', href: '/discover' },
+  { name: 'Profile', href: '#' },
+] as const;
+
 export default function Navbar() {
   const pathname = usePathname();
   const isActive = (path: string) => (pathname === path ? ' text-black' : '');
@@ -35,37 +41,28 @@ export default function Navbar() {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link
-                href="/events"
-                className={`rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline ${isActive('/events')}`}
-                prefetch={false}
-              >
-                Events
-              </Link>
-              <Link
-                href="/discover"
-                className={`rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline ${isActive('/discover')}`}
-                prefetch={false}
-              >
-                Discover
-              </Link>
-              <Link
-                href="#"
-                className="rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline"
-                prefetch={false}
-              >
-                Profile
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline ${isActive(item.href)}`}
+                  prefetch={false}
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
           </div>
           <div className="hidden items-center md:flex">
-            <Button
-              size="sm"
-              className="text-md mr-2 h-12 rounded bg-slate-500 px-6 font-bold hover:bg-slate-600"
-            >
-              <FiPlusCircle className="" />
-              Create Event
-            </Button>
+            <Link href="/create-event" prefetch={false}>
+              <Button
+                size="sm"
+                className="text-md mr-2 h-12 rounded bg-slate-500 px-6 font-bold hover:bg-slate-600"
+              >
+                <FiPlusCircle className="" />
+                Create Event
+              </Button>
+            </Link>
             <WalletAdapter />
           </div>
           <div className="flex items-center md:hidden">
@@ -81,29 +78,18 @@ export default function Navbar() {
                   <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col space-y-4">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-lg font-medium hover:underline"
+                      prefetch={false}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                   <Link
-                    href="/events"
-                    className="text-lg font-medium hover:underline"
-                    prefetch={false}
-                  >
-                    Event
-                  </Link>
-                  <Link
-                    href="#"
-                    className="text-lg font-medium hover:underline"
-                    prefetch={false}
-                  >
-                    Discover
-                  </Link>
-                  <Link
-                    href="#"
-                    className="text-lg font-medium hover:underline"
-                    prefetch={false}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="#"
+                    href="/create-event"
                     className="text-lg font-medium hover:underline"
                     prefetch={false}
                   >
