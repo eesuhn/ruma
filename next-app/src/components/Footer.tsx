@@ -1,9 +1,36 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="row-start-3 flex flex-wrap items-center justify-center gap-6">
-      {/* Probably need this in the future */}
+    <footer className="border-t px-24">
+      <div className="container py-6">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center space-x-2">
+            <Image
+              src="/ruma-logo.png"
+              alt="Ruma Logo"
+              width={40}
+              height={40}
+              priority
+            />
+            <span className="pl-4 text-sm text-muted-foreground">
+              © 2024. All rights reserved.
+            </span>
+          </div>
+          <nav className="flex gap-8 text-sm text-muted-foreground">
+            <Link href="/events" className="underline hover:text-foreground">
+              Events
+            </Link>
+            <Link href="/discover" className="underline hover:text-foreground">
+              Discover
+            </Link>
+            <Link href="/profile" className="underline hover:text-foreground">
+              Profile
+            </Link>
+          </nav>
+        </div>
+      </div>
     </footer>
   );
 }

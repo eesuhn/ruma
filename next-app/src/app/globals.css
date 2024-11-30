@@ -70,3 +70,11 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.wallet-adapter-button-trigger {
+  background-color: !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background-color: #452397 !important; /* Hover background color */
+}

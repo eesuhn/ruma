@@ -7,7 +7,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-ruma = "24ETuAaEav2KPEYqbzC5y4vLnM8KVa5jNt2sdw3RFtAz"
+ruma = "6ESyDq5JFThughGtRRn3cepWPEX1ZXDfMqQCGc6v1N2b"
 
 [registry]
 url = "https://api.apr.dev"

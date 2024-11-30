@@ -1,168 +1,123 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/CowzfwdSDEY
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
 'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { CgProfile } from 'react-icons/cg';
-import { BsQrCodeScan } from 'react-icons/bs';
+import { FiPlusCircle } from 'react-icons/fi';
+import { MenuSquareIcon } from 'lucide-react';
+import WalletAdapter from '@/components/WalletAdapter';
+import Image from 'next/image';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isActive = (path: string) =>
-    pathname === path ? 'underline text-black' : '';
-  return (
-    <div className="flex items-center justify-between px-6 py-4 font-[family-name:var(--font-geist-sans)]">
-      <Link href="/" className="flex items-center gap-2" prefetch={false}>
-        <MountainIcon className="h-6 w-6" />
-        <span className="text-[28px] font-semibold">Ruma</span>
-      </Link>
-      <div className="hidden gap-12 lg:flex">
-        <Link
-          href="/"
-          className="text-lg text-[#999999] underline-offset-4 hover:text-black hover:underline"
-          prefetch={false}
-        >
-          Home
-        </Link>
-        <Link
-          href="/events"
-          className={`text-lg text-[#999999] underline-offset-4 hover:text-black hover:underline ${isActive(
-            '/eventpage'
-          )}`}
-          prefetch={false}
-        >
-          Event
-        </Link>
-        <Link
-          href="#"
-          className="text-lg text-[#999999] underline-offset-4 hover:text-black hover:underline"
-          prefetch={false}
-        >
-          Calender
-        </Link>
-        <Link
-          href="#"
-          className="text-lg text-[#999999] underline-offset-4 hover:text-black hover:underline"
-          prefetch={false}
-        >
-          Discover
-        </Link>
-        <Link
-          href="#"
-          className="text-lg text-[#999999] underline-offset-4 hover:text-black hover:underline"
-          prefetch={false}
-        >
-          Contact
-        </Link>
-      </div>
-      <div className="flex flex-row place-content-center items-center">
-        <a className="mr-6 cursor-pointer rounded-md border-[2px] border-[#999999] px-4 py-1 text-slate-500 hover:scale-105 hover:border-black hover:text-black">
-          <p className="flex flex-row items-center">
-            <BsQrCodeScan className="mr-2" />
-            Check In
-          </p>
-        </a>
-        <Link
-          href="/profile"
-          className="flex items-center gap-2"
-          prefetch={false}
-        >
-          <CgProfile className="h-10 w-10 text-[#999999] hover:scale-105 hover:text-black" />
-        </Link>
-      </div>
+  const isActive = (path: string) => (pathname === path ? ' text-black' : '');
 
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="lg:hidden">
-            <MenuIcon className="h-6 w-6" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right">
-          <div className="grid w-[200px] p-4">
-            <Link
-              href="#"
-              className="text-lg font-medium underline-offset-4 hover:underline"
-              prefetch={false}
-            >
-              Home
-            </Link>
-            <Link
-              href="#"
-              className="text-lg font-medium underline-offset-4 hover:underline"
-              prefetch={false}
-            >
-              About
-            </Link>
-            <Link
-              href="#"
-              className="text-lg font-medium underline-offset-4 hover:underline"
-              prefetch={false}
-            >
-              Services
-            </Link>
-            <Link
-              href="#"
-              className="text-lg font-medium underline-offset-4 hover:underline"
-              prefetch={false}
-            >
-              Portfolio
-            </Link>
-            <Link
-              href="#"
-              className="text-lg font-medium underline-offset-4 hover:underline"
-              prefetch={false}
-            >
-              Contact
+  return (
+    <nav className="fixed left-0 top-0 z-50 w-full bg-white shadow-md">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-4">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center">
+            <Link href="/" className="flex-shrink-0" prefetch={false}>
+              <Image
+                src={'/ruma-banner.png'}
+                alt="ruma-logo"
+                width={120}
+                height={80}
+              />
             </Link>
           </div>
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-}
-
-function MenuIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
-  );
-}
-
-function MountainIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
-    </svg>
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-4">
+              <Link
+                href="/events"
+                className={`rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline ${isActive('/events')}`}
+                prefetch={false}
+              >
+                Events
+              </Link>
+              <Link
+                href="/discover"
+                className={`rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline ${isActive('/discover')}`}
+                prefetch={false}
+              >
+                Discover
+              </Link>
+              <Link
+                href="#"
+                className="rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline"
+                prefetch={false}
+              >
+                Profile
+              </Link>
+            </div>
+          </div>
+          <div className="hidden items-center md:flex">
+            <Button
+              size="sm"
+              className="text-md mr-2 h-12 rounded bg-slate-500 px-6 font-bold hover:bg-slate-600"
+            >
+              <FiPlusCircle className="" />
+              Create Event
+            </Button>
+            <WalletAdapter />
+          </div>
+          <div className="flex items-center md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MenuSquareIcon size={24} />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 flex flex-col space-y-4">
+                  <Link
+                    href="/events"
+                    className="text-lg font-medium hover:underline"
+                    prefetch={false}
+                  >
+                    Event
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-lg font-medium hover:underline"
+                    prefetch={false}
+                  >
+                    Discover
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-lg font-medium hover:underline"
+                    prefetch={false}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-lg font-medium hover:underline"
+                    prefetch={false}
+                  >
+                    Create Event
+                  </Link>
+                  <div className="pt-4">
+                    <WalletAdapter />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 }
