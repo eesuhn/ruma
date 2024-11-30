@@ -10,6 +10,7 @@ import {
   Globe2,
   CameraIcon,
   LucideDoorClosed,
+  Pen,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -278,56 +279,61 @@ export default function Page() {
           />
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Options</h2>
-
-            <FormField
-              control={form.control}
-              name="requireApproval"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">
-                      Require Approval
-                    </FormLabel>
-                    <FormDescription>
-                      Manually approve participants for this event
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="capacity"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      <FormLabel className="text-base">Capacity</FormLabel>
+            <div className="space-y-4 rounded-lg border p-4">
+              <FormField
+                control={form.control}
+                name="requireApproval"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        Require Approval
+                      </FormLabel>
+                      <FormDescription>
+                        Manually approve participants for this event
+                      </FormDescription>
                     </div>
-                    <FormDescription>
-                      Set the maximum number of participants
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Unlimited"
-                      className="w-[100px] text-right"
-                      {...field}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <div className="w-full border-t border-muted" />
+
+              <FormField
+                control={form.control}
+                name="capacity"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        <FormLabel className="text-base">Capacity</FormLabel>
+                      </div>
+                      <FormDescription>
+                        Set the maximum number of participants
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <div className="relative flex items-center gap-2">
+                        <Input
+                          type="text"
+                          placeholder="Unlimited"
+                          className="w-40 pl-8 text-right"
+                          {...field}
+                        />
+                        <Pen className="absolute left-2 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
 
           <div className="space-y-4">
