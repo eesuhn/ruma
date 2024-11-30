@@ -22,7 +22,7 @@ export const events: EventDetails[] = [
     date: new Date('2024-12-12'),
     description: 'test123',
     organizer: 'gdsc_logo',
-    organizerimg: '/sample/sample-organizer-logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
   {
     id: 2,
@@ -34,7 +34,7 @@ export const events: EventDetails[] = [
     date: new Date('2024-11-05'),
     description: 'test123',
     organizer: 'stc',
-    organizerimg: '/sample/sample-organizer-logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
   {
     id: 3,
@@ -46,7 +46,7 @@ export const events: EventDetails[] = [
     date: new Date('2024-10-25'),
     description: 'test123',
     organizer: 'stc',
-    organizerimg: '/sample/sample-organizer-logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
   {
     id: 4,
@@ -58,7 +58,7 @@ export const events: EventDetails[] = [
     date: new Date('2024-10-25'),
     description: 'test123',
     organizer: 'stc',
-    organizerimg: '/sample/sample-organizer-logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ export const events: EventDetails[] = [
     date: new Date('2024-10-25'),
     description: 'test123',
     organizer: 'stc',
-    organizerimg: '/sample/sample-organizer-logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
   {
     id: 6,
@@ -82,7 +82,7 @@ export const events: EventDetails[] = [
     organizer: 'stc',
     time: 1830,
     date: new Date('2024-10-25'),
-    organizerimg: '/sample/sample-organizer-logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
   {
     id: 7,
@@ -94,6 +94,6 @@ export const events: EventDetails[] = [
     time: 1830,
     date: new Date('2024-10-25'),
     organizer: 'stc',
-    organizerimg: '/gdsc_logo.png',
+    organizerimg: '/sample/organizer-logo.png',
   },
 ];

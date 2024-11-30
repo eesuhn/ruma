@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Globe } from 'lucide-react';
+import Image from 'next/image';
 
 export function EventCreationForm() {
   const [isUnlimited, setIsUnlimited] = useState(true);
@@ -25,9 +26,11 @@ export function EventCreationForm() {
     <div className="flex flex-col gap-12 p-8 lg:flex-row">
       <div className="lg:w-1/2">
         <div className="relative mt-[8px] h-[400px] w-full overflow-hidden rounded-lg">
-          <img
-            src="/landingimg.jpg?height=400&width=600"
+          <Image
+            src="/sample/landing-hero.jpg"
             alt="Event cover"
+            height={400}
+            width={600}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">

@@ -18,7 +18,7 @@ export default function Home() {
         </div>
         <Image
           className="rounded-md shadow-lg dark:invert"
-          src={'/landingimg.jpg'}
+          src={'/sample/landing-hero.jpg'}
           alt="Landing Image"
           width={360}
           height={38}
