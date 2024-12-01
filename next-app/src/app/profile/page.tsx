@@ -20,7 +20,7 @@ interface Profile {
   image:string
 }
 const profile:Profile = {
-  name: "Tech XYZ",
+  name: "Woods",
   hosted: 10,
   attended: 4,
   image: "/profile1.png"
@@ -40,12 +40,6 @@ const badges: Badge[] = [
     image: "/badge1.png",
     earnedDate: "2023-03-20"
   },
-  {
-    id: "3",
-    name: "Event Master",
-    image: "/badge1.png",
-    earnedDate: "2023-06-10"
-  }
 ]
 
 export default function ProfilePage() {
@@ -106,28 +100,33 @@ export default function ProfilePage() {
       </Card>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Badges Collection</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {badges.map((badge) => (
-            <Card key={badge.id}>
-              <CardContent className="p-4 text-center">
-                <div className="flex flex-col items-center gap-2">
-                  <Image
-                    src={badge.image}
-                    alt={badge.name}
-                    width={64}
-                    height={64}
-                    className="rounded-full"
-                  />
-                  <h3 className="font-medium">{badge.name}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Earned {new Date(badge.earnedDate).toLocaleDateString()}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {badges.length > 0 ? (
+          <div>
+          <h2 className="text-xl font-semibold">Badges Collection</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-2">
+            {badges.map((badge) => (
+              <Card key={badge.id}>
+                <CardContent className="p-4 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <Image
+                      src={badge.image}
+                      alt={badge.name}
+                      width={64}
+                      height={64}
+                      className="rounded-full"
+                    />
+                    <h3 className="font-medium">{badge.name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Earned {new Date(badge.earnedDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          </div>
+        ):(<h2 className="text-center font-bold text-xl mt-12">No badges Collected</h2>)}
+        
       </div>
     </div>
   )
