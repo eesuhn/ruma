@@ -106,7 +106,7 @@ export default function Page() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl px-6 py-24">
       <h1 className="mb-4 text-2xl font-bold">Create Event</h1>
 
       <Form {...form}>
