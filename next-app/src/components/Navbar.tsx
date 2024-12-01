@@ -50,7 +50,7 @@ export default function Navbar() {
                 Discover
               </Link>
               <Link
-                href="#"
+                href="/profile"
                 className="rounded-md px-3 py-2 text-base text-[#999999] hover:text-black hover:underline"
                 prefetch={false}
               >

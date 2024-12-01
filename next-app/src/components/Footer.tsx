@@ -3,8 +3,8 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="border-t px-24">
-      <div className="container py-6">
+    <footer className="w-full bg-muted px-24 py-6">
+      <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex items-center space-x-2">
             <Image
@@ -12,7 +12,6 @@ export default function Footer() {
               alt="Ruma Logo"
               width={40}
               height={40}
-              priority
             />
             <span className="pl-4 text-sm text-muted-foreground">
               © 2024. All rights reserved.
