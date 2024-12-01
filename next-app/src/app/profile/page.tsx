@@ -1,161 +1,135 @@
-'use client';
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Edit, Trophy, Users } from 'lucide-react'
+import Image from "next/image"
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CalendarPlus, Edit, User } from 'lucide-react';
+interface Badge {
+  id: string
+  name: string
+  image: string
+  earnedDate: string
+}
 
-export default function Page() {
-  const [name, setName] = useState('Tech XYZ');
-  const [username, setUsername] = useState('@techxyz');
+interface Profile {
+  name:string
+  hosted:number
+  attended:number
+  image:string
+}
+const profile:Profile = {
+  name: "Tech XYZ",
+  hosted: 10,
+  attended: 4,
+  image: "/profile1.png"
+}
 
-  const handleSaveChanges = () => {
-    // Here you would typically update the profile information
-    // For now, we'll just close the dialog
-    console.log('Profile updated:', { name, username });
-  };
+// Example badges data
+const badges: Badge[] = [
+  {
+    id: "1",
+    name: "Early Adopter",
+    image: "/badge1.png",
+    earnedDate: "2023-01-15"
+  },
+  {
+    id: "2",
+    name: "Top Contributor",
+    image: "/badge1.png",
+    earnedDate: "2023-03-20"
+  },
+  {
+    id: "3",
+    name: "Event Master",
+    image: "/badge1.png",
+    earnedDate: "2023-06-10"
+  }
+]
 
+export default function ProfilePage() {
   return (
-    <div className="container mx-auto max-w-3xl p-4">
-      <div className="mb-8 flex flex-col items-center">
-        <div className="relative mb-4 h-24 w-24">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-            <User className="h-12 w-12 text-muted-foreground" />
-          </div>
-        </div>
-        <h1 className="mb-1 text-2xl font-bold">{name}</h1>
-        <p className="mb-4 text-muted-foreground">Joined September 2022</p>
-        <div className="mb-6 flex gap-8">
-          <div className="text-center">
-            <div className="font-bold">10</div>
-            <div className="text-muted-foreground">Hosted</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold">4</div>
-            <div className="text-muted-foreground">Attended</div>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <Button
-            asChild
-            className="bg-blue-600 text-white transition ease-in-out hover:scale-105 hover:bg-blue-600"
-          >
-            <Link href="/events/create">
-              <CalendarPlus className="mr-2 h-4 w-4" />
-              Create Event
-            </Link>
-          </Button>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-white text-black transition ease-in-out hover:scale-105 hover:bg-white">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Profile
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit profile</DialogTitle>
-                <DialogDescription>
-                  Make changes to your profile here. Click save when you&apos;re
-                  done.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="col-span-3"
-                  />
+    <div className="max-w-2xl  mx-auto p-6 space-y-8">
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative h-20 w-20">
+                <Image
+                  src={profile.image}
+                  alt="Profile"
+                  className="rounded-full"
+                  width={80}
+                  height={80}
+                />
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{profile.name}</h1>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Edit className="h-4 w-4" />
+                        <span className="sr-only">Edit profile</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Profile</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Name</Label>
+                          <Input id="name" defaultValue="Tech XYZ" />
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="username" className="text-right">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="col-span-3"
-                  />
+                <div className="flex gap-6 mt-4">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm"><strong>{profile.hosted}</strong> Hosted</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm"><strong>{profile.attended}</strong> Attended</span>
+                  </div>
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="submit" onClick={handleSaveChanges}>
-                  Save changes
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            </div>
+          </div>
+          
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Badges Collection</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {badges.map((badge) => (
+            <Card key={badge.id}>
+              <CardContent className="p-4 text-center">
+                <div className="flex flex-col items-center gap-2">
+                  <Image
+                    src={badge.image}
+                    alt={badge.name}
+                    width={64}
+                    height={64}
+                    className="rounded-full"
+                  />
+                  <h3 className="font-medium">{badge.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Earned {new Date(badge.earnedDate).toLocaleDateString()}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-
-      <Tabs defaultValue="hosting" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="hosting">Hosting</TabsTrigger>
-          <TabsTrigger value="past">Past Events</TabsTrigger>
-        </TabsList>
-        <TabsContent value="hosting">
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Card key={i}>
-                <CardContent className="flex gap-4 p-4">
-                  <div className="h-20 w-20 flex-shrink-0 bg-muted" />
-                  <div className="flex-grow">
-                    <h3 className="font-semibold">Tech Conference 2023</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="h-4 w-4" />
-                      <span>By {name}</span>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Mon, Oct 28, 5:00 PM - XYZ Tower
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        <TabsContent value="past">
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Card key={i}>
-                <CardContent className="flex gap-4 p-4">
-                  <div className="h-20 w-20 flex-shrink-0 bg-muted" />
-                  <div className="flex-grow">
-                    <h3 className="font-semibold">Tech Conference 2024</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="h-4 w-4" />
-                      <span>By {name}</span>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Mon, Oct 28, 5:00 PM - XYZ Tower
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
-  );
+  )
 }
+
