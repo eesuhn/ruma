@@ -18,7 +18,7 @@ import Image from 'next/image';
 const navItems = [
   { name: 'Events', href: '/events' },
   { name: 'Discover', href: '/discover' },
-  { name: 'Profile', href: '#' },
+  { name: 'Profile', href: '/profile' },
 ] as const;
 
 export default function Navbar() {

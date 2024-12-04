@@ -15,7 +15,7 @@ export const events: EventDetails[] = [
   {
     id: 1,
     title: 'Community Meetup',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Tech Conference Center',
     address: '123, orchard road, merlion den',
     time: 1400,
@@ -27,7 +27,7 @@ export const events: EventDetails[] = [
   {
     id: 2,
     title: 'Annual Tech Summit',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Innovation Hub',
     address: '123, orchard road, merlion den',
     time: 900,
@@ -39,7 +39,7 @@ export const events: EventDetails[] = [
   {
     id: 3,
     title: 'Startup Pitch Night',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Entrepreneurship Lounge',
     address: '123, orchard road, merlion den',
     time: 1830,
@@ -51,7 +51,7 @@ export const events: EventDetails[] = [
   {
     id: 4,
     title: 'Startup Pitch Night',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Entrepreneurship Lounge',
     address: '123, orchard road, merlion den',
     time: 1830,
@@ -63,7 +63,7 @@ export const events: EventDetails[] = [
   {
     id: 5,
     title: 'Startup Pitch Night',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Entrepreneurship Lounge',
     address: '123, orchard road, merlion den',
     time: 1830,
@@ -75,7 +75,7 @@ export const events: EventDetails[] = [
   {
     id: 6,
     title: 'Startup Pitch Night',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Entrepreneurship Lounge',
     address: '123, orchard road, merlion den',
     description: 'test123',
@@ -87,7 +87,7 @@ export const events: EventDetails[] = [
   {
     id: 7,
     title: 'Startup Pitch Night',
-    event_img: '/sample/event-cover.png',
+    event_img: '/sample/event-cover1.png',
     venue: 'Entrepreneurship Lounge',
     address: '123, orchard road, merlion den',
     description: 'test123',
