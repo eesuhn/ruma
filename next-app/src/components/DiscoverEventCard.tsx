@@ -1,3 +1,4 @@
+import { Calendar, Pin } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -31,8 +32,12 @@ export function DiscoverEventCard({
           <h3 className="text-lg font-semibold transition-colors group-hover:text-gray-600">
             {title}
           </h3>
-          <p className="mt-1 text-gray-500">{date.toDateString()}</p>
-          <p className="text-gray-500">{address}</p>
+          <p className="my-1 flex gap-2 text-gray-500">
+            <Calendar className="mt-1 h-4 w-4" /> {date.toDateString()}
+          </p>
+          <p className="flex gap-2 text-gray-500">
+            <Pin className="mt-1 h-4 w-4" /> {address}
+          </p>
         </div>
       </Link>
     </div>
