@@ -37,13 +37,13 @@ const badges: Badge[] = [
   {
     id: '1',
     name: 'Early Adopter',
-    image: '/sample/badge.png',
+    image: '/sample/nft.svg',
     earnedDate: '2023-01-15',
   },
   {
     id: '2',
     name: 'Top Contributor',
-    image: '/sample/badge.png',
+    image: '/sample/nft.svg',
     earnedDate: '2023-03-20',
   },
 ];
@@ -79,16 +79,22 @@ export default function Page() {
                       <DialogHeader>
                         <DialogTitle>Edit Profile</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-4 py-4">
+                      <div className="">
                         <div className="space-y-2">
                           <Label htmlFor="name">Name</Label>
                           <Input id="name" defaultValue="Tech XYZ" />
+                        </div>
+                        <div className="flex justify-end gap-4 pt-4">
+                          <Button variant="ghost" className="h-9">
+                            Cancel
+                          </Button>
+                          <Button className="h-9">Save</Button>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="mt-4 flex gap-6">
+                <div className="mt-2 flex gap-6">
                   <div className="flex items-center gap-2">
                     <Trophy className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
@@ -108,26 +114,20 @@ export default function Page() {
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
+      <div className="">
         {badges.length > 0 ? (
           <div>
-            <h2 className="text-xl font-semibold">Badges Collection</h2>
-            <div className="grid grid-cols-2 gap-4 p-2 md:grid-cols-3">
+            <h2 className="mb-4 text-xl font-semibold">Badges Collection</h2>
+            <div className="grid grid-cols-6">
               {badges.map((badge) => (
-                <Card key={badge.id}>
-                  <CardContent className="p-4 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <Image
-                        src={badge.image}
-                        alt={badge.name}
-                        width={64}
-                        height={64}
-                        className="rounded-full"
-                      />
-                      <h3 className="font-medium">{badge.name}</h3>
-                    </div>
-                  </CardContent>
-                </Card>
+                <Image
+                  key={badge.id}
+                  src={badge.image}
+                  alt={badge.name}
+                  width={80}
+                  height={80}
+                  className="rounded-xl"
+                />
               ))}
             </div>
           </div>

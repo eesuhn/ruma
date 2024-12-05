@@ -71,10 +71,10 @@ body {
   }
 }
 
-.wallet-adapter-button-trigger {
-  background-color: !important;
+.wallet-adapter-button-trigger:hover {
+  background-color: #452397 !important;
 }
 
-.wallet-adapter-button-trigger:hover {
-  background-color: #452397 !important; /* Hover background color */
+.wallet-adapter-button {
+  height: 44px !important;
 }
