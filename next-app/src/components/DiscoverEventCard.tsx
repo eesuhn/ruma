@@ -17,15 +17,13 @@ interface DiscoverEventCardProps {
 export function DiscoverEventCard({
   id,
   title,
-  description,
   date,
   address,
   event_img,
 }: DiscoverEventCardProps) {
-  console.log(id, description);
   return (
     <div className="rounded-lg bg-[#F6F6F6] p-4 shadow-lg ease-in-out hover:bg-slate-300">
-      <Link href="#" className="group flex gap-6">
+      <Link href={`/events/${id}`} className="group flex gap-6">
         <div className="relative h-[120px] w-[120px] flex-shrink-0 overflow-hidden rounded-lg">
           <Image src={event_img} alt={title} fill className="object-cover" />
         </div>

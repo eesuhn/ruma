@@ -9,8 +9,8 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState('upcoming');
 
   return (
-    <div className="container mx-auto space-y-8 py-8">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto px-72">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Events</h1>
         <Tabs defaultValue="upcoming" onValueChange={setActiveTab}>
           <TabsList>

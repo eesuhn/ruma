@@ -37,13 +37,13 @@ const badges: Badge[] = [
   {
     id: '1',
     name: 'Early Adopter',
-    image: '/sample/badge.png',
+    image: '/sample/nft.svg',
     earnedDate: '2023-01-15',
   },
   {
     id: '2',
     name: 'Top Contributor',
-    image: '/sample/badge.png',
+    image: '/sample/nft.svg',
     earnedDate: '2023-03-20',
   },
 ];

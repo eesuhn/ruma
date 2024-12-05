@@ -16,7 +16,7 @@ export const UPCOMING_EVENTS = [
     time: '7:00pm',
     location: 'Sunway University',
     image: '/sample/event-cover2.png',
-    condition: 'register',
+    condition: '',
   },
   {
     id: '3',

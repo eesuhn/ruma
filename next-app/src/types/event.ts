@@ -9,7 +9,7 @@ export interface EventProps {
     status?: 'pending' | 'active';
     description?: string;
     endTime?: string;
-    condition: 'registered' | 'register' | 'manage';
+    condition: 'registered' | '' | 'manage';
     registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
   };
   showManage?: boolean;

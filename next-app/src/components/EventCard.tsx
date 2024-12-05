@@ -1,31 +1,47 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { ArrowRight, CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { type EventProps } from '@/types/event';
-import { getBadgeVariant } from '@/utils/getBadgeVariant';
+
+const getBadgeVariant = (status?: string) => {
+  switch (status) {
+    case 'pending':
+      return 'bg-[#f77f00]';
+    case 'going':
+      return 'bg-[#79be79]';
+    case 'checked-in':
+      return 'bg-[#91d1ce]';
+    case 'rejected':
+      return 'bg-[#e5383b]';
+    default:
+      return 'bg-black';
+  }
+};
 
 export function EventCard({ event }: EventProps) {
   const getButtonContent = () => {
     switch (event.condition) {
       case 'registered':
+        const badgeColor = getBadgeVariant(event.registrationStatus);
+        const badgeName = event.registrationStatus
+          ? event.registrationStatus.charAt(0).toUpperCase() +
+            event.registrationStatus.slice(1)
+          : '';
         return (
-          <Badge variant={getBadgeVariant(event.registrationStatus)}>
-            {event.registrationStatus}
+          <Badge
+            className={`${badgeColor} hover:${badgeColor} inline-block rounded-full px-3 py-1 text-sm font-semibold`}
+          >
+            {badgeName}
           </Badge>
-        );
-      case 'register':
-        return (
-          <Button variant="secondary" size="sm">
-            Register for Event
-          </Button>
         );
       case 'manage':
         return (
-          <Button variant="secondary" size="sm">
+          <Button size="sm" className="h-9">
             Manage Event
+            <ArrowRight className="h-4 w-4" />
           </Button>
         );
     }
@@ -39,11 +55,11 @@ export function EventCard({ event }: EventProps) {
           : `/events/${event.id}`
       }
     >
-      <Card className="overflow-hidden transition-shadow hover:shadow-lg">
+      <Card className="mb-2 overflow-hidden transition-shadow hover:shadow-lg">
         <div className="grid gap-4 p-4 md:grid-cols-[1fr,200px]">
           <div className="space-y-3">
             <h3 className="text-xl font-semibold">{event.title}</h3>
-            <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="ml-1 space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span>{event.date}</span>
