@@ -19,7 +19,7 @@ const WalletAdapter: NextPage = () => {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets}>
         <WalletModalProvider>
-          <WalletMultiButton className="bg-blue-200" />
+          <WalletMultiButton />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
