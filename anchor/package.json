@@ -1,8 +1,9 @@
 {
   "license": "ISC",
   "scripts": {
+    "local": "solana-test-validator",
     "format": "prettier . -w",
-    "format:check": "prettier . --check",
+    "format:check": "prettier . --check"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.30.1",

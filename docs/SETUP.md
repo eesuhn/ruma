@@ -1,6 +1,6 @@
 ## Getting started...
 
-### Setting up Solana
+### Setting up Solana in `anchor/`
 
 1. Install [Solana CLI](https://solana.com/docs/intro/installation)
 
@@ -12,7 +12,7 @@
    solana config set -u l
    ```
 
-3. In root directory, create a custom keypair file `ruma-wallet.json`, and paste in the secret key:
+3. In `anchor/` directory, create a custom keypair file `ruma-wallet.json`, and paste in the secret key:
 
    ```bash
    touch ruma-wallet.json
@@ -32,7 +32,7 @@
 
 ### Deploying Anchor to local network
 
-1. In root directory, start local validator with Token Metadata program, then leave it running:
+1. In `anchor/` directory, start local validator with Token Metadata program, then leave it running:
 
    ```bash
    solana-test-validator --bpf-program metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s tests/fixtures/mpl_token_metadata.so -r
@@ -86,10 +86,10 @@
    bun test endToEnd
    ```
 
-7. In root directory, run these commands to sync IDL and program types:
+7. In root directory, run this command to sync IDL and program types:
 
    ```bash
    bash docs/sync-idl.sh
    ```
 
-   > You need to run these commands every time you update the IDL or program types.
+   > You need to run this command every time you update the IDL or program types.
