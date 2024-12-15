@@ -1,4 +1,4 @@
 #!/bin/bash
 
-mkdir -p next-app/idl/ && cp target/idl/ruma.json next-app/idl/
-mkdir -p next-app/src/types/ && cp target/types/ruma.ts next-app/src/types/
+mkdir -p client/idl/ && cp anchor/target/idl/ruma.json client/idl/
+mkdir -p client/src/types/ && cp anchor/target/types/ruma.ts client/src/types/
