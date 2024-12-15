@@ -6,7 +6,7 @@ pub mod error;
 pub mod instructions;
 pub mod state;
 
-declare_id!("6ESyDq5JFThughGtRRn3cepWPEX1ZXDfMqQCGc6v1N2b");
+declare_id!("GuaX9RxQYJu1ePcq8NXhMJ3HK9jjXu8Hp4hrmbaQGBBR");
 
 #[program]
 pub mod ruma {

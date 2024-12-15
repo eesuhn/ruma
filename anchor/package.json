@@ -1,14 +1,8 @@
 {
   "license": "ISC",
   "scripts": {
-    "postinstall": "bun install --cwd next-app",
     "format": "prettier . -w",
     "format:check": "prettier . --check",
-    "dev": "bun run --cwd next-app dev",
-    "build": "bun run --cwd next-app build",
-    "start": "bun run --cwd next-app start",
-    "lint": "bun run --cwd next-app lint",
-    "local": "solana-test-validator"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.30.1",
