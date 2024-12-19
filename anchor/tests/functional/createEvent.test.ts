@@ -1,31 +1,34 @@
-import { BN } from 'bn.js';
-import { describe, expect, test } from 'bun:test';
+import { beforeEach, describe, expect, test } from 'bun:test';
+import { AnchorError, BN } from '@coral-xyz/anchor';
+import { Keypair } from '@solana/web3.js';
+import { getFundedKeypair, program } from '../utils';
+import { createEvent, createProfile } from '../methods';
 import {
-  createEvent,
-  createProfile,
-  generateAvatarUri,
   getEventDataPdaAndBump,
   getEventPdaAndBump,
-  getFundedKeypair,
   getUserPdaAndBump,
-} from '../utils';
-import { icons, shapes } from '@dicebear/collection';
-import { AnchorError } from '@coral-xyz/anchor';
+} from '../pda';
+import { MAX_EVENT_IMAGE_LENGTH, MAX_EVENT_NAME_LENGTH } from '../constants';
 
 describe('createEvent', () => {
-  test('creates an event', async () => {
-    const organizer = await getFundedKeypair();
+  let organizer: Keypair;
+
+  beforeEach(async () => {
+    organizer = await getFundedKeypair();
 
     await createProfile(
-      organizer,
+      program,
       'Zack',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
+      'https://example.com/image.png',
+      organizer
     );
+  });
 
+  test('creates an event', async () => {
     const isPublic = true;
     const needsApproval = true;
     const eventName = 'Test event';
-    const eventImage = await generateAvatarUri(icons);
+    const eventImage = 'https://example.com/image.png';
     const capacity = 10;
     const startTimestamp = new BN(Date.now());
     // 24 hours after start
@@ -34,7 +37,7 @@ describe('createEvent', () => {
     const about = 'This is a test event';
 
     const { eventAcc, eventDataAcc } = await createEvent(
-      organizer,
+      program,
       isPublic,
       needsApproval,
       eventName,
@@ -43,7 +46,8 @@ describe('createEvent', () => {
       startTimestamp,
       endTimestamp,
       location,
-      about
+      about,
+      organizer
     );
 
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
@@ -70,18 +74,10 @@ describe('createEvent', () => {
   });
 
   test('creates an event with optional values', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
     const isPublic = true;
     const needsApproval = true;
     const eventName = 'Test event';
-    const eventImage = await generateAvatarUri(icons);
+    const eventImage = 'https://example.com/image.png';
     const capacity = null;
     const startTimestamp = null;
     const endTimestamp = null;
@@ -89,7 +85,7 @@ describe('createEvent', () => {
     const about = null;
 
     const { eventAcc, eventDataAcc } = await createEvent(
-      organizer,
+      program,
       isPublic,
       needsApproval,
       eventName,
@@ -98,7 +94,8 @@ describe('createEvent', () => {
       startTimestamp,
       endTimestamp,
       location,
-      about
+      about,
+      organizer
     );
 
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
@@ -125,18 +122,10 @@ describe('createEvent', () => {
   });
 
   test('throws when creating an event with empty name', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
     const isPublic = true;
     const needsApproval = true;
     const eventName = '';
-    const eventImage = await generateAvatarUri(icons);
+    const eventImage = 'https://example.com/image.png';
     const capacity = 10;
     const startTimestamp = new BN(Date.now());
     // 24 hours after start
@@ -146,7 +135,7 @@ describe('createEvent', () => {
 
     try {
       await createEvent(
-        organizer,
+        program,
         isPublic,
         needsApproval,
         eventName,
@@ -155,7 +144,8 @@ describe('createEvent', () => {
         startTimestamp,
         endTimestamp,
         location,
-        about
+        about,
+        organizer
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -165,19 +155,10 @@ describe('createEvent', () => {
   });
 
   test('throws when creating an event with a name that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
     const isPublic = true;
     const needsApproval = true;
-    const eventNameMaxLength = 128;
-    const eventName = '_'.repeat(eventNameMaxLength + 1);
-    const eventImage = await generateAvatarUri(icons);
+    const eventName = '_'.repeat(MAX_EVENT_NAME_LENGTH + 1);
+    const eventImage = 'https://example.com/image.png';
     const capacity = 10;
     const startTimestamp = new BN(Date.now());
     // 24 hours after start
@@ -187,7 +168,7 @@ describe('createEvent', () => {
 
     expect(async () => {
       await createEvent(
-        organizer,
+        program,
         isPublic,
         needsApproval,
         eventName,
@@ -196,20 +177,13 @@ describe('createEvent', () => {
         startTimestamp,
         endTimestamp,
         location,
-        about
+        about,
+        organizer
       );
     }).toThrow();
   });
 
   test('throws when creating an event with empty image', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
     const isPublic = true;
     const needsApproval = true;
     const eventName = 'Test event';
@@ -223,7 +197,7 @@ describe('createEvent', () => {
 
     try {
       await createEvent(
-        organizer,
+        program,
         isPublic,
         needsApproval,
         eventName,
@@ -232,7 +206,8 @@ describe('createEvent', () => {
         startTimestamp,
         endTimestamp,
         location,
-        about
+        about,
+        organizer
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -242,19 +217,10 @@ describe('createEvent', () => {
   });
 
   test('throws when creating an event with a image that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
     const isPublic = true;
     const needsApproval = true;
     const eventName = 'Test event';
-    const eventImageMaxLength = 200;
-    const eventImage = '_'.repeat(eventImageMaxLength + 1);
+    const eventImage = '_'.repeat(MAX_EVENT_IMAGE_LENGTH + 1);
     const capacity = 10;
     const startTimestamp = new BN(Date.now());
     // 24 hours after start
@@ -264,7 +230,7 @@ describe('createEvent', () => {
 
     try {
       await createEvent(
-        organizer,
+        program,
         isPublic,
         needsApproval,
         eventName,
@@ -273,7 +239,8 @@ describe('createEvent', () => {
         startTimestamp,
         endTimestamp,
         location,
-        about
+        about,
+        organizer
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);

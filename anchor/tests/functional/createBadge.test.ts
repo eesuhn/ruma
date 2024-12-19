@@ -1,62 +1,67 @@
-import { describe, expect, test } from 'bun:test';
-import {
-  createBadge,
-  createEvent,
-  createProfile,
-  generateAvatarUri,
-  getEventPdaAndBump,
-  getFundedKeypair,
-  getUserPdaAndBump,
-} from '../utils';
-import { icons, rings, shapes } from '@dicebear/collection';
-import { BN } from 'bn.js';
+import { beforeEach, describe, expect, test } from 'bun:test';
 import { Keypair, SendTransactionError } from '@solana/web3.js';
-import { AnchorError } from '@coral-xyz/anchor';
+import { AnchorError, BN } from '@coral-xyz/anchor';
+import { getFundedKeypair, program, umi } from '../utils';
+import { createBadge, createEvent, createProfile } from '../methods';
+import { getEventPdaAndBump, getUserPdaAndBump } from '../pda';
+import {
+  MAX_BADGE_NAME_LENGTH,
+  MAX_BADGE_SYMBOL_LENGTH,
+  MAX_BADGE_URI_LENGTH,
+} from '../constants';
 
 describe('createBadge', () => {
-  test('creates a badge with max supply', async () => {
-    const organizer = await getFundedKeypair();
+  let organizer: Keypair;
+
+  const eventName = 'Test event';
+  const capacity = 10;
+
+  beforeEach(async () => {
+    organizer = await getFundedKeypair();
 
     await createProfile(
-      organizer,
+      program,
       'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
+      'https://example.com/image.png',
+      organizer
     );
 
-    const eventName = 'Test event';
-    const capacity = 10;
-
     await createEvent(
-      organizer,
+      program,
       true,
       true,
       eventName,
-      await generateAvatarUri(icons),
+      'https://example.com/image.png',
       capacity,
       new BN(Date.now()),
       new BN(Date.now() + 1000 * 60 * 60 * 24),
       'Sunway University, Subang Jaya',
-      'This is a test event'
+      'This is a test event',
+      organizer
     );
+  });
 
+  test('creates a badge with max supply', async () => {
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     const { metadataAcc, masterEditionAcc, eventAcc, masterTokenAcc } =
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
 
     expect(metadataAcc.name).toEqual(badgeName);
@@ -74,48 +79,26 @@ describe('createBadge', () => {
   });
 
   test('creates a badge without max supply', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = null;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
-    const maxSupply = capacity;
+    const maxSupply = null;
 
     const { metadataAcc, masterEditionAcc, eventAcc, masterTokenAcc } =
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        maxSupply
+        maxSupply,
+        organizer,
+        eventPda,
+        masterMint
       );
 
     expect(metadataAcc.name).toEqual(badgeName);
@@ -133,48 +116,26 @@ describe('createBadge', () => {
   });
 
   test('throws when creating a badge with empty name', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = '';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -184,49 +145,26 @@ describe('createBadge', () => {
   });
 
   test('throws when creating a badge with a name that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
-    const badgeNameMaxLength = 32;
-    const badgeName = '_'.repeat(badgeNameMaxLength + 1);
+    const badgeName = '_'.repeat(MAX_BADGE_NAME_LENGTH + 1);
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -236,48 +174,26 @@ describe('createBadge', () => {
   });
 
   test('throws when creating a badge with empty symbol', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = '';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -287,49 +203,26 @@ describe('createBadge', () => {
   });
 
   test('throws when creating a badge with a symbol that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
-    const badgeSymbolMaxLength = 10;
-    const badgeSymbol = '_'.repeat(badgeSymbolMaxLength + 1);
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeSymbol = '_'.repeat(MAX_BADGE_SYMBOL_LENGTH + 1);
+    const badgeUri = await 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -339,30 +232,6 @@ describe('createBadge', () => {
   });
 
   test('throws when creating a badge with empty URI', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
@@ -374,13 +243,15 @@ describe('createBadge', () => {
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -390,49 +261,26 @@ describe('createBadge', () => {
   });
 
   test('throws when creating a badge with a URI that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUriMaxLength = 200;
-    const badgeUri = '_'.repeat(badgeUriMaxLength + 1);
+    const badgeUri = '_'.repeat(MAX_BADGE_URI_LENGTH + 1);
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -442,58 +290,38 @@ describe('createBadge', () => {
   });
 
   test('throws when creating an event badge when badge already exists', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
-    await createEvent(
-      organizer,
-      true,
-      true,
-      eventName,
-      await generateAvatarUri(icons),
-      capacity,
-      new BN(Date.now()),
-      new BN(Date.now() + 1000 * 60 * 60 * 24),
-      'Sunway University, Subang Jaya',
-      'This is a test event'
-    );
-
     const masterMint = Keypair.generate();
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     await createBadge(
-      organizer,
-      masterMint,
-      eventPda,
+      program,
+      umi,
       badgeName,
       badgeSymbol,
       badgeUri,
-      new BN(maxSupply)
+      new BN(maxSupply),
+      organizer,
+      eventPda,
+      masterMint
     );
 
     try {
       await createBadge(
-        organizer,
-        masterMint,
-        eventPda,
+        program,
+        umi,
         badgeName,
         badgeSymbol,
         badgeUri,
-        new BN(maxSupply)
+        new BN(maxSupply),
+        organizer,
+        eventPda,
+        masterMint
       );
     } catch (err) {
       expect(err).toBeInstanceOf(SendTransactionError);

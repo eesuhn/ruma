@@ -1,79 +1,91 @@
-import { describe, expect, test } from 'bun:test';
+import { beforeEach, describe, expect, test } from 'bun:test';
+import { Keypair, PublicKey, SendTransactionError } from '@solana/web3.js';
+import { AnchorError, BN } from '@coral-xyz/anchor';
+import { getFundedKeypair, program, umi } from '../utils';
 import {
   createBadge,
   createEvent,
   createProfile,
-  generateAvatarUri,
+  registerForEvent,
+} from '../methods';
+import {
   getAttendeePdaAndBump,
   getEventPdaAndBump,
-  getFundedKeypair,
   getUserPdaAndBump,
-  registerForEvent,
-} from '../utils';
-import { icons, rings, shapes } from '@dicebear/collection';
-import { BN } from 'bn.js';
-import { Keypair, SendTransactionError } from '@solana/web3.js';
-import { AnchorError } from '@coral-xyz/anchor';
+} from '../pda';
 
 describe('registerForEvent', () => {
-  test('registers for an event', async () => {
-    const organizer = await getFundedKeypair();
+  let organizer: Keypair;
+  let registrant: Keypair;
+
+  const eventName = 'Test event';
+  const capacity = 10;
+
+  let organizerUserPda: PublicKey;
+  let registrantUserPda: PublicKey;
+
+  beforeEach(async () => {
+    organizer = await getFundedKeypair();
+    registrant = await getFundedKeypair();
 
     await createProfile(
-      organizer,
+      program,
       'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
+      'https://example.com/image.png',
+      organizer
     );
 
-    const eventName = 'Test event';
-    const capacity = 10;
+    await createProfile(
+      program,
+      'Paul',
+      'https://example.com/image.png',
+      registrant
+    );
 
+    [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
+  });
+
+  test('registers for an event', async () => {
     await createEvent(
-      organizer,
+      program,
       true,
       true,
       eventName,
-      await generateAvatarUri(icons),
+      'https://example.com/image.png',
       capacity,
       new BN(Date.now()),
       new BN(Date.now() + 1000 * 60 * 60 * 24),
       'Sunway University, Subang Jaya',
-      'This is a test event'
+      'This is a test event',
+      organizer
     );
 
     const masterMint = Keypair.generate();
-    const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
+    [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     await createBadge(
-      organizer,
-      masterMint,
-      eventPda,
+      program,
+      umi,
       badgeName,
       badgeSymbol,
       badgeUri,
-      new BN(maxSupply)
+      new BN(maxSupply),
+      organizer,
+      eventPda,
+      masterMint
     );
-
-    const registrant = await getFundedKeypair();
-
-    await createProfile(
-      registrant,
-      'Paul',
-      await generateAvatarUri(shapes, registrant.publicKey.toBase58())
-    );
-
-    const [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
 
     const { eventAcc, attendeeAcc } = await registerForEvent(
+      program,
+      eventName,
       organizerUserPda,
-      registrantUserPda,
-      eventName
+      registrantUserPda
     );
 
     const [attendeePda, attendeeBump] = getAttendeePdaAndBump(
@@ -87,63 +99,55 @@ describe('registerForEvent', () => {
   });
 
   test('throws when registering for the same event again', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
-    const capacity = 10;
-
     await createEvent(
-      organizer,
+      program,
       true,
       true,
       eventName,
-      await generateAvatarUri(icons),
+      'https://example.com/image.png',
       capacity,
       new BN(Date.now()),
       new BN(Date.now() + 1000 * 60 * 60 * 24),
       'Sunway University, Subang Jaya',
-      'This is a test event'
+      'This is a test event',
+      organizer
     );
 
     const masterMint = Keypair.generate();
-    const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
+    [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     await createBadge(
-      organizer,
-      masterMint,
-      eventPda,
+      program,
+      umi,
       badgeName,
       badgeSymbol,
       badgeUri,
-      new BN(maxSupply)
+      new BN(maxSupply),
+      organizer,
+      eventPda,
+      masterMint
     );
 
-    const registrant = await getFundedKeypair();
-
-    await createProfile(
-      registrant,
-      'Paul',
-      await generateAvatarUri(shapes, registrant.publicKey.toBase58())
+    await registerForEvent(
+      program,
+      eventName,
+      organizerUserPda,
+      registrantUserPda
     );
-
-    const [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
-
-    await registerForEvent(organizerUserPda, registrantUserPda, eventName);
 
     try {
-      await registerForEvent(organizerUserPda, registrantUserPda, eventName);
+      await registerForEvent(
+        program,
+        eventName,
+        organizerUserPda,
+        registrantUserPda
+      );
     } catch (err) {
       expect(err).toBeInstanceOf(SendTransactionError);
       expect(err.logs).toEqual(
@@ -157,61 +161,67 @@ describe('registerForEvent', () => {
   });
 
   test('throws when registering for a full event', async () => {
-    const organizer = await getFundedKeypair();
-
-    await createProfile(
-      organizer,
-      'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
-    );
-
-    const eventName = 'Test event';
     const capacity = 1;
 
     await createEvent(
-      organizer,
+      program,
       true,
       true,
       eventName,
-      await generateAvatarUri(icons),
+      'https://example.com/image.png',
       capacity,
       new BN(Date.now()),
       new BN(Date.now() + 1000 * 60 * 60 * 24),
       'Sunway University, Subang Jaya',
-      'This is a test event'
+      'This is a test event',
+      organizer
     );
 
     const masterMint = Keypair.generate();
-    const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
+    [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     await createBadge(
-      organizer,
-      masterMint,
-      eventPda,
+      program,
+      umi,
       badgeName,
       badgeSymbol,
       badgeUri,
-      new BN(maxSupply)
+      new BN(maxSupply),
+      organizer,
+      eventPda,
+      masterMint
     );
 
-    const registrant = await getFundedKeypair();
+    await registerForEvent(
+      program,
+      eventName,
+      organizerUserPda,
+      registrantUserPda
+    );
+
+    const newRegistrant = await getFundedKeypair();
+    const [newRegistrantUserPda] = getUserPdaAndBump(newRegistrant.publicKey);
 
     await createProfile(
-      registrant,
+      program,
       'Paul',
-      await generateAvatarUri(shapes, registrant.publicKey.toBase58())
+      'https://example.com/image.png',
+      newRegistrant
     );
 
-    const [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
-
     try {
-      await registerForEvent(organizerUserPda, registrantUserPda, eventName);
+      await registerForEvent(
+        program,
+        eventName,
+        organizerUserPda,
+        newRegistrantUserPda
+      );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('EventCapacityMaxReached');
