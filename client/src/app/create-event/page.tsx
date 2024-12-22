@@ -11,7 +11,6 @@ import {
   CameraIcon,
   LucideDoorClosed,
   Pen,
-  Clock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -158,7 +157,7 @@ export default function Page() {
                     )}
                   />
 
-                <div className="flex gap-4">
+                  <div className="flex gap-4">
                     <FormField
                       control={form.control}
                       name="startDate"
@@ -169,14 +168,14 @@ export default function Page() {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
-                                  variant={"outline"}
+                                  variant={'outline'}
                                   className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
+                                    'w-[240px] pl-3 text-left font-normal',
+                                    !field.value && 'text-muted-foreground'
                                   )}
                                 >
                                   {field.value ? (
-                                    format(field.value, "PPP HH:mm")
+                                    format(field.value, 'PPP HH:mm')
                                   ) : (
                                     <span>Pick a date</span>
                                   )}
@@ -184,20 +183,29 @@ export default function Page() {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
                                 selected={field.value || undefined}
                                 onSelect={field.onChange}
                                 initialFocus
                               />
-                              <div className="p-3 border-t">
+                              <div className="border-t p-3">
                                 <Input
                                   type="time"
                                   onChange={(e) => {
-                                    const date = field.value ? new Date(field.value) : new Date();
-                                    const [hours, minutes] = e.target.value.split(':');
-                                    date.setHours(parseInt(hours), parseInt(minutes));
+                                    const date = field.value
+                                      ? new Date(field.value)
+                                      : new Date();
+                                    const [hours, minutes] =
+                                      e.target.value.split(':');
+                                    date.setHours(
+                                      parseInt(hours),
+                                      parseInt(minutes)
+                                    );
                                     field.onChange(date);
                                   }}
                                 />
@@ -218,14 +226,14 @@ export default function Page() {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
-                                  variant={"outline"}
+                                  variant={'outline'}
                                   className={cn(
-                                    "w-[240px] pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
+                                    'w-[240px] pl-3 text-left font-normal',
+                                    !field.value && 'text-muted-foreground'
                                   )}
                                 >
                                   {field.value ? (
-                                    format(field.value, "PPP HH:mm")
+                                    format(field.value, 'PPP HH:mm')
                                   ) : (
                                     <span>Pick a date</span>
                                   )}
@@ -233,20 +241,29 @@ export default function Page() {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
                                 selected={field.value || undefined}
                                 onSelect={field.onChange}
                                 initialFocus
                               />
-                              <div className="p-3 border-t">
+                              <div className="border-t p-3">
                                 <Input
                                   type="time"
                                   onChange={(e) => {
-                                    const date = field.value ? new Date(field.value) : new Date();
-                                    const [hours, minutes] = e.target.value.split(':');
-                                    date.setHours(parseInt(hours), parseInt(minutes));
+                                    const date = field.value
+                                      ? new Date(field.value)
+                                      : new Date();
+                                    const [hours, minutes] =
+                                      e.target.value.split(':');
+                                    date.setHours(
+                                      parseInt(hours),
+                                      parseInt(minutes)
+                                    );
                                     field.onChange(date);
                                   }}
                                 />

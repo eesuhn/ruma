@@ -1,17 +1,12 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Edit, Trophy, Users } from 'lucide-react';
+import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
-import { Tooltip, TooltipContent, TooltipTrigger,TooltipProvider } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from '@/components/ui/tooltip';
 
 interface Badge {
   id: string;
@@ -95,17 +90,17 @@ export default function Page() {
           <div>
             <h2 className="mb-4 text-xl font-semibold">Badges Collection</h2>
             <TooltipProvider>
-              <div className="grid grid-cols-6 p-2 cursor-default items-center gap-8">
+              <div className="grid cursor-default grid-cols-6 items-center gap-8 p-2">
                 {badges.map((badge) => (
                   <Tooltip key={badge.id}>
                     <TooltipTrigger asChild>
-                      <div className="w-20 h-20 flex items-center justify-center ">
+                      <div className="flex h-20 w-20 items-center justify-center">
                         <Image
                           src={badge.image}
                           alt={badge.name}
                           width={80}
                           height={80}
-                          className="rounded-xl cursor-default object-cover w-full h-full"
+                          className="h-full w-full cursor-default rounded-xl object-cover"
                         />
                       </div>
                     </TooltipTrigger>
