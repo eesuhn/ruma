@@ -43,7 +43,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { generateDicebear } from '@/hooks/useDicebear';
+import { generateDicebear } from '@/lib/utils';
 
 const formSchema = z.object({
   eventName: z.string().min(2, {

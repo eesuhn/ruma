@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { generateDicebear } from '@/hooks/useDicebear';
+import { generateDicebear } from '@/lib/utils';
 
 export default function Page() {
   const [seed, setSeed] = useState<string>('');
