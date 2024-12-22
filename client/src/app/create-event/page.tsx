@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -43,6 +43,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { generateDicebear } from '@/hooks/useDicebear';
 
 const formSchema = z.object({
   eventName: z.string().min(2, {
@@ -68,6 +69,9 @@ const formSchema = z.object({
 export default function Page() {
   const [eventImage, setEventImage] = useState<string | null>(null);
   const [badgeImage, setBadgeImage] = useState<string | null>(null);
+  const [isCustomEventImage, setIsCustomEventImage] = useState(false);
+  const [isCustomBadgeImage, setIsCustomBadgeImage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -82,18 +86,34 @@ export default function Page() {
     },
   });
 
+  useEffect(() => {
+    const eventSeed = Math.random().toString(36).substring(7);
+    const badgeSeed = Math.random().toString(36).substring(7);
+
+    const eventSvg = generateDicebear({ seed: eventSeed, style: 'event' });
+    const badgeSvg = generateDicebear({ seed: badgeSeed, style: 'badge' });
+
+    setEventImage(eventSvg);
+    setBadgeImage(badgeSvg);
+    setIsLoading(false);
+  }, []);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log({ ...values, eventImage, badgeImage });
   }
 
   const handleImageChange =
-    (setter: React.Dispatch<React.SetStateAction<string | null>>) =>
+    (
+      setter: React.Dispatch<React.SetStateAction<string | null>>,
+      setCustom: (value: boolean) => void
+    ) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onloadend = () => {
           setter(reader.result as string);
+          setCustom(true);
         };
         reader.readAsDataURL(file);
       }
@@ -117,24 +137,32 @@ export default function Page() {
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
                     onClick={handleImageClick(eventImageInputRef)}
                   >
-                    {eventImage ? (
+                    {isLoading ? (
+                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
+                        <CameraIcon size={48} />
+                        <span className="mt-2 text-sm">Loading...</span>
+                      </div>
+                    ) : isCustomEventImage ? (
                       <Image
-                        src={eventImage}
+                        src={eventImage!}
                         alt="Event image preview"
                         layout="fill"
                         objectFit="cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <CameraIcon size={48} />
-                        <span className="mt-2 text-sm">Add Event Image</span>
-                      </div>
+                      <div
+                        className="h-full w-full"
+                        dangerouslySetInnerHTML={{ __html: eventImage || '' }}
+                      />
                     )}
                   </div>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange(setEventImage)}
+                    onChange={handleImageChange(
+                      setEventImage,
+                      setIsCustomEventImage
+                    )}
                     className="hidden"
                     ref={eventImageInputRef}
                   />
@@ -420,24 +448,32 @@ export default function Page() {
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
                     onClick={handleImageClick(badgeImageInputRef)}
                   >
-                    {badgeImage ? (
+                    {isLoading ? (
+                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
+                        <CameraIcon size={48} />
+                        <span className="mt-2 text-sm">Loading...</span>
+                      </div>
+                    ) : isCustomBadgeImage ? (
                       <Image
-                        src={badgeImage}
+                        src={badgeImage!}
                         alt="Badge image preview"
                         layout="fill"
                         objectFit="cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <CameraIcon size={48} />
-                        <span className="mt-2 text-sm">Add Badge Image</span>
-                      </div>
+                      <div
+                        className="h-full w-full"
+                        dangerouslySetInnerHTML={{ __html: badgeImage || '' }}
+                      />
                     )}
                   </div>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageChange(setBadgeImage)}
+                    onChange={handleImageChange(
+                      setBadgeImage,
+                      setIsCustomBadgeImage
+                    )}
                     className="hidden"
                     ref={badgeImageInputRef}
                   />
