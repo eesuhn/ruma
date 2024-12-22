@@ -18,12 +18,3 @@ wallet = "ruma-wallet.json"
 
 [scripts]
 test = "bun test --timeout 1000000"
-
-[test]
-startup_wait = 5000
-shutdown_wait = 2000
-upgradeable = true
-
-[[test.genesis]]
-address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-program = "tests/fixtures/mpl_token_metadata.so"

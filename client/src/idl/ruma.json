@@ -1,0 +1,947 @@
+{
+  "address": "561nPDsZmmaEtQiRdW4eCaNBkHtbSh1gTLDsjhbLREUU",
+  "metadata": {
+    "name": "ruma",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "change_attendee_status",
+      "discriminator": [124, 192, 107, 195, 207, 243, 25, 170],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true,
+          "address": "RUMAAgFQxafzGWmfPhcBSL6AeGfw77gFZrSvDdkRUMk"
+        },
+        {
+          "name": "user"
+        },
+        {
+          "name": "event"
+        },
+        {
+          "name": "attendee",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 116, 116, 101, 110, 100, 101, 101]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              },
+              {
+                "kind": "account",
+                "path": "event"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "status",
+          "type": {
+            "defined": {
+              "name": "AttendeeStatus"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "check_into_event",
+      "discriminator": [174, 115, 38, 67, 105, 235, 193, 133],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true,
+          "address": "RUMAAgFQxafzGWmfPhcBSL6AeGfw77gFZrSvDdkRUMk"
+        },
+        {
+          "name": "host",
+          "signer": true
+        },
+        {
+          "name": "organizer",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "host"
+              }
+            ]
+          }
+        },
+        {
+          "name": "registrant",
+          "writable": true
+        },
+        {
+          "name": "attendee"
+        },
+        {
+          "name": "edition_mint",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "edition_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "registrant"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "edition_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "edition_metadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "edition_mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "edition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "edition_mint"
+              },
+              {
+                "kind": "const",
+                "value": [101, 100, 105, 116, 105, 111, 110]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "edition_marker_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "master_mint"
+              },
+              {
+                "kind": "const",
+                "value": [101, 100, 105, 116, 105, 111, 110]
+              },
+              {
+                "kind": "arg",
+                "path": "edition_number.checked_div(EDITION_MARKER_BIT_SIZE)"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "master_mint"
+        },
+        {
+          "name": "master_token_account"
+        },
+        {
+          "name": "master_metadata"
+        },
+        {
+          "name": "master_edition",
+          "writable": true
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "sysvar_instructions",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "edition_number",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_badge",
+      "discriminator": [25, 191, 79, 235, 98, 119, 184, 59],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "organizer",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "payer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "writable": true
+        },
+        {
+          "name": "master_mint",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "master_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "master_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
+                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
+                219, 233, 248, 89
+              ]
+            }
+          }
+        },
+        {
+          "name": "master_metadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "master_mint"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "master_edition",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "token_metadata_program"
+              },
+              {
+                "kind": "account",
+                "path": "master_mint"
+              },
+              {
+                "kind": "const",
+                "value": [101, 100, 105, 116, 105, 111, 110]
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "token_metadata_program"
+            }
+          }
+        },
+        {
+          "name": "token_metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "badge_name",
+          "type": "string"
+        },
+        {
+          "name": "badge_symbol",
+          "type": "string"
+        },
+        {
+          "name": "badge_uri",
+          "type": "string"
+        },
+        {
+          "name": "max_supply",
+          "type": {
+            "option": "u64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_event",
+      "discriminator": [49, 219, 29, 203, 22, 98, 100, 87],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "organizer",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "payer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "event",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [101, 118, 101, 110, 116]
+              },
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "event_data",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [101, 118, 101, 110, 116, 95, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "event"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "is_public",
+          "type": "bool"
+        },
+        {
+          "name": "needs_approval",
+          "type": "bool"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "image",
+          "type": "string"
+        },
+        {
+          "name": "capacity",
+          "type": {
+            "option": "i32"
+          }
+        },
+        {
+          "name": "start_timestamp",
+          "type": {
+            "option": "i64"
+          }
+        },
+        {
+          "name": "end_timestamp",
+          "type": {
+            "option": "i64"
+          }
+        },
+        {
+          "name": "location",
+          "type": {
+            "option": "string"
+          }
+        },
+        {
+          "name": "about",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_profile",
+      "discriminator": [225, 205, 234, 143, 17, 186, 50, 220],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114]
+              },
+              {
+                "kind": "account",
+                "path": "payer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_data",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114, 95, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "image",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "register_for_event",
+      "discriminator": [9, 43, 142, 151, 8, 125, 154, 139],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true,
+          "address": "RUMAAgFQxafzGWmfPhcBSL6AeGfw77gFZrSvDdkRUMk"
+        },
+        {
+          "name": "organizer"
+        },
+        {
+          "name": "registrant"
+        },
+        {
+          "name": "event",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [101, 118, 101, 110, 116]
+              },
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "arg",
+                "path": "name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "event_data",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [101, 118, 101, 110, 116, 95, 100, 97, 116, 97]
+              },
+              {
+                "kind": "account",
+                "path": "event"
+              }
+            ]
+          }
+        },
+        {
+          "name": "attendee",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 116, 116, 101, 110, 100, 101, 101]
+              },
+              {
+                "kind": "account",
+                "path": "registrant"
+              },
+              {
+                "kind": "account",
+                "path": "event"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Attendee",
+      "discriminator": [231, 172, 150, 240, 220, 165, 51, 65]
+    },
+    {
+      "name": "Event",
+      "discriminator": [125, 192, 125, 158, 9, 115, 152, 233]
+    },
+    {
+      "name": "EventData",
+      "discriminator": [245, 224, 183, 136, 42, 117, 154, 170]
+    },
+    {
+      "name": "User",
+      "discriminator": [159, 117, 95, 227, 239, 151, 58, 236]
+    },
+    {
+      "name": "UserData",
+      "discriminator": [139, 248, 167, 203, 253, 220, 210, 221]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "UserNameRequired",
+      "msg": "User name is required"
+    },
+    {
+      "code": 6001,
+      "name": "UserNameTooLong",
+      "msg": "User name can not be longer than 32 characters"
+    },
+    {
+      "code": 6002,
+      "name": "UserImageRequired",
+      "msg": "User image is required"
+    },
+    {
+      "code": 6003,
+      "name": "UserImageTooLong",
+      "msg": "User image can not be longer than 200 characters"
+    },
+    {
+      "code": 6004,
+      "name": "EventNameRequired",
+      "msg": "Event name is required"
+    },
+    {
+      "code": 6005,
+      "name": "EventNameTooLong",
+      "msg": "Event name can not be longer than 128 characters"
+    },
+    {
+      "code": 6006,
+      "name": "EventImageRequired",
+      "msg": "Image is required"
+    },
+    {
+      "code": 6007,
+      "name": "EventImageTooLong",
+      "msg": "Image can not be longer than 200 characters"
+    },
+    {
+      "code": 6008,
+      "name": "BadgeNameRequired",
+      "msg": "Badge name is required"
+    },
+    {
+      "code": 6009,
+      "name": "BadgeNameTooLong",
+      "msg": "Badge name can not be longer than 32 characters"
+    },
+    {
+      "code": 6010,
+      "name": "BadgeSymbolRequired",
+      "msg": "Badge symbol is required"
+    },
+    {
+      "code": 6011,
+      "name": "BadgeSymbolTooLong",
+      "msg": "Badge symbol can not be longer than 10 characters"
+    },
+    {
+      "code": 6012,
+      "name": "BadgeUriRequired",
+      "msg": "Badge URI is required"
+    },
+    {
+      "code": 6013,
+      "name": "BadgeUriTooLong",
+      "msg": "Badge URI can not be longer than 200 characters"
+    },
+    {
+      "code": 6014,
+      "name": "UnauthorizedMasterWallet",
+      "msg": "Signer not authorized"
+    },
+    {
+      "code": 6015,
+      "name": "EventCapacityMaxReached",
+      "msg": "Event capacity has reached maximum"
+    },
+    {
+      "code": 6016,
+      "name": "AttendeeNotApproved",
+      "msg": "Attendee is not approved for this event"
+    }
+  ],
+  "types": [
+    {
+      "name": "Attendee",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AttendeeStatus"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttendeeStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Event",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "data",
+            "type": "pubkey"
+          },
+          {
+            "name": "badge",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "attendees",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "EventData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "is_public",
+            "type": "bool"
+          },
+          {
+            "name": "needs_approval",
+            "type": "bool"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "type": "string"
+          },
+          {
+            "name": "capacity",
+            "type": {
+              "option": "i32"
+            }
+          },
+          {
+            "name": "start_timestamp",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "end_timestamp",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "location",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "about",
+            "type": {
+              "option": "string"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "User",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "data",
+            "type": "pubkey"
+          },
+          {
+            "name": "badges",
+            "type": {
+              "vec": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "image",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "RUMA_WALLET",
+      "type": "pubkey",
+      "value": "RUMAAgFQxafzGWmfPhcBSL6AeGfw77gFZrSvDdkRUMk"
+    }
+  ]
+}

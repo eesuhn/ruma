@@ -1,20 +1,5 @@
 import { describe, test } from 'bun:test';
-import {
-  changeAttendeeStatus,
-  checkIntoEvent,
-  createBadge,
-  createEvent,
-  createProfile,
-  generateAvatarUri,
-  getAttendeePdaAndBump,
-  getEventPdaAndBump,
-  getFundedKeypair,
-  getUserPdaAndBump,
-  registerForEvent,
-  umi,
-} from './utils';
-import { icons, rings, shapes } from '@dicebear/collection';
-import { BN } from 'bn.js';
+import { getFundedKeypair, program, umi } from './utils';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import {
@@ -22,31 +7,48 @@ import {
   findMetadataPda,
 } from '@metaplex-foundation/mpl-token-metadata';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
+import { BN } from '@coral-xyz/anchor';
+import {
+  changeAttendeeStatus,
+  checkIntoEvent,
+  createBadge,
+  createEvent,
+  createProfile,
+  registerForEvent,
+} from './methods';
+import {
+  getAttendeePdaAndBump,
+  getEventPdaAndBump,
+  getUserPdaAndBump,
+} from './pda';
 
 describe('end-to-end', () => {
   test('ruma', async () => {
     const organizer = await getFundedKeypair();
+    const registrant = await getFundedKeypair();
 
     await createProfile(
-      organizer,
+      program,
       'Bob',
-      await generateAvatarUri(shapes, organizer.publicKey.toBase58())
+      'https://example.com/image.png',
+      organizer
     );
 
     const eventName = 'Test event';
     const capacity = 10;
 
     await createEvent(
-      organizer,
+      program,
       true,
       true,
       eventName,
-      await generateAvatarUri(icons),
+      'https://example.com/image.png',
       capacity,
       new BN(Date.now()),
       new BN(Date.now() + 1000 * 60 * 60 * 24),
       'Sunway University, Subang Jaya',
-      'This is a test event'
+      'This is a test event',
+      organizer
     );
 
     const masterMint = Keypair.generate();
@@ -54,35 +56,44 @@ describe('end-to-end', () => {
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
     const badgeName = 'Test badge';
     const badgeSymbol = 'BDG';
-    const badgeUri = await generateAvatarUri(rings, 'uri');
+    const badgeUri = 'https://example.com/image.png';
     // corresponds to capacity of event
     const maxSupply = capacity;
 
     await createBadge(
-      organizer,
-      masterMint,
-      eventPda,
+      program,
+      umi,
       badgeName,
       badgeSymbol,
       badgeUri,
-      new BN(maxSupply)
+      new BN(maxSupply),
+      organizer,
+      eventPda,
+      masterMint
     );
 
-    const registrant = await getFundedKeypair();
-
     await createProfile(
-      registrant,
+      program,
       'Paul',
-      await generateAvatarUri(shapes, registrant.publicKey.toBase58())
+      'https://example.com/image.png',
+      registrant
     );
 
     const [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
 
-    await registerForEvent(organizerUserPda, registrantUserPda, eventName);
+    await registerForEvent(
+      program,
+      eventName,
+      organizerUserPda,
+      registrantUserPda
+    );
 
-    const newStatus = { approved: {} };
-
-    await changeAttendeeStatus(registrantUserPda, eventPda, newStatus);
+    await changeAttendeeStatus(
+      program,
+      { approved: {} },
+      registrantUserPda,
+      eventPda
+    );
 
     const editionMint = Keypair.generate();
     const [attendeePda] = getAttendeePdaAndBump(registrantUserPda, eventPda);
@@ -99,6 +110,8 @@ describe('end-to-end', () => {
     });
 
     await checkIntoEvent(
+      program,
+      umi,
       organizer,
       editionMint,
       registrantUserPda,

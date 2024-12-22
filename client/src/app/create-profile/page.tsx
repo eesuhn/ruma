@@ -1,14 +1,31 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { CameraIcon } from 'lucide-react';
+import { generateDicebear } from '@/hooks/useDicebear';
 
 export default function Page() {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [seed, setSeed] = useState<string>('');
+  const [profileImage, setProfileImage] = useState<string>('');
+  const [isCustomImage, setIsCustomImage] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // TODO: Replace the seed with user wallet address
+    setSeed(Math.random().toString(36).substring(7));
+  }, []);
+
+  useEffect(() => {
+    if (seed) {
+      // TODO: Save generated SVG to IPFS
+      const svg = generateDicebear({ seed, style: 'profile' });
+      setProfileImage(svg);
+      setIsLoading(false);
+    }
+  }, [seed]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -16,6 +33,7 @@ export default function Page() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result as string);
+        setIsCustomImage(true);
       };
       reader.readAsDataURL(file);
     }
@@ -40,7 +58,9 @@ export default function Page() {
               className="relative h-36 w-36 cursor-pointer overflow-hidden rounded-lg"
               onClick={handleImageClick}
             >
-              {profileImage ? (
+              {isLoading ? (
+                <div className="h-full w-full bg-muted" />
+              ) : isCustomImage ? (
                 <Image
                   src={profileImage}
                   alt="Profile preview"
@@ -48,9 +68,10 @@ export default function Page() {
                   objectFit="cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                  <CameraIcon size={48} />
-                </div>
+                <div
+                  className="h-full w-full"
+                  dangerouslySetInnerHTML={{ __html: profileImage }}
+                />
               )}
             </div>
           </div>
