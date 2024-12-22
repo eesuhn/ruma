@@ -10,6 +10,7 @@
     "format": "prettier . -w"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",
