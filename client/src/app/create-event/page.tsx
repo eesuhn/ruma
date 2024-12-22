@@ -162,7 +162,7 @@ export default function Page() {
                       control={form.control}
                       name="startDate"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem className="flex w-1/2 flex-col">
                           <FormLabel>Start Date & Time</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
@@ -170,7 +170,7 @@ export default function Page() {
                                 <Button
                                   variant={'outline'}
                                   className={cn(
-                                    'w-[240px] pl-3 text-left font-normal',
+                                    'w-full pl-3 text-left font-normal',
                                     !field.value && 'text-muted-foreground'
                                   )}
                                 >
@@ -220,7 +220,7 @@ export default function Page() {
                       control={form.control}
                       name="endDate"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
+                        <FormItem className="flex w-1/2 flex-col">
                           <FormLabel>End Date & Time</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
@@ -228,7 +228,7 @@ export default function Page() {
                                 <Button
                                   variant={'outline'}
                                   className={cn(
-                                    'w-[240px] pl-3 text-left font-normal',
+                                    'w-full pl-3 text-left font-normal',
                                     !field.value && 'text-muted-foreground'
                                   )}
                                 >
