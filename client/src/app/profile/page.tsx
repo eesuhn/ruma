@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Edit, Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
+import { Tooltip, TooltipContent, TooltipTrigger,TooltipProvider } from '@/components/ui/tooltip';
 
 interface Badge {
   id: string;
@@ -68,31 +69,6 @@ export default function Page() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl font-bold">{profile.name}</h1>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit profile</span>
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Profile</DialogTitle>
-                      </DialogHeader>
-                      <div className="">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Name</Label>
-                          <Input id="name" defaultValue="Tech XYZ" />
-                        </div>
-                        <div className="flex justify-end gap-4 pt-4">
-                          <Button variant="ghost" className="h-9">
-                            Cancel
-                          </Button>
-                          <Button className="h-9">Save</Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
                 <div className="mt-2 flex gap-6">
                   <div className="flex items-center gap-2">
@@ -114,22 +90,33 @@ export default function Page() {
         </CardContent>
       </Card>
 
-      <div className="">
+      <div className="cursor-default">
         {badges.length > 0 ? (
           <div>
             <h2 className="mb-4 text-xl font-semibold">Badges Collection</h2>
-            <div className="grid grid-cols-6">
-              {badges.map((badge) => (
-                <Image
-                  key={badge.id}
-                  src={badge.image}
-                  alt={badge.name}
-                  width={80}
-                  height={80}
-                  className="rounded-xl"
-                />
-              ))}
-            </div>
+            <TooltipProvider>
+              <div className="grid grid-cols-6 p-2 cursor-default items-center gap-8">
+                {badges.map((badge) => (
+                  <Tooltip key={badge.id}>
+                    <TooltipTrigger asChild>
+                      <div className="w-20 h-20 flex items-center justify-center ">
+                        <Image
+                          src={badge.image}
+                          alt={badge.name}
+                          width={80}
+                          height={80}
+                          className="rounded-xl cursor-default object-cover w-full h-full"
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{badge.name}</p>
+                      <p>Earned on: {badge.earnedDate}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
           </div>
         ) : (
           <h2 className="mt-12 text-center text-xl font-bold">

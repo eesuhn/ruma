@@ -11,6 +11,7 @@ import {
   CameraIcon,
   LucideDoorClosed,
   Pen,
+  Clock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -41,16 +42,16 @@ import {
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
   eventName: z.string().min(2, {
     message: 'Event name must be at least 2 characters.',
   }),
   visibility: z.string(),
-  dateRange: z.object({
-    from: z.date(),
-    to: z.date().optional(),
-  }),
+  startDate: z.date().nullable(),
+  endDate: z.date().nullable(),
   location: z.string().min(1, {
     message: 'Location is required.',
   }),
@@ -77,10 +78,8 @@ export default function Page() {
       visibility: 'public',
       requireApproval: false,
       capacity: '',
-      dateRange: {
-        from: new Date(),
-        to: undefined,
-      },
+      startDate: null,
+      endDate: null,
     },
   });
 
@@ -107,47 +106,225 @@ export default function Page() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">
-      <h1 className="mb-4 text-2xl font-bold">Create Event</h1>
+      <h1 className="mb-6 text-3xl font-bold">Create Event</h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="mb-[-8px] flex gap-6">
-            <div className="w-1/3">
-              <div
-                className="relative aspect-square w-64 cursor-pointer overflow-hidden rounded-lg"
-                onClick={handleImageClick(eventImageInputRef)}
-              >
-                {eventImage ? (
-                  <Image
-                    src={eventImage}
-                    alt="Event image preview"
-                    layout="fill"
-                    objectFit="cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                    <CameraIcon size={48} />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex gap-6">
+                <div className="w-1/3">
+                  <div
+                    className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
+                    onClick={handleImageClick(eventImageInputRef)}
+                  >
+                    {eventImage ? (
+                      <Image
+                        src={eventImage}
+                        alt="Event image preview"
+                        layout="fill"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
+                        <CameraIcon size={48} />
+                        <span className="mt-2 text-sm">Add Event Image</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange(setEventImage)}
+                    className="hidden"
+                    ref={eventImageInputRef}
+                  />
+                </div>
+                <div className="w-2/3 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="eventName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Event Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="BuidlerHub: Blockchain 101"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                <div className="flex gap-4">
+                    <FormField
+                      control={form.control}
+                      name="startDate"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Start Date & Time</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-[240px] pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP HH:mm")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value || undefined}
+                                onSelect={field.onChange}
+                                initialFocus
+                              />
+                              <div className="p-3 border-t">
+                                <Input
+                                  type="time"
+                                  onChange={(e) => {
+                                    const date = field.value ? new Date(field.value) : new Date();
+                                    const [hours, minutes] = e.target.value.split(':');
+                                    date.setHours(parseInt(hours), parseInt(minutes));
+                                    field.onChange(date);
+                                  }}
+                                />
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="endDate"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>End Date & Time</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-[240px] pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP HH:mm")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value || undefined}
+                                onSelect={field.onChange}
+                                initialFocus
+                              />
+                              <div className="p-3 border-t">
+                                <Input
+                                  type="time"
+                                  onChange={(e) => {
+                                    const date = field.value ? new Date(field.value) : new Date();
+                                    const [hours, minutes] = e.target.value.split(':');
+                                    date.setHours(parseInt(hours), parseInt(minutes));
+                                    field.onChange(date);
+                                  }}
+                                />
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex gap-4">
+                    <FormField
+                      control={form.control}
+                      name="visibility"
+                      render={({ field }) => (
+                        <FormItem className="w-1/2">
+                          <FormLabel>Visibility</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select visibility" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="public">
+                                <div className="flex items-center">
+                                  <Globe2 className="mr-2 h-4 w-4" />
+                                  Public
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="private">
+                                <div className="flex items-center">
+                                  <LucideDoorClosed className="mr-2 h-4 w-4" />
+                                  Private
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem className="w-1/2">
+                          <FormLabel>Location</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Kuala Lumpur" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange(setEventImage)}
-                className="hidden"
-                ref={eventImageInputRef}
-              />
-            </div>
-            <div className="w-2/3 space-y-4">
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
               <FormField
                 control={form.control}
-                name="eventName"
+                name="about"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Event Name</FormLabel>
+                    <FormLabel>About</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="BuidlerHub: Blockchain 101"
+                      <Textarea
+                        placeholder="Tell us about your event"
+                        className="resize-none"
                         {...field}
                       />
                     </FormControl>
@@ -155,131 +332,11 @@ export default function Page() {
                   </FormItem>
                 )}
               />
+            </CardContent>
+          </Card>
 
-              <div className="flex gap-6">
-                <div className="mt-2 w-1/2">
-                  <FormField
-                    control={form.control}
-                    name="dateRange"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel className="mb-1">Event Date</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'w-full justify-start text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value?.from ? (
-                                  field.value.to ? (
-                                    <>
-                                      {format(field.value.from, 'LLL dd, y')} -{' '}
-                                      {format(field.value.to, 'LLL dd, y')}
-                                    </>
-                                  ) : (
-                                    format(field.value.from, 'LLL dd, y')
-                                  )
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              initialFocus
-                              mode="range"
-                              defaultMonth={field.value?.from}
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              numberOfMonths={2}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="mt-[2px] w-1/2">
-                  <FormField
-                    control={form.control}
-                    name="visibility"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Visibility</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select visibility" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="public">
-                              <div className="flex items-center">
-                                <Globe2 className="mr-2 h-4 w-4" />
-                                Public
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="private">
-                              <div className="flex items-center">
-                                <LucideDoorClosed className="mr-2 h-4 w-4" />
-                                Private
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Kuala Lumpur" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          <FormField
-            control={form.control}
-            name="about"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>About</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Tell us about your event"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="space-y-4">
-            <div className="space-y-4 rounded-lg border p-4">
+          <Card>
+            <CardContent className="space-y-4 p-6">
               <FormField
                 control={form.control}
                 name="requireApproval"
@@ -303,7 +360,7 @@ export default function Page() {
                 )}
               />
 
-              <div className="w-full border-t border-muted" />
+              <Separator />
 
               <FormField
                 control={form.control}
@@ -333,69 +390,72 @@ export default function Page() {
                   </FormItem>
                 )}
               />
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Badge Details</h2>
+          <Card>
+            <CardContent className="p-6">
+              <h2 className="mb-4 text-lg font-semibold">Badge Details</h2>
 
-            <div className="flex gap-6">
-              <div className="w-1/4">
-                <div
-                  className="relative aspect-square w-48 cursor-pointer overflow-hidden rounded-lg"
-                  onClick={handleImageClick(badgeImageInputRef)}
-                >
-                  {badgeImage ? (
-                    <Image
-                      src={badgeImage}
-                      alt="Badge image preview"
-                      layout="fill"
-                      objectFit="cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
-                      <CameraIcon size={48} />
-                    </div>
-                  )}
+              <div className="flex gap-6">
+                <div className="w-1/4">
+                  <div
+                    className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
+                    onClick={handleImageClick(badgeImageInputRef)}
+                  >
+                    {badgeImage ? (
+                      <Image
+                        src={badgeImage}
+                        alt="Badge image preview"
+                        layout="fill"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
+                        <CameraIcon size={48} />
+                        <span className="mt-2 text-sm">Add Badge Image</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange(setBadgeImage)}
+                    className="hidden"
+                    ref={badgeImageInputRef}
+                  />
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange(setBadgeImage)}
-                  className="hidden"
-                  ref={badgeImageInputRef}
-                />
+                <div className="w-3/4 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="badgeName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Chill Guy" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="badgeSymbol"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Symbol</FormLabel>
+                        <FormControl>
+                          <Input placeholder="CHG" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="mt-[-6px] w-3/4 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="badgeName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Chill Guy" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="badgeSymbol"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Symbol</FormLabel>
-                      <FormControl>
-                        <Input placeholder="CHG" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           <Button type="submit" className="w-full">
             Create Event
