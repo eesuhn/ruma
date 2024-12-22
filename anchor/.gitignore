@@ -21,3 +21,5 @@ tests/fixtures/
 # Sensitive files
 *wallet.json
 .env
+
+.anchor

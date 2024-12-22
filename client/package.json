@@ -10,6 +10,7 @@
     "format": "prettier . -w"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
     "@dicebear/collection": "^9.2.2",
     "@dicebear/converter": "^9.2.2",
     "@dicebear/core": "^9.2.2",
@@ -29,6 +30,7 @@
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/web3.js": "^1.98.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

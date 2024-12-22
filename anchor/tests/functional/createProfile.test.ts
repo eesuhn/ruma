@@ -1,28 +1,27 @@
-import { describe, expect, test } from 'bun:test';
-import {
-  createProfile,
-  generateAvatarUri,
-  getFundedKeypair,
-  getUserDataPdaAndBump,
-  getUserPdaAndBump,
-  program,
-} from '../utils';
-import { shapes } from '@dicebear/collection';
+import { beforeEach, describe, expect, test } from 'bun:test';
 import { AnchorError } from '@coral-xyz/anchor';
+import { Keypair } from '@solana/web3.js';
+import { createProfile } from '../methods';
+import { getUserDataPdaAndBump, getUserPdaAndBump } from '../pda';
+import { MAX_USER_IMAGE_LENGTH, MAX_USER_NAME_LENGTH } from '../constants';
+import { getFundedKeypair, program } from '../utils';
 
 describe('createProfile', () => {
+  let organizer: Keypair;
+
+  beforeEach(async () => {
+    organizer = await getFundedKeypair();
+  });
+
   test('creates a profile', async () => {
-    const organizer = await getFundedKeypair();
     const organizerName = 'Jeff';
-    const organizerImage = await generateAvatarUri(
-      shapes,
-      organizer.publicKey.toBase58()
-    );
+    const organizerImage = 'https://example.com/image.png';
 
     const { userAcc, userDataAcc } = await createProfile(
-      organizer,
+      program,
       organizerName,
-      organizerImage
+      organizerImage,
+      organizer
     );
 
     const [organizerUserPda, organizerUserBump] = getUserPdaAndBump(
@@ -40,15 +39,11 @@ describe('createProfile', () => {
   });
 
   test('throws when creating a profile with empty name', async () => {
-    const organizer = await getFundedKeypair();
     const organizerName = '';
-    const organizerImage = await generateAvatarUri(
-      shapes,
-      organizer.publicKey.toBase58()
-    );
+    const organizerImage = 'https://example.com/image.png';
 
     try {
-      await createProfile(organizer, organizerName, organizerImage);
+      await createProfile(program, organizerName, organizerImage, organizer);
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('UserNameRequired');
@@ -57,18 +52,14 @@ describe('createProfile', () => {
   });
 
   test('throws when creating a profile with name that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
-    const organizerImage = await generateAvatarUri(
-      shapes,
-      organizer.publicKey.toBase58()
-    );
-    const userNameMaxLength = 32;
+    const organizerImage = 'https://example.com/image.png';
 
     try {
       await createProfile(
-        organizer,
-        '_'.repeat(userNameMaxLength + 1),
-        organizerImage
+        program,
+        '_'.repeat(MAX_USER_NAME_LENGTH + 1),
+        organizerImage,
+        organizer
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
@@ -78,12 +69,11 @@ describe('createProfile', () => {
   });
 
   test('throws when creating a profile with empty image', async () => {
-    const organizer = await getFundedKeypair();
     const organizerName = 'Jeff';
-    const organizerImage = '';
+    const organizerImage = 'https://example.com/image.png';
 
     try {
-      await createProfile(organizer, organizerName, organizerImage);
+      await createProfile(program, organizerName, organizerImage, organizer);
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('UserImageRequired');
@@ -92,15 +82,14 @@ describe('createProfile', () => {
   });
 
   test('throws when creating a profile with image that exceeds max length', async () => {
-    const organizer = await getFundedKeypair();
     const organizerName = 'Bob';
-    const userImageMaxLength = 200;
 
     try {
       await createProfile(
-        organizer,
+        program,
         organizerName,
-        '_'.repeat(userImageMaxLength + 1)
+        '_'.repeat(MAX_USER_IMAGE_LENGTH + 1),
+        organizer
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
