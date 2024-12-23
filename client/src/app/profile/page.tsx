@@ -1,13 +1,16 @@
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, User, Users } from 'lucide-react';
-import Image from 'next/image';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from '@/components/ui/tooltip';
-import { UserData } from '@/types/state';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Edit, Trophy, Users } from 'lucide-react';
+import Image from 'next/image';
 
 interface Badge {
   id: string;
@@ -45,12 +48,7 @@ const badges: Badge[] = [
   },
 ];
 
-export default function Page({
-  bump,
-  name,
-  image
-}: UserData) {
-  void bump;
+export default function Page() {
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
       <Card>
@@ -59,7 +57,7 @@ export default function Page({
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-20">
                 <Image
-                  src={image} // Fix: Use the image prop directly
+                  src={profile.image}
                   alt="Profile"
                   className="rounded-full"
                   width={80}
@@ -69,7 +67,7 @@ export default function Page({
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{name}</h1> {/* Fix: Use the name prop */}
+                  <h1 className="text-2xl font-bold">{profile.name}</h1>
                 </div>
                 <div className="mt-2 flex gap-6">
                   <div className="flex items-center gap-2">
@@ -91,33 +89,22 @@ export default function Page({
         </CardContent>
       </Card>
 
-      <div className="cursor-default">
+      <div className="">
         {badges.length > 0 ? (
           <div>
             <h2 className="mb-4 text-xl font-semibold">Badges Collection</h2>
-            <TooltipProvider>
-              <div className="grid cursor-default grid-cols-6 items-center gap-8 p-2">
-                {badges.map((badge) => (
-                  <Tooltip key={badge.id}>
-                    <TooltipTrigger asChild>
-                      <div className="flex h-20 w-20 items-center justify-center">
-                        <Image
-                          src={badge.image}
-                          alt={badge.name}
-                          width={80}
-                          height={80}
-                          className="h-full w-full cursor-default rounded-xl object-cover"
-                        />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{badge.name}</p>
-                      <p>Earned on: {badge.earnedDate}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
-            </TooltipProvider>
+            <div className="grid grid-cols-6">
+              {badges.map((badge) => (
+                <Image
+                  key={badge.id}
+                  src={badge.image}
+                  alt={badge.name}
+                  width={80}
+                  height={80}
+                  className="rounded-xl"
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <h2 className="mt-12 text-center text-xl font-bold">
