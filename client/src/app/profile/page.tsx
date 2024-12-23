@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Users } from 'lucide-react';
+import { Trophy, User, Users } from 'lucide-react';
 import Image from 'next/image';
 import {
   Tooltip,
@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import { UserData } from '@/types/state';
 
 interface Badge {
   id: string;
@@ -44,7 +45,12 @@ const badges: Badge[] = [
   },
 ];
 
-export default function Page() {
+export default function Page({
+  bump,
+  name,
+  image
+}: UserData) {
+  void bump;
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
       <Card>
@@ -53,7 +59,7 @@ export default function Page() {
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-20">
                 <Image
-                  src={profile.image}
+                  src={image} // Fix: Use the image prop directly
                   alt="Profile"
                   className="rounded-full"
                   width={80}
@@ -63,7 +69,7 @@ export default function Page() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">{profile.name}</h1>
+                  <h1 className="text-2xl font-bold">{name}</h1> {/* Fix: Use the name prop */}
                 </div>
                 <div className="mt-2 flex gap-6">
                   <div className="flex items-center gap-2">
