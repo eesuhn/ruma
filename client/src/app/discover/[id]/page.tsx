@@ -20,8 +20,8 @@ export default function Page() {
     <div className="flex flex-row">
       <div>
         <Image
-          src={event.event_img}
-          alt={event.title}
+          src={event.image}
+          alt={event.name}
           height={400}
           width={600}
           className="mb-2 h-80 w-full object-contain"
@@ -29,28 +29,28 @@ export default function Page() {
         <p className="text-[14px] font-bold">Hosted by:</p>
         <div className="ml-2 flex flex-row items-center">
           <Avatar className="mr-2 h-12 w-12">
-            <AvatarImage src={event.organizerimg} alt={event.organizer} />
-            <AvatarFallback>{event.organizer}</AvatarFallback>
+            <AvatarImage src={event.image} alt={"organizer image"} />
+            <AvatarFallback>{event.image}</AvatarFallback>
           </Avatar>
-          <p className="text-[18px] font-semibold">{event.organizer}</p>
+          <p className="text-[18px] font-semibold">{event.image}</p>
         </div>
       </div>
       <div className="w-[600px] p-8">
-        <h1 className="mb-4 text-4xl font-bold">{event.title}</h1>
+        <h1 className="mb-4 text-4xl font-bold">{event.name}</h1>
         <div className="mb-2 ml-4 flex flex-row items-center">
           <IoCalendarOutline className="mr-3 text-[35px]" />
           <div className="leading-6">
             <p className="text-[24px] font-semibold">
-              {event.date.toDateString()}
+              {event.startTimestamp}date
             </p>
-            <p className="text-[16px] font-light">{event.time}</p>
+            <p className="text-[16px] font-light">{event.startTimestamp}time</p>
           </div>
         </div>
         <div className="mb-2 ml-4 flex flex-row items-center">
           <IoLocationOutline className="mr-3 text-[35px]" />
           <div className="leading-6">
-            <p className="text-[24px] font-semibold">{event.venue}</p>
-            <p className="text-[16px] font-light">{event.address}</p>
+            <p className="text-[24px] font-semibold">{event.location}venue</p>
+            <p className="text-[16px] font-light">{event.location}address</p>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export default function Page() {
           </div>
         </div>
         <p className="font-semibold">About Event:</p>
-        <p>{event.description}</p>
+        <p>{event.about}</p>
       </div>
     </div>
   );
