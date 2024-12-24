@@ -30,8 +30,6 @@ export interface UserData {
   bump: number;
   name: string;
   image: string;
-  hosted: number;
-  attended: number;
 }
 
 export interface User {
