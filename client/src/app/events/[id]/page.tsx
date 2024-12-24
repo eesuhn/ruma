@@ -5,9 +5,26 @@ import { CalendarIcon, Clock, MapPin, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
+import { EventData } from '@/types/state';
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: { params: { id: string } },{
+  bump,
+  isPublic,
+  needsApproval,
+  name,
+  image,
+  capacity,
+  startTimestamp,
+  endTimestamp,
+  location,
+  about,
+}: EventData) {
   void params;
+  void bump;
+  void isPublic;
+  void needsApproval;
+  void capacity;
+  void endTimestamp;
   const router = useRouter();
 
   // SAMPLE
@@ -96,8 +113,8 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="space-y-6">
           <div className="relative aspect-square w-full">
             <Image
-              src={eventDetailsSample.image}
-              alt={eventDetailsSample.title}
+              src={image}
+              alt={name}
               fill
               className="rounded-lg object-cover"
             />
@@ -106,20 +123,20 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="space-y-6">
           <div>
             <h1 className="mb-4 text-3xl font-bold">
-              {eventDetailsSample.title}
+              {name}
             </h1>
             <div className="ml-1 space-y-2 text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span>{eventDetailsSample.date}</span>
+                <span>{startTimestamp}date</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>{eventDetailsSample.time}</span>
+                <span>{startTimestamp}time</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>{eventDetailsSample.location}</span>
+                <span>{location}</span>
               </div>
             </div>
           </div>
@@ -129,7 +146,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="space-y-2">
             <h2 className="text-xl font-semibold">About</h2>
             <p className="ml-[1px] text-justify text-muted-foreground">
-              {eventDetailsSample.description}
+              {about}
             </p>
           </div>
 
