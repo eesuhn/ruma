@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import z from 'zod';
+import { z } from 'zod';
+import { createEventFormSchema } from '@/lib/formSchemas';
 import {
   CalendarIcon,
   Users,
@@ -41,41 +42,6 @@ import {
   SelectValue,
 } from '@/components/ui';
 
-const formSchema = z.object({
-  eventName: z
-    .string()
-    .min(2, {
-      message: 'Event name must be at least 2 characters.',
-    })
-    .default(''),
-  visibility: z.string().default('public'),
-  startDate: z.date().nullable(),
-  endDate: z.date().nullable(),
-  location: z
-    .string()
-    .min(1, {
-      message: 'Location is required.',
-    })
-    .default(''),
-  about: z.string().default(''),
-  requireApproval: z.boolean().default(false),
-  capacity: z.string().default(''),
-  badgeName: z
-    .string()
-    .min(2, {
-      message: 'Badge name must be at least 2 characters.',
-    })
-    .default(''),
-  badgeSymbol: z
-    .string()
-    .min(1, {
-      message: 'Badge symbol is required.',
-    })
-    .default(''),
-  eventImage: z.string().default(''),
-  badgeImage: z.string().default(''),
-});
-
 export default function Page() {
   const [eventImage, setEventImage] = useState<string | null>(null);
   const [badgeImage, setBadgeImage] = useState<string | null>(null);
@@ -85,21 +51,21 @@ export default function Page() {
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof createEventFormSchema>>({
+    resolver: zodResolver(createEventFormSchema),
     defaultValues: {
       eventName: '',
       visibility: 'public',
       location: '',
       about: '',
       requireApproval: false,
-      capacity: '',
+      capacity: null,
       badgeName: '',
       badgeSymbol: '',
       startDate: null,
       endDate: null,
-      eventImage: '',
-      badgeImage: '',
+      eventImage: undefined,
+      badgeImage: undefined,
     },
   });
 
@@ -117,7 +83,7 @@ export default function Page() {
     setIsLoading(false);
   }, [form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof createEventFormSchema>) {
     console.log({
       ...values,
       eventImage: eventImage || values.eventImage,
@@ -134,12 +100,15 @@ export default function Page() {
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
+        // Set the actual File object for validation
+        form.setValue(fieldName, file);
+
+        // Create preview
         const reader = new FileReader();
         reader.onloadend = () => {
           const result = reader.result as string;
           setter(result);
           setCustom(true);
-          form.setValue(fieldName, result);
         };
         reader.readAsDataURL(file);
       }
@@ -467,11 +436,23 @@ export default function Page() {
                           type="text"
                           placeholder="Unlimited"
                           className="w-40 pl-8 text-right"
-                          {...field}
+                          value={field.value === null ? '' : field.value}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                              field.onChange(null);
+                            } else {
+                              const num = parseInt(value, 10);
+                              if (!isNaN(num)) {
+                                field.onChange(num);
+                              }
+                            }
+                          }}
                         />
                         <Pen className="absolute left-2 h-4 w-4 text-muted-foreground" />
                       </div>
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
