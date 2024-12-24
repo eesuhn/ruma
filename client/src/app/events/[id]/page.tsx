@@ -7,7 +7,7 @@ import { Button } from '@/components/ui';
 import { EventData } from '@/types/state';
 
 interface EventDetails extends EventData {
-  condition: 'register' | 'registered' | 'manage'| 'checked-in';
+  condition: 'register' | 'registered' | 'manage' | 'checked-in';
   registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
   nft: {
     image: string;
@@ -26,7 +26,8 @@ const eventDetailsSample: EventDetails = {
   startTimestamp: 1637385600,
   endTimestamp: 1637400000,
   location: 'Sunway University',
-  about:'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placer',
+  about:
+    'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placer',
   condition: 'register',
   registrationStatus: 'going',
   nft: {
@@ -34,12 +35,11 @@ const eventDetailsSample: EventDetails = {
     title: 'Event Attendee',
     symbol: 'EVT',
   },
-}
+};
 
 export default function Page({ params }: { params: { id: string } }) {
   void params;
   const router = useRouter();
-
 
   const getButtonContent = () => {
     switch (eventDetailsSample.condition) {
@@ -124,7 +124,11 @@ export default function Page({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 {eventDetailsSample.startTimestamp ? (
-                <span>{new Date(eventDetailsSample.startTimestamp * 1000).toLocaleDateString()}</span>
+                  <span>
+                    {new Date(
+                      eventDetailsSample.startTimestamp * 1000
+                    ).toLocaleDateString()}
+                  </span>
                 ) : (
                   <span>Not available</span>
                 )}
@@ -132,7 +136,8 @@ export default function Page({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {eventDetailsSample.startTimestamp && eventDetailsSample.endTimestamp
+                  {eventDetailsSample.startTimestamp &&
+                  eventDetailsSample.endTimestamp
                     ? `${new Date(eventDetailsSample.startTimestamp * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} to ${new Date(eventDetailsSample.endTimestamp * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}`
                     : 'Time not available'}
                 </span>
