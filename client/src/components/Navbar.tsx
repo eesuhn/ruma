@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { FiPlusCircle } from 'react-icons/fi';
 import { MenuSquareIcon, Ticket, Compass, User } from 'lucide-react';
-import WalletAdapter from '@/components/WalletAdapter';
 import Image from 'next/image';
 
 const navItems = [
@@ -64,7 +63,6 @@ export default function Navbar() {
                 Create Event
               </Button>
             </Link>
-            <WalletAdapter />
           </div>
           <div className="flex items-center md:hidden">
             <Sheet>
@@ -97,7 +95,6 @@ export default function Navbar() {
                     Create Event
                   </Link>
                   <div className="pt-4">
-                    <WalletAdapter />
                   </div>
                 </div>
               </SheetContent>
