@@ -2,11 +2,19 @@ import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui';
 import { UserData } from '@/types/state';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
 interface Badge {
   id: string;
   name: string;
   image: string;
   earnedDate: string;
+  event: string; // Add this line
 }
 
 interface Profile extends UserData {
@@ -29,12 +37,14 @@ const badges: Badge[] = [
     name: 'Early Adopter',
     image: '/sample/nft.svg',
     earnedDate: '2023-01-15',
+    event: 'First Launch Event',
   },
   {
     id: '2',
     name: 'Top Contributor',
     image: '/sample/nft.svg',
     earnedDate: '2023-03-20',
+    event: 'Spring Meetup',
   },
 ];
 
@@ -85,14 +95,32 @@ export default function Page() {
             <h2 className="mb-4 text-xl font-semibold">Badges Collection</h2>
             <div className="grid grid-cols-6">
               {badges.map((badge) => (
-                <Image
-                  key={badge.id}
-                  src={badge.image}
-                  alt={badge.name}
-                  width={80}
-                  height={80}
-                  className="rounded-xl"
-                />
+                <TooltipProvider key={badge.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="cursor-default">
+                      <div>
+                        <Image
+                          src={badge.image}
+                          alt={badge.name}
+                          width={80}
+                          height={80}
+                          className="rounded-xl"
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        <strong>{badge.name}</strong>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        From: {badge.event}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Earned: {badge.earnedDate}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </div>
