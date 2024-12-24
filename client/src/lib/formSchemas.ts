@@ -1,5 +1,16 @@
-import { z } from "zod";
-import { ACCEPTED_IMAGE_TYPES, MAX_BADGE_NAME_LENGTH, MAX_BADGE_SYMBOL_LENGTH, MAX_EVENT_NAME_LENGTH, MAX_FILE_SIZE, MAX_USER_NAME_LENGTH, MIN_BADGE_NAME_LENGTH, MIN_BADGE_SYMBOL_LENGTH, MIN_EVENT_NAME_LENGTH, MIN_USER_NAME_LENGTH } from "./constants";
+import { z } from 'zod';
+import {
+  ACCEPTED_IMAGE_TYPES,
+  MAX_BADGE_NAME_LENGTH,
+  MAX_BADGE_SYMBOL_LENGTH,
+  MAX_EVENT_NAME_LENGTH,
+  MAX_FILE_SIZE,
+  MAX_USER_NAME_LENGTH,
+  MIN_BADGE_NAME_LENGTH,
+  MIN_BADGE_SYMBOL_LENGTH,
+  MIN_EVENT_NAME_LENGTH,
+  MIN_USER_NAME_LENGTH,
+} from './constants';
 
 function validateFileSize(size: number) {
   return size <= MAX_FILE_SIZE;
@@ -20,11 +31,10 @@ export const createProfileFormSchema = z.object({
     }),
   profileImage: z
     .any()
-    .refine(file => validateFileSize(file?.size), {
+    .refine((file) => validateFileSize(file?.size), {
       message: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
-    .refine(
-      file => validateFileType(file?.type), {
+    .refine((file) => validateFileType(file?.type), {
       message: `File type must be ${ACCEPTED_IMAGE_TYPES.join(', ')}.`,
     })
     .optional(),
@@ -41,33 +51,22 @@ export const createEventFormSchema = z.object({
     }),
   eventImage: z
     .any()
-    .refine(file => validateFileSize(file?.size), {
+    .refine((file) => validateFileSize(file?.size), {
       message: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
-    .refine(
-      file => validateFileType(file?.type), {
+    .refine((file) => validateFileType(file?.type), {
       message: `File type must be ${ACCEPTED_IMAGE_TYPES.join(', ')}.`,
     })
     .optional(),
   visibility: z.string(),
-  startDate: z
-    .date()
-    .nullable(),
-  endDate: z
-    .date()
-    .nullable(),
-  location: z
-    .string()
-    .min(1, {
-      message: 'Location is required.',
-    }),
+  startDate: z.date().nullable(),
+  endDate: z.date().nullable(),
+  location: z.string().min(1, {
+    message: 'Location is required.',
+  }),
   about: z.string(),
-  requireApproval: z
-    .boolean()
-    .default(false),
-  capacity: z
-    .number()
-    .nullable(),
+  requireApproval: z.boolean().default(false),
+  capacity: z.number().nullable(),
   badgeName: z
     .string()
     .min(MIN_BADGE_NAME_LENGTH, {
@@ -86,11 +85,10 @@ export const createEventFormSchema = z.object({
     }),
   badgeImage: z
     .any()
-    .refine(file => validateFileSize(file?.size), {
+    .refine((file) => validateFileSize(file?.size), {
       message: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
-    .refine(
-      file => validateFileType(file?.type), {
+    .refine((file) => validateFileType(file?.type), {
       message: `File type must be ${ACCEPTED_IMAGE_TYPES.join(', ')}.`,
     })
     .optional(),

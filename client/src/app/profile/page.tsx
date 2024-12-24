@@ -1,9 +1,6 @@
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
-import {
-  Card,
-  CardContent,
-} from '@/components/ui';
+import { Card, CardContent } from '@/components/ui';
 
 interface Badge {
   id: string;

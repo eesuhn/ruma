@@ -4,10 +4,4 @@ import Footer from './Footer';
 import Navbar from './Navbar';
 import SolanaProvider from './SolanaProvider';
 
-export {
-  DiscoverEventCard,
-  EventCard,
-  Footer,
-  Navbar,
-  SolanaProvider,
-};
+export { DiscoverEventCard, EventCard, Footer, Navbar, SolanaProvider };
