@@ -42,24 +42,38 @@ import {
 } from '@/components/ui';
 
 const formSchema = z.object({
-  eventName: z.string().min(2, {
-    message: 'Event name must be at least 2 characters.',
-  }),
-  visibility: z.string(),
+  eventName: z
+    .string()
+    .min(2, {
+      message: 'Event name must be at least 2 characters.',
+    })
+    .default(''),
+  visibility: z.string().default('public'),
   startDate: z.date().nullable(),
   endDate: z.date().nullable(),
-  location: z.string().min(1, {
-    message: 'Location is required.',
-  }),
-  about: z.string(),
+  location: z
+    .string()
+    .min(1, {
+      message: 'Location is required.',
+    })
+    .default(''),
+  about: z.string().default(''),
   requireApproval: z.boolean().default(false),
-  capacity: z.string().default('unlimited'),
-  badgeName: z.string().min(2, {
-    message: 'Badge name must be at least 2 characters.',
-  }),
-  badgeSymbol: z.string().min(1, {
-    message: 'Badge symbol is required.',
-  }),
+  capacity: z.string().default(''),
+  badgeName: z
+    .string()
+    .min(2, {
+      message: 'Badge name must be at least 2 characters.',
+    })
+    .default(''),
+  badgeSymbol: z
+    .string()
+    .min(1, {
+      message: 'Badge symbol is required.',
+    })
+    .default(''),
+  eventImage: z.string().default(''),
+  badgeImage: z.string().default(''),
 });
 
 export default function Page() {
@@ -74,11 +88,18 @@ export default function Page() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      eventName: '',
       visibility: 'public',
+      location: '',
+      about: '',
       requireApproval: false,
       capacity: '',
+      badgeName: '',
+      badgeSymbol: '',
       startDate: null,
       endDate: null,
+      eventImage: '',
+      badgeImage: '',
     },
   });
 
@@ -91,25 +112,34 @@ export default function Page() {
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
+    form.setValue('eventImage', eventSvg);
+    form.setValue('badgeImage', badgeSvg);
     setIsLoading(false);
-  }, []);
+  }, [form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ ...values, eventImage, badgeImage });
+    console.log({
+      ...values,
+      eventImage: eventImage || values.eventImage,
+      badgeImage: badgeImage || values.badgeImage,
+    });
   }
 
   const handleImageChange =
     (
       setter: React.Dispatch<React.SetStateAction<string | null>>,
-      setCustom: (value: boolean) => void
+      setCustom: (value: boolean) => void,
+      fieldName: 'eventImage' | 'badgeImage'
     ) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setter(reader.result as string);
+          const result = reader.result as string;
+          setter(result);
           setCustom(true);
+          form.setValue(fieldName, result);
         };
         reader.readAsDataURL(file);
       }
@@ -152,15 +182,29 @@ export default function Page() {
                       />
                     )}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange(
-                      setEventImage,
-                      setIsCustomEventImage
+                  <FormField
+                    control={form.control}
+                    name="eventImage"
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange(
+                            setEventImage,
+                            setIsCustomEventImage,
+                            'eventImage'
+                          )}
+                          className="hidden"
+                          ref={eventImageInputRef}
+                        />
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </>
                     )}
-                    className="hidden"
-                    ref={eventImageInputRef}
                   />
                 </div>
                 <div className="w-2/3 space-y-4">
@@ -463,15 +507,29 @@ export default function Page() {
                       />
                     )}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange(
-                      setBadgeImage,
-                      setIsCustomBadgeImage
+                  <FormField
+                    control={form.control}
+                    name="badgeImage"
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange(
+                            setBadgeImage,
+                            setIsCustomBadgeImage,
+                            'badgeImage'
+                          )}
+                          className="hidden"
+                          ref={badgeImageInputRef}
+                        />
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </>
                     )}
-                    className="hidden"
-                    ref={badgeImageInputRef}
                   />
                 </div>
                 <div className="w-3/4 space-y-4">
