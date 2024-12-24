@@ -6,7 +6,7 @@ import { ArrowRight, CalendarIcon, Clock, MapPin, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 export default function Page({ params }: { params: { id: string } }) {
-  console.log(params);
+  void params;
   const router = useRouter();
 
   // SAMPLE
