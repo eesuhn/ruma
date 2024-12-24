@@ -20,37 +20,40 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
+import { UserData } from '@/types/state';
 
 type Status = 'going' | 'pending' | 'rejected' | 'checked-in';
 
-interface Participant {
-  id: string;
-  name: string;
-  image: string;
+interface ParticipantInfo extends UserData {
+  publicKey: string;
   status: Status;
 }
 
-const participants: Participant[] = [
+const participants: ParticipantInfo[] = [
   {
-    id: '4b2j...w6oZ',
+    publicKey: '4b2j...w6oZ',
+    bump: 1,
     name: 'Jeff Bezos',
     image: '/sample/profile.png',
     status: 'going',
   },
   {
-    id: 'K9Tx...2x9a',
+    publicKey: 'K9Tx...2x9a',
+    bump: 1,
     name: 'Mary Lane',
     image: '/sample/profile.png',
     status: 'pending',
   },
   {
-    id: 'J7gC...x41k',
+    publicKey: 'J7gC...x41k',
+    bump: 1,
     name: 'David Jackson',
     image: '/sample/profile.png',
     status: 'rejected',
   },
   {
-    id: 'mBm...6q1e',
+    publicKey: 'mBm...6q1e',
+    bump: 1,
     name: 'Amy Lau',
     image: '/sample/profile.png',
     status: 'checked-in',
@@ -68,7 +71,7 @@ export default function Page() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedParticipant, setSelectedParticipant] =
-    useState<Participant | null>(null);
+    useState<ParticipantInfo | null>(null);
   const [editStatus, setEditStatus] = useState<Status | ''>('');
 
   const filteredParticipants = participants.filter((participant) => {
@@ -122,7 +125,7 @@ export default function Page() {
 
       <div className="divide-y rounded-lg border">
         {filteredParticipants.map((participant) => (
-          <Dialog key={participant.id}>
+          <Dialog key={participant.publicKey}>
             <DialogTrigger asChild>
               <button
                 className="flex w-full items-center justify-between p-4 hover:bg-gray-50"
@@ -142,7 +145,7 @@ export default function Page() {
                   <div className="text-left">
                     <div className="font-medium">{participant.name}</div>
                     <div className="text-sm text-gray-500">
-                      {participant.id}
+                      {participant.publicKey}
                     </div>
                   </div>
                 </div>
@@ -167,7 +170,7 @@ export default function Page() {
                       {selectedParticipant?.name}
                     </DialogTitle>
                     <p className="text-sm text-muted-foreground">
-                      {selectedParticipant?.id}
+                      {selectedParticipant?.publicKey}
                     </p>
                   </div>
                 </div>
