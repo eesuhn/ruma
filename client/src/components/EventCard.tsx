@@ -24,7 +24,7 @@ interface EventCardProps extends EventData {
   showManage?: boolean;
 }
 
-export function EventCard({
+export default function EventCard({
   name,
   image,
   startTimestamp,
