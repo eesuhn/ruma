@@ -7,14 +7,14 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from '@/components/ui/tooltip';
 
 interface Badge {
   id: string;
   name: string;
   image: string;
   earnedDate: string;
-  event: string;  // Add this line
+  event: string; // Add this line
 }
 
 interface Profile extends UserData {
@@ -109,9 +109,15 @@ export default function Page() {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p><strong>{badge.name}</strong></p>
-                      <p className="text-xs text-muted-foreground">From: {badge.event}</p>
-                      <p className="text-xs text-muted-foreground">Earned: {badge.earnedDate}</p>
+                      <p>
+                        <strong>{badge.name}</strong>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        From: {badge.event}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Earned: {badge.earnedDate}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
