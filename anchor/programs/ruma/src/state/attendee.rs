@@ -3,8 +3,8 @@ use num_derive::*;
 
 #[account]
 pub struct Attendee {
-    pub bump: u8,
-    pub status: AttendeeStatus,
+    pub bump: u8, // 1
+    pub status: AttendeeStatus, // 1 + 1
 }
 
 impl Attendee {
