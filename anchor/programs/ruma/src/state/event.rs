@@ -3,6 +3,7 @@ use anchor_lang::{prelude::*, Discriminator};
 #[account]
 pub struct Event {
     pub bump: u8,               // 1
+    pub organizer: Pubkey,      // 32
     pub data: Pubkey,           // 32
     pub badge: Option<Pubkey>,  // 1 + 32
     pub attendees: Vec<Pubkey>, // 4

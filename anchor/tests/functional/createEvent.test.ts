@@ -58,8 +58,9 @@ describe('createEvent', () => {
     const [eventDataPda, eventDataBump] = getEventDataPdaAndBump(eventPda);
 
     expect(eventAcc.bump).toEqual(eventBump);
-    expect(eventAcc.badge).toEqual(null);
+    expect(eventAcc.organizer).toEqual(organizerUserPda);
     expect(eventAcc.data).toEqual(eventDataPda);
+    expect(eventAcc.badge).toEqual(null);
     expect(eventAcc.attendees).toEqual([]);
     expect(eventDataAcc.bump).toEqual(eventDataBump);
     expect(eventDataAcc.isPublic).toEqual(isPublic);
