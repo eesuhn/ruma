@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 
 export default function Page({ params }: { params: { id: string } }) {
-  console.log(params);
+  void params;
   const router = useRouter();
 
   // SAMPLE

@@ -3,19 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { EventData } from '@/types/state';
 
-interface DiscoverEventCardProps {
-  id: number;
-  title: string;
-  event_img: string;
-  venue: string;
-  address: string;
-  time: number;
-  date: Date;
-  description: string;
-  organizer: string;
-  organizerimg: string;
-}
-
 export function DiscoverEventCard({
   bump,
   isPublic,
@@ -26,7 +13,7 @@ export function DiscoverEventCard({
   startTimestamp,
   endTimestamp,
   location,
-  about
+  about,
 }: EventData) {
   void isPublic;
   void needsApproval;
