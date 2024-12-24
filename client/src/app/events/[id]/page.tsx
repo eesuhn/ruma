@@ -4,29 +4,42 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, CalendarIcon, Clock, MapPin, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { EventData } from '@/types/state';
+
+interface EventDetails extends EventData {
+  condition: 'register' | 'registered' | 'manage'| 'checked-in';
+  registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
+  nft: {
+    image: string;
+    title: string;
+    symbol: string;
+  };
+}
+
+const eventDetailsSample: EventDetails = {
+  bump: 1,
+  isPublic: true,
+  needsApproval: false,
+  name: 'SuperteamMY Meetup #24',
+  image: '/sample/event-cover2.png',
+  capacity: 100,
+  startTimestamp: 1637385600,
+  endTimestamp: 1637400000,
+  location: 'Sunway University',
+  about:'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placer',
+  condition: 'register',
+  registrationStatus: 'going',
+  nft: {
+    image: '/sample/nft.svg',
+    title: 'Event Attendee',
+    symbol: 'EVT',
+  },
+}
 
 export default function Page({ params }: { params: { id: string } }) {
   void params;
   const router = useRouter();
 
-  // SAMPLE
-  const eventDetailsSample = {
-    id: '1',
-    title: 'SuperteamMY Meetup #24',
-    date: 'Wednesday, November 20',
-    time: '12:00 PM - 4:00 PM',
-    location: 'Sunway University',
-    image: '/sample/event-cover2.png',
-    description:
-      'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placerat eu metus feugiat pretium. Ut sit elementum dignissim dolor hendrerit lectus posuere justo.',
-    condition: 'register',
-    registrationStatus: 'going',
-    nft: {
-      image: '/sample/nft.svg',
-      title: 'Event Attendee',
-      symbol: 'EVT',
-    },
-  };
 
   const getButtonContent = () => {
     switch (eventDetailsSample.condition) {
@@ -51,7 +64,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <Button
             className="h-8"
             onClick={() =>
-              router.push(`/events/${eventDetailsSample.id}/manage`)
+              router.push(`/events/${eventDetailsSample.bump}/manage`)
             }
           >
             Manage Event
@@ -96,7 +109,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="relative aspect-square w-full">
             <Image
               src={eventDetailsSample.image}
-              alt={eventDetailsSample.title}
+              alt={eventDetailsSample.name}
               fill
               className="rounded-lg object-cover"
             />
@@ -105,16 +118,24 @@ export default function Page({ params }: { params: { id: string } }) {
         <div className="space-y-6">
           <div>
             <h1 className="mb-4 text-3xl font-bold">
-              {eventDetailsSample.title}
+              {eventDetailsSample.name}
             </h1>
             <div className="ml-1 space-y-2 text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span>{eventDetailsSample.date}</span>
+                {eventDetailsSample.startTimestamp ? (
+                <span>{new Date(eventDetailsSample.startTimestamp * 1000).toLocaleDateString()}</span>
+                ) : (
+                  <span>Not available</span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
-                <span>{eventDetailsSample.time}</span>
+                <span>
+                  {eventDetailsSample.startTimestamp && eventDetailsSample.endTimestamp
+                    ? `${new Date(eventDetailsSample.startTimestamp * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} to ${new Date(eventDetailsSample.endTimestamp * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}`
+                    : 'Time not available'}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -128,7 +149,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <div className="space-y-2">
             <h2 className="text-xl font-semibold">About</h2>
             <p className="ml-[1px] text-justify text-muted-foreground">
-              {eventDetailsSample.description}
+              {eventDetailsSample.about}
             </p>
           </div>
 
