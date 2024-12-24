@@ -1,10 +1,9 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { IoCalendarOutline } from 'react-icons/io5';
-import { IoLocationOutline } from 'react-icons/io5';
 import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui';
+import { IoCalendarOutline, IoLocationOutline } from 'react-icons/io5';
 import { events } from '@/samples/discoverData';
 
 export default function Page() {

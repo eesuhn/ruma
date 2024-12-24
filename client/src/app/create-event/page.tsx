@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import z from 'zod';
 import {
   CalendarIcon,
   Users,
@@ -14,10 +14,12 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { cn, generateDicebear } from '@/lib/utils';
 import {
+  Button,
+  Calendar,
+  Card,
+  CardContent,
   Form,
   FormControl,
   FormDescription,
@@ -25,25 +27,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { generateDicebear } from '@/lib/utils';
+  Textarea,
+  Switch,
+  Separator,
+  SelectValue,
+} from '@/components/ui';
 
 const formSchema = z.object({
   eventName: z.string().min(2, {

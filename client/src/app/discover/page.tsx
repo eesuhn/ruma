@@ -1,5 +1,5 @@
 import { events } from '@/samples/discoverData';
-import { DiscoverEventCard } from '@/components/DiscoverEventCard';
+import { DiscoverEventCard } from '@/components/';
 
 export default function Page() {
   return (

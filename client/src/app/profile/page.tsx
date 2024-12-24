@@ -1,12 +1,13 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 import {
+  Card,
+  CardContent,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   TooltipProvider,
-} from '@/components/ui/tooltip';
+} from '@/components/ui';
 
 interface Badge {
   id: string;
@@ -21,6 +22,7 @@ interface Profile {
   attended: number;
   image: string;
 }
+
 const profile: Profile = {
   name: 'Woods',
   hosted: 10,

@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import SolanaProvider from '@/components/SolanaProvider';
+import { Navbar, Footer, SolanaProvider } from '@/components';
 
 export const metadata: Metadata = {
   title: 'RUMA',

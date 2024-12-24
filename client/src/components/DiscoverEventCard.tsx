@@ -15,7 +15,7 @@ interface DiscoverEventCardProps {
   organizerimg: string;
 }
 
-export function DiscoverEventCard({
+export default function DiscoverEventCard({
   id,
   title,
   date,

@@ -2,17 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { Button, Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui';
 import { FiPlusCircle } from 'react-icons/fi';
 import { MenuSquareIcon, Ticket, Compass, User } from 'lucide-react';
-import Image from 'next/image';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const navItems = [

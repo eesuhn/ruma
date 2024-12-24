@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EventCard } from '@/components/EventCard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui';
+import { EventCard } from '@/components';
 import { UPCOMING_EVENTS, PAST_EVENTS } from '@/samples/eventsData';
 
 export default function Page() {
