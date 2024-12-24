@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import z from 'zod';
+import { z } from 'zod';
+import { createEventFormSchema } from '@/lib/formSchemas';
 import {
   CalendarIcon,
   Users,
@@ -40,27 +41,7 @@ import {
   Separator,
   SelectValue,
 } from '@/components/ui';
-
-const formSchema = z.object({
-  eventName: z.string().min(2, {
-    message: 'Event name must be at least 2 characters.',
-  }),
-  visibility: z.string(),
-  startDate: z.date().nullable(),
-  endDate: z.date().nullable(),
-  location: z.string().min(1, {
-    message: 'Location is required.',
-  }),
-  about: z.string(),
-  requireApproval: z.boolean().default(false),
-  capacity: z.string().default('unlimited'),
-  badgeName: z.string().min(2, {
-    message: 'Badge name must be at least 2 characters.',
-  }),
-  badgeSymbol: z.string().min(1, {
-    message: 'Badge symbol is required.',
-  }),
-});
+import { toast } from '@/hooks/use-toast';
 
 export default function Page() {
   const [eventImage, setEventImage] = useState<string | null>(null);
@@ -68,17 +49,25 @@ export default function Page() {
   const [isCustomEventImage, setIsCustomEventImage] = useState(false);
   const [isCustomBadgeImage, setIsCustomBadgeImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof createEventFormSchema>>({
+    resolver: zodResolver(createEventFormSchema),
     defaultValues: {
+      eventName: '',
       visibility: 'public',
+      location: '',
+      about: '',
       requireApproval: false,
-      capacity: '',
+      capacity: null,
+      badgeName: '',
+      badgeSymbol: '',
       startDate: null,
       endDate: null,
+      eventImage: undefined,
+      badgeImage: undefined,
     },
   });
 
@@ -91,24 +80,69 @@ export default function Page() {
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
-    setIsLoading(false);
-  }, []);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ ...values, eventImage, badgeImage });
+    // Set the SVG strings directly as form values
+    form.setValue('eventImage', eventSvg);
+    form.setValue('badgeImage', badgeSvg);
+
+    setIsLoading(false);
+  }, [form]);
+
+  async function onSubmit(values: z.infer<typeof createEventFormSchema>) {
+    try {
+      setIsSubmitting(true);
+
+      // Handle image submissions
+      const finalEventImage = isCustomEventImage
+        ? values.eventImage
+        : eventImage;
+      const finalBadgeImage = isCustomBadgeImage
+        ? values.badgeImage
+        : badgeImage;
+
+      // Debug print form data
+      const formData = {
+        ...values,
+        eventImage: finalEventImage,
+        badgeImage: finalBadgeImage,
+      };
+      console.log('Form submission data:', formData);
+
+      // TODO: Add your API call here
+
+      toast({
+        title: 'Success',
+        description: 'Event created successfully!',
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create event. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleImageChange =
     (
       setter: React.Dispatch<React.SetStateAction<string | null>>,
-      setCustom: (value: boolean) => void
+      setCustom: (value: boolean) => void,
+      fieldName: 'eventImage' | 'badgeImage'
     ) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
+        // Set the actual File object for validation
+        form.setValue(fieldName, file);
+
+        // Create preview
         const reader = new FileReader();
         reader.onloadend = () => {
-          setter(reader.result as string);
+          const result = reader.result as string;
+          setter(result);
           setCustom(true);
         };
         reader.readAsDataURL(file);
@@ -152,15 +186,29 @@ export default function Page() {
                       />
                     )}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange(
-                      setEventImage,
-                      setIsCustomEventImage
+                  <FormField
+                    control={form.control}
+                    name="eventImage"
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange(
+                            setEventImage,
+                            setIsCustomEventImage,
+                            'eventImage'
+                          )}
+                          className="hidden"
+                          ref={eventImageInputRef}
+                        />
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </>
                     )}
-                    className="hidden"
-                    ref={eventImageInputRef}
                   />
                 </div>
                 <div className="w-2/3 space-y-4">
@@ -423,11 +471,23 @@ export default function Page() {
                           type="text"
                           placeholder="Unlimited"
                           className="w-40 pl-8 text-right"
-                          {...field}
+                          value={field.value === null ? '' : field.value}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                              field.onChange(null);
+                            } else {
+                              const num = parseInt(value, 10);
+                              if (!isNaN(num)) {
+                                field.onChange(num);
+                              }
+                            }
+                          }}
                         />
                         <Pen className="absolute left-2 h-4 w-4 text-muted-foreground" />
                       </div>
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -463,15 +523,29 @@ export default function Page() {
                       />
                     )}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange(
-                      setBadgeImage,
-                      setIsCustomBadgeImage
+                  <FormField
+                    control={form.control}
+                    name="badgeImage"
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange(
+                            setBadgeImage,
+                            setIsCustomBadgeImage,
+                            'badgeImage'
+                          )}
+                          className="hidden"
+                          ref={badgeImageInputRef}
+                        />
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </>
                     )}
-                    className="hidden"
-                    ref={badgeImageInputRef}
                   />
                 </div>
                 <div className="w-3/4 space-y-4">
@@ -506,8 +580,8 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full">
-            Create Event
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating Event...' : 'Create Event'}
           </Button>
         </form>
       </Form>
