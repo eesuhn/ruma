@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDL
+src/idl/ruma.json
+src/types/ruma.ts
