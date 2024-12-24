@@ -20,6 +20,24 @@ function validateFileType(type: string) {
   return ACCEPTED_IMAGE_TYPES.includes(type);
 }
 
+/**
+ * Validate image file or SVG string (from Dicebear)
+ *
+ * @param value
+ * @returns
+ */
+function validateImage(value: string | File) {
+  if (typeof value === 'string' && value.includes('<svg')) {
+    // If it's an SVG string (from Dicebear)
+    return true;
+  }
+  if (value instanceof File) {
+    // If it's a File object and file size below MAX_FILE_SIZE
+    return validateFileSize(value.size) && validateFileType(value.type);
+  }
+  return false;
+}
+
 export const createProfileFormSchema = z.object({
   name: z
     .string()
@@ -31,11 +49,8 @@ export const createProfileFormSchema = z.object({
     }),
   profileImage: z
     .any()
-    .refine((file) => validateFileSize(file?.size), {
-      message: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
-    })
-    .refine((file) => validateFileType(file?.type), {
-      message: `File type must be ${ACCEPTED_IMAGE_TYPES.join(', ')}.`,
+    .refine(validateImage, {
+      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}) and less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
     .optional(),
 });
@@ -51,11 +66,8 @@ export const createEventFormSchema = z.object({
     }),
   eventImage: z
     .any()
-    .refine((file) => validateFileSize(file?.size), {
-      message: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
-    })
-    .refine((file) => validateFileType(file?.type), {
-      message: `File type must be ${ACCEPTED_IMAGE_TYPES.join(', ')}.`,
+    .refine(validateImage, {
+      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}) and less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
     .optional(),
   visibility: z.string(),
@@ -85,11 +97,8 @@ export const createEventFormSchema = z.object({
     }),
   badgeImage: z
     .any()
-    .refine((file) => validateFileSize(file?.size), {
-      message: `File size must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
-    })
-    .refine((file) => validateFileType(file?.type), {
-      message: `File type must be ${ACCEPTED_IMAGE_TYPES.join(', ')}.`,
+    .refine(validateImage, {
+      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}) and less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
     .optional(),
 });

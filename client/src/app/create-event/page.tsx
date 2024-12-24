@@ -41,6 +41,7 @@ import {
   Separator,
   SelectValue,
 } from '@/components/ui';
+import { toast } from '@/hooks/use-toast';
 
 export default function Page() {
   const [eventImage, setEventImage] = useState<string | null>(null);
@@ -48,6 +49,7 @@ export default function Page() {
   const [isCustomEventImage, setIsCustomEventImage] = useState(false);
   const [isCustomBadgeImage, setIsCustomBadgeImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,17 +80,50 @@ export default function Page() {
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
+
+    // Set the SVG strings directly as form values
     form.setValue('eventImage', eventSvg);
     form.setValue('badgeImage', badgeSvg);
+
     setIsLoading(false);
   }, [form]);
 
-  function onSubmit(values: z.infer<typeof createEventFormSchema>) {
-    console.log({
-      ...values,
-      eventImage: eventImage || values.eventImage,
-      badgeImage: badgeImage || values.badgeImage,
-    });
+  async function onSubmit(values: z.infer<typeof createEventFormSchema>) {
+    try {
+      setIsSubmitting(true);
+
+      // Handle image submissions
+      const finalEventImage = isCustomEventImage
+        ? values.eventImage
+        : eventImage;
+      const finalBadgeImage = isCustomBadgeImage
+        ? values.badgeImage
+        : badgeImage;
+
+      // Debug print form data
+      const formData = {
+        ...values,
+        eventImage: finalEventImage,
+        badgeImage: finalBadgeImage,
+      };
+      console.log('Form submission data:', formData);
+
+      // TODO: Add your API call here
+
+      toast({
+        title: 'Success',
+        description: 'Event created successfully!',
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create event. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleImageChange =
@@ -545,8 +580,8 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full">
-            Create Event
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating Event...' : 'Create Event'}
           </Button>
         </form>
       </Form>
