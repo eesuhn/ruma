@@ -94,8 +94,7 @@ export default function Navbar() {
                   >
                     Create Event
                   </Link>
-                  <div className="pt-4">
-                  </div>
+                  <div className="pt-4"></div>
                 </div>
               </SheetContent>
             </Sheet>

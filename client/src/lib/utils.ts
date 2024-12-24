@@ -14,7 +14,7 @@ const styleMap = {
   profile: bigSmile,
   event: shapes,
   badge: rings,
-}
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
