@@ -1,10 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { CalendarIcon, Clock, MapPin, Ticket } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CalendarIcon, Clock, MapPin, Ticket } from 'lucide-react';
+import { Button } from '@/components/ui';
 
 export default function Page({ params }: { params: { id: string } }) {
   void params;

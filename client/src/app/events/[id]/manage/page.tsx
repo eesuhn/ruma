@@ -2,23 +2,21 @@
 
 import { useState } from 'react';
 import { Camera, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+  Badge,
+} from '@/components/ui';
 import Image from 'next/image';
 import { UserData } from '@/types/state';
 

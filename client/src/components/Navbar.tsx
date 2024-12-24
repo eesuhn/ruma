@@ -2,17 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { Button, Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui';
 import { FiPlusCircle } from 'react-icons/fi';
 import { MenuSquareIcon, Ticket, Compass, User } from 'lucide-react';
-import Image from 'next/image';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 const navItems = [
   { name: 'Events', href: '/events', icon: Ticket },
@@ -63,6 +57,7 @@ export default function Navbar() {
                 Create Event
               </Button>
             </Link>
+            <WalletMultiButton />
           </div>
           <div className="flex items-center md:hidden">
             <Sheet>
@@ -77,6 +72,7 @@ export default function Navbar() {
                   <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col space-y-4">
+                  <WalletMultiButton />
                   {navItems.map((item) => (
                     <Link
                       key={item.name}
@@ -94,7 +90,6 @@ export default function Navbar() {
                   >
                     Create Event
                   </Link>
-                  <div className="pt-4"></div>
                 </div>
               </SheetContent>
             </Sheet>

@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { EventData } from '@/types/state';
 
-export function DiscoverEventCard({
+export default function DiscoverEventCard({
   bump,
   isPublic,
   needsApproval,

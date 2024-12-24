@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, Button, Badge } from '@/components/ui';
 import { EventData } from '@/types/state';
 
 const getBadgeVariant = (status?: string) => {
