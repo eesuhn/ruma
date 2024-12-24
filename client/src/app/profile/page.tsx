@@ -1,7 +1,7 @@
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui';
-
+import { UserData } from '@/types/state';
 interface Badge {
   id: string;
   name: string;
@@ -9,14 +9,13 @@ interface Badge {
   earnedDate: string;
 }
 
-interface Profile {
-  name: string;
+interface Profile extends UserData {
   hosted: number;
   attended: number;
-  image: string;
 }
 
 const profile: Profile = {
+  bump: 0,
   name: 'Woods',
   hosted: 10,
   attended: 4,
