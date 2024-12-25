@@ -36,11 +36,14 @@ export default function SolanaProvider({ children }: { children: ReactNode }) {
       <WalletProvider
         wallets={wallets}
         autoConnect
-        onError={() => toast({
-          title: 'Unable to connect wallet',
-          description: 'Please try again or use a different wallet.',
-          variant: 'destructive',
-        })}>
+        onError={() =>
+          toast({
+            title: 'Unable to connect wallet',
+            description: 'Please try again or use a different wallet.',
+            variant: 'destructive',
+          })
+        }
+      >
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

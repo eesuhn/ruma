@@ -15,7 +15,12 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn, generateDicebearAvatar, handleImageChange, handleImageClick } from '@/lib/utils';
+import {
+  cn,
+  generateDicebearAvatar,
+  handleImageChange,
+  handleImageClick,
+} from '@/lib/utils';
 import {
   Button,
   Calendar,
@@ -76,8 +81,16 @@ export default function Page() {
     const eventSeed = Math.random().toString(36).substring(7);
     const badgeSeed = Math.random().toString(36).substring(7);
 
-    const eventSvg = generateDicebearAvatar({ seed: eventSeed, style: 'event', output: 'svg' });
-    const badgeSvg = generateDicebearAvatar({ seed: badgeSeed, style: 'badge', output: 'svg' });
+    const eventSvg = generateDicebearAvatar({
+      seed: eventSeed,
+      style: 'event',
+      output: 'svg',
+    });
+    const badgeSvg = generateDicebearAvatar({
+      seed: badgeSeed,
+      style: 'badge',
+      output: 'svg',
+    });
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
@@ -168,13 +181,15 @@ export default function Page() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleImageChange(
-                            e,
-                            form,
-                            'eventImage',
-                            setEventImage,
-                            setIsCustomEventImage
-                          )}
+                          onChange={(e) =>
+                            handleImageChange(
+                              e,
+                              form,
+                              'eventImage',
+                              setEventImage,
+                              setIsCustomEventImage
+                            )
+                          }
                           className="hidden"
                           ref={eventImageInputRef}
                         />
@@ -507,13 +522,15 @@ export default function Page() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleImageChange(
-                            e,
-                            form,
-                            'badgeImage',
-                            setBadgeImage,
-                            setIsCustomBadgeImage
-                          )}
+                          onChange={(e) =>
+                            handleImageChange(
+                              e,
+                              form,
+                              'badgeImage',
+                              setBadgeImage,
+                              setIsCustomBadgeImage
+                            )
+                          }
                           className="hidden"
                           ref={badgeImageInputRef}
                         />

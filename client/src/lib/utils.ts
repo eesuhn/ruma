@@ -29,7 +29,11 @@ export function cn(...inputs: ClassValue[]) {
  * @param {DicebearProps} output 'svg' | 'uri'
  * @returns {string} SVG in XML format or URI
  */
-export function generateDicebearAvatar({ seed, style, output }: DicebearProps): string {
+export function generateDicebearAvatar({
+  seed,
+  style,
+  output,
+}: DicebearProps): string {
   const avatar = createAvatar(styleMap[style], {
     seed,
   });
@@ -58,7 +62,7 @@ export function handleImageChange(
 
     reader.readAsDataURL(file);
   }
-};
+}
 
 export function handleImageClick(ref: RefObject<HTMLInputElement>) {
   ref.current?.click();

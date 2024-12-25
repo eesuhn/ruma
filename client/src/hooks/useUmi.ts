@@ -32,6 +32,6 @@ export default function useUmi() {
   }
 
   return {
-    uploadFile
+    uploadFile,
   };
 }
