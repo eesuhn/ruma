@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import { createAvatar } from '@dicebear/core';
 import { bigSmile, shapes, rings } from '@dicebear/collection';
 import { UseFormReturn } from 'react-hook-form';
+import { RefObject } from 'react';
 
 interface DicebearProps {
   seed: string;
@@ -58,3 +59,7 @@ export function handleImageChange(
     reader.readAsDataURL(file);
   }
 };
+
+export function handleImageClick(ref: RefObject<HTMLInputElement>) {
+  ref.current?.click();
+}

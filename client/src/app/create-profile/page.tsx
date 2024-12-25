@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { z } from 'zod';
 import { createProfileFormSchema } from '@/lib/formSchemas';
-import { generateDicebearAvatar, handleImageChange } from '@/lib/utils';
+import { generateDicebearAvatar, handleImageChange, handleImageClick } from '@/lib/utils';
 import {
   Button,
   Form,
@@ -49,11 +49,6 @@ export default function Page() {
       setIsLoading(false);
     }
   }, [publicKey, form]);
-
-
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
 
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
     try {
@@ -112,7 +107,7 @@ export default function Page() {
                   <div>
                     <div
                       className="relative h-36 w-36 cursor-pointer overflow-hidden rounded-lg"
-                      onClick={handleImageClick}
+                      onClick={() => handleImageClick(fileInputRef)}
                     >
                       {isLoading ? (
                         <div className="h-full w-full bg-muted" />

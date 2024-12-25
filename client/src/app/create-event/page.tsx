@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn, generateDicebearAvatar, handleImageChange } from '@/lib/utils';
+import { cn, generateDicebearAvatar, handleImageChange, handleImageClick } from '@/lib/utils';
 import {
   Button,
   Calendar,
@@ -127,10 +127,6 @@ export default function Page() {
     }
   }
 
-  const handleImageClick = (ref: React.RefObject<HTMLInputElement>) => () => {
-    ref.current?.click();
-  };
-
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">
       <h1 className="mb-6 text-3xl font-bold">Create Event</h1>
@@ -143,7 +139,7 @@ export default function Page() {
                 <div className="w-1/3">
                   <div
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
-                    onClick={handleImageClick(eventImageInputRef)}
+                    onClick={() => handleImageClick(eventImageInputRef)}
                   >
                     {isLoading ? (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
@@ -482,7 +478,7 @@ export default function Page() {
                 <div className="w-1/4">
                   <div
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
-                    onClick={handleImageClick(badgeImageInputRef)}
+                    onClick={() => handleImageClick(badgeImageInputRef)}
                   >
                     {isLoading ? (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
