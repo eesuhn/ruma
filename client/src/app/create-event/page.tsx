@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn, generateDicebearAvatar } from '@/lib/utils';
+import { cn, generateDicebearAvatar, handleImageChange } from '@/lib/utils';
 import {
   Button,
   Calendar,
@@ -127,29 +127,6 @@ export default function Page() {
     }
   }
 
-  const handleImageChange =
-    (
-      setter: React.Dispatch<React.SetStateAction<string | null>>,
-      setCustom: (value: boolean) => void,
-      fieldName: 'eventImage' | 'badgeImage'
-    ) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        // Set the actual File object for validation
-        form.setValue(fieldName, file);
-
-        // Create preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          setter(result);
-          setCustom(true);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-
   const handleImageClick = (ref: React.RefObject<HTMLInputElement>) => () => {
     ref.current?.click();
   };
@@ -195,10 +172,12 @@ export default function Page() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleImageChange(
+                          onChange={(e) => handleImageChange(
+                            e,
+                            form,
+                            'eventImage',
                             setEventImage,
-                            setIsCustomEventImage,
-                            'eventImage'
+                            setIsCustomEventImage
                           )}
                           className="hidden"
                           ref={eventImageInputRef}
@@ -532,10 +511,12 @@ export default function Page() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleImageChange(
+                          onChange={(e) => handleImageChange(
+                            e,
+                            form,
+                            'badgeImage',
                             setBadgeImage,
-                            setIsCustomBadgeImage,
-                            'badgeImage'
+                            setIsCustomBadgeImage
                           )}
                           className="hidden"
                           ref={badgeImageInputRef}

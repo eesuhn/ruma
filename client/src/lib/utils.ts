@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { createAvatar } from '@dicebear/core';
 import { bigSmile, shapes, rings } from '@dicebear/collection';
+import { UseFormReturn } from 'react-hook-form';
 
 interface DicebearProps {
   seed: string;
@@ -34,3 +35,26 @@ export function generateDicebearAvatar({ seed, style, output }: DicebearProps): 
 
   return output === 'svg' ? avatar.toString() : avatar.toDataUri();
 }
+
+export function handleImageChange(
+  event: React.ChangeEvent<HTMLInputElement>,
+  form: UseFormReturn<any, any, undefined>,
+  formFieldName: string,
+  setProfileImage: (image: string) => void,
+  setIsCustomImage: (isCustom: boolean) => void
+) {
+  const file = event.target.files?.[0];
+
+  if (file) {
+    form.setValue(formFieldName, file);
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setProfileImage(reader.result as string);
+      setIsCustomImage(true);
+    };
+
+    reader.readAsDataURL(file);
+  }
+};

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { z } from 'zod';
 import { createProfileFormSchema } from '@/lib/formSchemas';
-import { generateDicebearAvatar } from '@/lib/utils';
+import { generateDicebearAvatar, handleImageChange } from '@/lib/utils';
 import {
   Button,
   Form,
@@ -133,7 +133,14 @@ export default function Page() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleImageChange}
+                      onChange={(e) => handleImageChange(
+                        e,
+                        form,
+                        'profileImage',
+                        setProfileImage,
+                        setIsCustomImage
+                      )
+                    }
                       className="hidden"
                       ref={fileInputRef}
                     />
