@@ -3,11 +3,10 @@ import { twMerge } from 'tailwind-merge';
 import { createAvatar } from '@dicebear/core';
 import { bigSmile, shapes, rings } from '@dicebear/collection';
 
-type AvatarStyle = 'profile' | 'event' | 'badge';
-
 interface DicebearProps {
   seed: string;
-  style: AvatarStyle;
+  style: 'profile' | 'event' | 'badge';
+  output: 'svg' | 'uri';
 }
 
 const styleMap = {
@@ -25,10 +24,13 @@ export function cn(...inputs: ClassValue[]) {
  *
  * @param {DicebearProps} seed
  * @param {DicebearProps} style 'profile' | 'event' | 'badge'
- * @returns {string} svg
+ * @param {DicebearProps} output 'svg' | 'uri'
+ * @returns {string} SVG in XML format or URI
  */
-export function generateDicebear({ seed, style }: DicebearProps): string {
-  return createAvatar(styleMap[style], {
+export function generateDicebearAvatar({ seed, style, output }: DicebearProps): string {
+  const avatar = createAvatar(styleMap[style], {
     seed,
-  }).toString();
+  });
+
+  return output === 'svg' ? avatar.toString() : avatar.toDataUri();
 }

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn, generateDicebear } from '@/lib/utils';
+import { cn, generateDicebearAvatar } from '@/lib/utils';
 import {
   Button,
   Calendar,
@@ -72,11 +72,12 @@ export default function Page() {
   });
 
   useEffect(() => {
+    // TODO: use eventPda as eventSeed and badgeSeed
     const eventSeed = Math.random().toString(36).substring(7);
     const badgeSeed = Math.random().toString(36).substring(7);
 
-    const eventSvg = generateDicebear({ seed: eventSeed, style: 'event' });
-    const badgeSvg = generateDicebear({ seed: badgeSeed, style: 'badge' });
+    const eventSvg = generateDicebearAvatar({ seed: eventSeed, style: 'event', output: 'svg' });
+    const badgeSvg = generateDicebearAvatar({ seed: badgeSeed, style: 'badge', output: 'svg' });
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
