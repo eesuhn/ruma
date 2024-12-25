@@ -14,6 +14,7 @@ import {
 import { ReactNode, useMemo } from 'react';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import { clusterApiUrl } from '@solana/web3.js';
+import { toast } from '@/hooks/use-toast';
 
 export default function SolanaProvider({ children }: { children: ReactNode }) {
   const endpoint = useMemo(
@@ -32,7 +33,14 @@ export default function SolanaProvider({ children }: { children: ReactNode }) {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider
+        wallets={wallets}
+        autoConnect
+        onError={() => toast({
+          title: 'Unable to connect wallet',
+          description: 'Please try again or use a different wallet.',
+          variant: 'destructive',
+        })}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
