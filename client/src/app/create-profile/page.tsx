@@ -6,7 +6,11 @@ import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { z } from 'zod';
 import { createProfileFormSchema } from '@/lib/formSchemas';
-import { generateDicebearAvatar, handleImageChange, handleImageClick } from '@/lib/utils';
+import {
+  generateDicebearAvatar,
+  handleImageChange,
+  handleImageClick,
+} from '@/lib/utils';
 import {
   Button,
   Form,
@@ -41,7 +45,7 @@ export default function Page() {
       const svg = generateDicebearAvatar({
         seed: publicKey.toBase58(),
         style: 'profile',
-        output: 'svg'
+        output: 'svg',
       });
 
       form.setValue('profileImage', svg);
@@ -128,14 +132,15 @@ export default function Page() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleImageChange(
-                        e,
-                        form,
-                        'profileImage',
-                        setProfileImage,
-                        setIsCustomImage
-                      )
-                    }
+                      onChange={(e) =>
+                        handleImageChange(
+                          e,
+                          form,
+                          'profileImage',
+                          setProfileImage,
+                          setIsCustomImage
+                        )
+                      }
                       className="hidden"
                       ref={fileInputRef}
                     />
