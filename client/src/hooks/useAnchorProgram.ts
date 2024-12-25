@@ -5,12 +5,13 @@ import {
   useConnection,
   useWallet,
 } from '@solana/wallet-adapter-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import idl from '@/idl/ruma.json';
 import {
   ComputeBudgetProgram,
   Keypair,
   PublicKey,
+  Transaction,
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
@@ -19,36 +20,28 @@ import { getEventPda, getUserPda } from '@/lib/pda';
 import { RUMA_WALLET } from '@/lib/constants';
 
 export function useAnchorProgram() {
-  const [program, setProgram] = useState<Program<Ruma>>(
-    new Program(idl as Ruma)
-  );
+  const [program, setProgram] = useState<Program<Ruma> | null>(null);
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
 
   useMemo(() => {
     if (wallet) {
-      setProgram(
-        new Program(
-          idl as Ruma,
-          new AnchorProvider(connection, wallet, {
-            commitment: 'confirmed',
-          })
-        )
-      );
+      const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
+      setProgram(new Program(idl as Ruma, provider));
     }
   }, [connection, wallet]);
 
-  async function getCreateProfileIx(
+  async function getCreateProfileTx(
     userName: string,
     userImage: string
-  ): Promise<TransactionInstruction> {
-    return await program.methods
+  ): Promise<Transaction> {
+    return await program!.methods
       .createProfile(userName, userImage)
       .accounts({
         payer: publicKey!,
       })
-      .instruction();
+      .transaction();
   }
 
   async function getCreateEventIx(
@@ -62,7 +55,7 @@ export function useAnchorProgram() {
     location: string | null,
     about: string | null
   ): Promise<TransactionInstruction> {
-    return await program.methods
+    return await program!.methods
       .createEvent(
         isPublic,
         needsApproval,
@@ -87,7 +80,7 @@ export function useAnchorProgram() {
     badgeUri: string,
     maxSupply: number | null
   ): Promise<TransactionInstruction> {
-    return await program.methods
+    return await program!.methods
       .createBadge(
         badgeName,
         badgeSymbol,
@@ -115,7 +108,7 @@ export function useAnchorProgram() {
     eventName: string,
     organizerPda: PublicKey
   ): Promise<TransactionSignature> {
-    return await program.methods
+    return await program!.methods
       .registerForEvent(eventName)
       .accounts({
         organizer: organizerPda,
@@ -129,7 +122,7 @@ export function useAnchorProgram() {
     status: { approved: {} } | { rejected: {} },
     eventPda: PublicKey
   ): Promise<TransactionSignature> {
-    return await program.methods
+    return await program!.methods
       .changeAttendeeStatus(status)
       .accounts({
         user: getUserPda(publicKey!),
@@ -139,7 +132,7 @@ export function useAnchorProgram() {
       .rpc();
   }
 
-  async function getCheckIntoEventIx(
+  async function getCheckIntoEventTx(
     editionNumber: number,
     registrantUserPda: PublicKey,
     attendeePda: PublicKey,
@@ -148,8 +141,8 @@ export function useAnchorProgram() {
     masterAtaPda: PublicKey,
     masterMetadataPda: PublicKey,
     masterEditionPda: PublicKey
-  ): Promise<TransactionInstruction> {
-    return await program.methods
+  ): Promise<Transaction> {
+    return await program!.methods
       .checkIntoEvent(new BN(editionNumber))
       .accounts({
         host: publicKey!,
@@ -167,28 +160,38 @@ export function useAnchorProgram() {
         true
       )
       .signers([RUMA_WALLET, editionMint])
-      .instruction();
+      .transaction();
   }
 
-  async function getUserAcc(userPda: PublicKey) {
-    return await program.account.user.fetchNullable(userPda);
-  }
+  const getUserAcc = useCallback(async (userPda: PublicKey) => {
+    if (program) {
+      return await program.account.user.fetchNullable(userPda);
+    }
+  }, [program]);
 
-  async function getUserDataAcc(userDataPda: PublicKey) {
-    return await program.account.userData.fetchNullable(userDataPda);
-  }
+  const getUserDataAcc = useCallback(async (userDataPda: PublicKey) => {
+    if (program) {
+      return await program.account.userData.fetchNullable(userDataPda);
+    }
+  }, [program]);
 
-  async function getEventAcc(eventPda: PublicKey) {
-    return await program.account.event.fetchNullable(eventPda);
-  }
+  const getEventAcc = useCallback(async (eventPda: PublicKey) => {
+    if (program) {
+      return await program.account.event.fetchNullable(eventPda);
+    }
+  }, [program]);
 
-  async function getEventDataAcc(eventDataPda: PublicKey) {
-    return await program.account.eventData.fetchNullable(eventDataPda);
-  }
+  const getEventDataAcc = useCallback(async (eventDataPda: PublicKey) => {
+    if (program) {
+      return await program.account.eventData.fetchNullable(eventDataPda);
+    }
+  }, [program]);
 
-  async function getAttendeeAcc(attendeePda: PublicKey) {
-    return await program.account.attendee.fetchNullable(attendeePda);
-  }
+  const getAttendeeAcc = useCallback(async (attendeePda: PublicKey) => {
+    if (program) {
+      return await program.account.attendee.fetchNullable(attendeePda);
+    }
+  }, [program]);
 
   return {
     getUserAcc,
@@ -196,11 +199,11 @@ export function useAnchorProgram() {
     getEventAcc,
     getEventDataAcc,
     getAttendeeAcc,
-    getCreateProfileIx,
+    getCreateProfileTx,
     getCreateEventIx,
     getCreateBadgeIx,
     registerForEvent,
     changeAttendeeStatus,
-    getCheckIntoEventIx,
+    getCheckIntoEventTx,
   };
 }
