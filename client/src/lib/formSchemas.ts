@@ -12,30 +12,12 @@ import {
   MIN_USER_NAME_LENGTH,
 } from './constants';
 
-function validateFileSize(size: number) {
-  return size <= MAX_FILE_SIZE;
+function validateFileSize(file: File) {
+  return file.size <= MAX_FILE_SIZE;
 }
 
-function validateFileType(type: string) {
-  return ACCEPTED_IMAGE_TYPES.includes(type);
-}
-
-/**
- * Validate image file or SVG string (from Dicebear)
- *
- * @param value
- * @returns
- */
-function validateImage(value: string | File) {
-  if (typeof value === 'string' && value.includes('<svg')) {
-    // If it's an SVG string (from Dicebear)
-    return true;
-  }
-  if (value instanceof File) {
-    // If it's a File object and file size below MAX_FILE_SIZE
-    return validateFileSize(value.size) && validateFileType(value.type);
-  }
-  return false;
+function validateFileType(file: File) {
+  return ACCEPTED_IMAGE_TYPES.includes(file.type);
 }
 
 export const createProfileFormSchema = z.object({
@@ -49,8 +31,11 @@ export const createProfileFormSchema = z.object({
     }),
   profileImage: z
     .any()
-    .refine(validateImage, {
-      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}) and less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    .refine(validateFileSize, {
+      message: `Invalid image. Must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    })
+    .refine(validateFileType, {
+      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
 });
@@ -66,8 +51,11 @@ export const createEventFormSchema = z.object({
     }),
   eventImage: z
     .any()
-    .refine(validateImage, {
-      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}) and less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    .refine(validateFileSize, {
+      message: `Invalid image. Must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    })
+    .refine(validateFileType, {
+      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
   visibility: z.string(),
@@ -97,8 +85,11 @@ export const createEventFormSchema = z.object({
     }),
   badgeImage: z
     .any()
-    .refine(validateImage, {
-      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}) and less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    .refine(validateFileSize, {
+      message: `Invalid image. Must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+    })
+    .refine(validateFileType, {
+      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
 });
