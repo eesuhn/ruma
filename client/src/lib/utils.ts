@@ -67,5 +67,3 @@ export function handleImageChange(
 export function handleImageClick(ref: RefObject<HTMLInputElement>) {
   ref.current?.click();
 }
-
-export function dimitriDance(){console.log('🕺🏻')}
