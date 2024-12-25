@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import Image from 'next/image';
 import { z } from 'zod';
 import { createProfileFormSchema } from '@/lib/formSchemas';
-import { generateDicebear } from '@/lib/utils';
+import { generateDicebearAvatar, handleImageChange, handleImageClick } from '@/lib/utils';
 import {
   Button,
   Form,
@@ -18,8 +18,10 @@ import {
   Input,
 } from '@/components/ui';
 import { toast } from '@/hooks/use-toast';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function Page() {
+  const { publicKey } = useWallet();
   const [profileImage, setProfileImage] = useState<string>('');
   const [isCustomImage, setIsCustomImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,31 +37,18 @@ export default function Page() {
   });
 
   useEffect(() => {
-    // TODO: Replace the seed with user wallet address
-    const seed = Math.random().toString(36).substring(7);
-    const svg = generateDicebear({ seed, style: 'profile' });
-    setProfileImage(svg);
-    form.setValue('profileImage', svg);
-    setIsLoading(false);
-  }, [form]);
+    if (publicKey) {
+      const svg = generateDicebearAvatar({
+        seed: publicKey.toBase58(),
+        style: 'profile',
+        output: 'svg'
+      });
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      form.setValue('profileImage', file);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
-        setIsCustomImage(true);
-      };
-      reader.readAsDataURL(file);
+      form.setValue('profileImage', svg);
+      setProfileImage(svg);
+      setIsLoading(false);
     }
-  };
-
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
+  }, [publicKey, form]);
 
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
     try {
@@ -118,7 +107,7 @@ export default function Page() {
                   <div>
                     <div
                       className="relative h-36 w-36 cursor-pointer overflow-hidden rounded-lg"
-                      onClick={handleImageClick}
+                      onClick={() => handleImageClick(fileInputRef)}
                     >
                       {isLoading ? (
                         <div className="h-full w-full bg-muted" />
@@ -139,7 +128,14 @@ export default function Page() {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleImageChange}
+                      onChange={(e) => handleImageChange(
+                        e,
+                        form,
+                        'profileImage',
+                        setProfileImage,
+                        setIsCustomImage
+                      )
+                    }
                       className="hidden"
                       ref={fileInputRef}
                     />

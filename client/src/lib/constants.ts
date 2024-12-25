@@ -1,7 +1,7 @@
 import { Keypair, PublicKey } from '@solana/web3.js';
 import idl from '@/idl/ruma.json';
 
-export const RUMA_PROGRAM_ID = new PublicKey(idl.address)
+export const RUMA_PROGRAM_ID = new PublicKey(idl.address);
 export const RUMA_WALLET = Keypair.fromSecretKey(
   new Uint8Array(JSON.parse(process.env.NEXT_PUBLIC_RUMA_WALLET!))
 );

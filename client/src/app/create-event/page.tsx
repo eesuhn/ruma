@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn, generateDicebear } from '@/lib/utils';
+import { cn, generateDicebearAvatar, handleImageChange, handleImageClick } from '@/lib/utils';
 import {
   Button,
   Calendar,
@@ -72,11 +72,12 @@ export default function Page() {
   });
 
   useEffect(() => {
+    // TODO: use eventPda as eventSeed and badgeSeed
     const eventSeed = Math.random().toString(36).substring(7);
     const badgeSeed = Math.random().toString(36).substring(7);
 
-    const eventSvg = generateDicebear({ seed: eventSeed, style: 'event' });
-    const badgeSvg = generateDicebear({ seed: badgeSeed, style: 'badge' });
+    const eventSvg = generateDicebearAvatar({ seed: eventSeed, style: 'event', output: 'svg' });
+    const badgeSvg = generateDicebearAvatar({ seed: badgeSeed, style: 'badge', output: 'svg' });
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
@@ -126,33 +127,6 @@ export default function Page() {
     }
   }
 
-  const handleImageChange =
-    (
-      setter: React.Dispatch<React.SetStateAction<string | null>>,
-      setCustom: (value: boolean) => void,
-      fieldName: 'eventImage' | 'badgeImage'
-    ) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        // Set the actual File object for validation
-        form.setValue(fieldName, file);
-
-        // Create preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          setter(result);
-          setCustom(true);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-
-  const handleImageClick = (ref: React.RefObject<HTMLInputElement>) => () => {
-    ref.current?.click();
-  };
-
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">
       <h1 className="mb-6 text-3xl font-bold">Create Event</h1>
@@ -165,7 +139,7 @@ export default function Page() {
                 <div className="w-1/3">
                   <div
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
-                    onClick={handleImageClick(eventImageInputRef)}
+                    onClick={() => handleImageClick(eventImageInputRef)}
                   >
                     {isLoading ? (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
@@ -194,10 +168,12 @@ export default function Page() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleImageChange(
+                          onChange={(e) => handleImageChange(
+                            e,
+                            form,
+                            'eventImage',
                             setEventImage,
-                            setIsCustomEventImage,
-                            'eventImage'
+                            setIsCustomEventImage
                           )}
                           className="hidden"
                           ref={eventImageInputRef}
@@ -502,7 +478,7 @@ export default function Page() {
                 <div className="w-1/4">
                   <div
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
-                    onClick={handleImageClick(badgeImageInputRef)}
+                    onClick={() => handleImageClick(badgeImageInputRef)}
                   >
                     {isLoading ? (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
@@ -531,10 +507,12 @@ export default function Page() {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={handleImageChange(
+                          onChange={(e) => handleImageChange(
+                            e,
+                            form,
+                            'badgeImage',
                             setBadgeImage,
-                            setIsCustomBadgeImage,
-                            'badgeImage'
+                            setIsCustomBadgeImage
                           )}
                           className="hidden"
                           ref={badgeImageInputRef}

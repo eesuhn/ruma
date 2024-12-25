@@ -1,39 +1,50 @@
 import { Ruma } from '@/types/ruma';
 import { AnchorProvider, BN, Program } from '@coral-xyz/anchor';
-import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react';
+import {
+  useAnchorWallet,
+  useConnection,
+  useWallet,
+} from '@solana/wallet-adapter-react';
 import { useMemo, useState } from 'react';
 import idl from '@/idl/ruma.json';
-import { ComputeBudgetProgram, Keypair, PublicKey, TransactionInstruction, TransactionSignature } from '@solana/web3.js';
+import {
+  ComputeBudgetProgram,
+  Keypair,
+  PublicKey,
+  TransactionInstruction,
+  TransactionSignature,
+} from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { getEventPda, getUserPda } from '@/lib/pda';
 import { RUMA_WALLET } from '@/lib/constants';
 
 export function useAnchorProgram() {
-  const [program, setProgram] = useState<Program<Ruma>>(new Program(idl as Ruma));
+  const [program, setProgram] = useState<Program<Ruma>>(
+    new Program(idl as Ruma)
+  );
   const { connection } = useConnection();
   const { publicKey } = useWallet();
   const wallet = useAnchorWallet();
 
   useMemo(() => {
     if (wallet) {
-      setProgram(new Program(
-        idl as Ruma,
-        new AnchorProvider(connection, wallet, {
-          commitment: 'confirmed',
-        })
-      ));
+      setProgram(
+        new Program(
+          idl as Ruma,
+          new AnchorProvider(connection, wallet, {
+            commitment: 'confirmed',
+          })
+        )
+      );
     }
   }, [connection, wallet]);
 
   async function getCreateProfileIx(
     userName: string,
-    userImage: string,
+    userImage: string
   ): Promise<TransactionInstruction> {
     return await program.methods
-      .createProfile(
-        userName,
-        userImage
-      )
+      .createProfile(userName, userImage)
       .accounts({
         payer: publicKey!,
       })
@@ -49,7 +60,7 @@ export function useAnchorProgram() {
     startTimeStamp: number | null,
     endTimeStamp: number | null,
     location: string | null,
-    about: string | null,
+    about: string | null
   ): Promise<TransactionInstruction> {
     return await program.methods
       .createEvent(
@@ -74,7 +85,7 @@ export function useAnchorProgram() {
     badgeName: string,
     badgeSymbol: string,
     badgeUri: string,
-    maxSupply: number | null,
+    maxSupply: number | null
   ): Promise<TransactionInstruction> {
     return await program.methods
       .createBadge(
@@ -102,7 +113,7 @@ export function useAnchorProgram() {
 
   async function registerForEvent(
     eventName: string,
-    organizerPda: PublicKey,
+    organizerPda: PublicKey
   ): Promise<TransactionSignature> {
     return await program.methods
       .registerForEvent(eventName)
@@ -136,7 +147,7 @@ export function useAnchorProgram() {
     masterMintPubkey: PublicKey,
     masterAtaPda: PublicKey,
     masterMetadataPda: PublicKey,
-    masterEditionPda: PublicKey,
+    masterEditionPda: PublicKey
   ): Promise<TransactionInstruction> {
     return await program.methods
       .checkIntoEvent(new BN(editionNumber))
