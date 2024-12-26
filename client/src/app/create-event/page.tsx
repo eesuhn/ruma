@@ -9,7 +9,6 @@ import {
   CalendarIcon,
   Users,
   Globe2,
-  CameraIcon,
   LucideDoorClosed,
   Pen,
 } from 'lucide-react';
@@ -17,7 +16,7 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import {
   cn,
-  generateDicebearAvatar,
+  generateDicebearAvatarUri,
   handleImageChange,
   handleImageClick,
 } from '@/lib/utils';
@@ -47,14 +46,19 @@ import {
   SelectValue,
 } from '@/components/ui';
 import { toast } from '@/hooks/use-toast';
+import { useAnchorProgram } from '@/hooks/useAnchorProgram';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { Cluster, ComputeBudgetProgram, Transaction } from '@solana/web3.js';
+import { getExplorerLink } from '@solana-developers/helpers';
+import { uploadFile } from '@/actions';
 
 export default function Page() {
-  const [eventImage, setEventImage] = useState<string | null>(null);
-  const [badgeImage, setBadgeImage] = useState<string | null>(null);
-  const [isCustomEventImage, setIsCustomEventImage] = useState(false);
-  const [isCustomBadgeImage, setIsCustomBadgeImage] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
+  const { getCreateEventIx, getCreateBadgeIx } = useAnchorProgram();
+  const [eventImageUri, setEventImageUri] = useState<string>('');
+  const [badgeImageUri, setBadgeImageUri] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,56 +81,97 @@ export default function Page() {
   });
 
   useEffect(() => {
-    // TODO: use eventPda as eventSeed and badgeSeed
-    const eventSeed = Math.random().toString(36).substring(7);
-    const badgeSeed = Math.random().toString(36).substring(7);
+    if (publicKey) {
+      if (!form.getValues('eventImage')) {
+        const eventUri = generateDicebearAvatarUri({
+          seed: publicKey.toBase58(),
+          style: 'event',
+        });
 
-    const eventSvg = generateDicebearAvatar({
-      seed: eventSeed,
-      style: 'event',
-      output: 'svg',
-    });
-    const badgeSvg = generateDicebearAvatar({
-      seed: badgeSeed,
-      style: 'badge',
-      output: 'svg',
-    });
+        setEventImageUri(eventUri);
+      }
 
-    setEventImage(eventSvg);
-    setBadgeImage(badgeSvg);
+      if (!form.getValues('badgeImage')) {
+        const badgeUri = generateDicebearAvatarUri({
+          seed: publicKey.toBase58(),
+          style: 'badge',
+        });
 
-    // Set the SVG strings directly as form values
-    form.setValue('eventImage', eventSvg);
-    form.setValue('badgeImage', badgeSvg);
-
-    setIsLoading(false);
-  }, [form]);
+        setBadgeImageUri(badgeUri);
+      }
+    }
+  }, [publicKey, form]);
 
   async function onSubmit(values: z.infer<typeof createEventFormSchema>) {
     try {
-      setIsSubmitting(true);
+      setIsUploading(true);
+      const [uploadedEventImageUri, uploadedBadgeImageUri] = await uploadFile([
+        eventImageUri,
+        badgeImageUri,
+      ]);
+      setIsUploading(false);
+      const { blockhash, lastValidBlockHeight } =
+        await connection.getLatestBlockhash();
 
-      // Handle image submissions
-      const finalEventImage = isCustomEventImage
-        ? values.eventImage
-        : eventImage;
-      const finalBadgeImage = isCustomBadgeImage
-        ? values.badgeImage
-        : badgeImage;
+      const {
+        visibility,
+        requireApproval,
+        eventName,
+        capacity,
+        startDate,
+        endDate,
+        location,
+        about,
+        badgeName,
+        badgeSymbol,
+      } = values;
 
-      // Debug print form data
-      const formData = {
-        ...values,
-        eventImage: finalEventImage,
-        badgeImage: finalBadgeImage,
-      };
-      console.log('Form submission data:', formData);
+      const createEventIx = await getCreateEventIx(
+        visibility === 'public',
+        requireApproval,
+        eventName,
+        uploadedEventImageUri,
+        capacity,
+        startDate?.getTime() ?? null,
+        endDate?.getTime() ?? null,
+        location,
+        about
+      );
 
-      // TODO: Add your API call here
+      const createBadgeIx = await getCreateBadgeIx(
+        eventName,
+        badgeName,
+        badgeSymbol,
+        uploadedBadgeImageUri,
+        capacity
+      );
+
+      const tx = new Transaction().add(
+        ComputeBudgetProgram.setComputeUnitLimit({
+          units: 400000,
+        }),
+        createEventIx,
+        createBadgeIx
+      );
+
+      tx.recentBlockhash = blockhash;
+      tx.lastValidBlockHeight = lastValidBlockHeight;
+
+      const signature = await sendTransaction(tx, connection);
+
+      await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight,
+      });
 
       toast({
-        title: 'Success',
-        description: 'Event created successfully!',
+        title: 'Event create successfully',
+        description: getExplorerLink(
+          'tx',
+          signature,
+          process.env.NEXT_PUBLIC_CLUSTER! as Cluster
+        ),
       });
     } catch (error) {
       console.error('Form submission error:', error);
@@ -135,8 +180,8 @@ export default function Page() {
         description: 'Failed to create event. Please try again.',
         variant: 'destructive',
       });
-    } finally {
-      setIsSubmitting(false);
+
+      setIsUploading(false);
     }
   }
 
@@ -154,23 +199,15 @@ export default function Page() {
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
                     onClick={() => handleImageClick(eventImageInputRef)}
                   >
-                    {isLoading ? (
-                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <CameraIcon size={48} />
-                        <span className="mt-2 text-sm">Loading...</span>
-                      </div>
-                    ) : isCustomEventImage ? (
+                    {eventImageUri ? (
                       <Image
-                        src={eventImage!}
+                        src={eventImageUri}
                         alt="Event image preview"
                         layout="fill"
                         objectFit="cover"
                       />
                     ) : (
-                      <div
-                        className="h-full w-full"
-                        dangerouslySetInnerHTML={{ __html: eventImage || '' }}
-                      />
+                      <div className="h-full w-full bg-muted" />
                     )}
                   </div>
                   <FormField
@@ -186,8 +223,7 @@ export default function Page() {
                               e,
                               form,
                               'eventImage',
-                              setEventImage,
-                              setIsCustomEventImage
+                              setEventImageUri
                             )
                           }
                           className="hidden"
@@ -495,23 +531,15 @@ export default function Page() {
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
                     onClick={() => handleImageClick(badgeImageInputRef)}
                   >
-                    {isLoading ? (
-                      <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
-                        <CameraIcon size={48} />
-                        <span className="mt-2 text-sm">Loading...</span>
-                      </div>
-                    ) : isCustomBadgeImage ? (
+                    {badgeImageUri ? (
                       <Image
-                        src={badgeImage!}
+                        src={badgeImageUri}
                         alt="Badge image preview"
                         layout="fill"
                         objectFit="cover"
                       />
                     ) : (
-                      <div
-                        className="h-full w-full"
-                        dangerouslySetInnerHTML={{ __html: badgeImage || '' }}
-                      />
+                      <div className="h-full w-full bg-muted" />
                     )}
                   </div>
                   <FormField
@@ -527,8 +555,7 @@ export default function Page() {
                               e,
                               form,
                               'badgeImage',
-                              setBadgeImage,
-                              setIsCustomBadgeImage
+                              setBadgeImageUri
                             )
                           }
                           className="hidden"
@@ -575,8 +602,16 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating Event...' : 'Create Event'}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={form.formState.isSubmitting}
+          >
+            {isUploading
+              ? 'Uploading files...'
+              : form.formState.isSubmitting
+                ? 'Waiting for signature...'
+                : 'Create'}
           </Button>
         </form>
       </Form>
