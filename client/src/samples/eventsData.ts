@@ -7,7 +7,6 @@ type EventDataWithStatus = EventData & {
 
 export const UPCOMING_EVENTS: EventDataWithStatus[] = [
   {
-    bump: 1,
     isPublic: true,
     needsApproval: false,
     name: 'SuperteamMY Meetup #24',
@@ -20,7 +19,6 @@ export const UPCOMING_EVENTS: EventDataWithStatus[] = [
     registrationStatus: 'going',
   },
   {
-    bump: 2,
     isPublic: true,
     needsApproval: false,
     name: 'Lorem ipsum',
@@ -32,7 +30,6 @@ export const UPCOMING_EVENTS: EventDataWithStatus[] = [
     about: 'Lorem ipsum event',
   },
   {
-    bump: 3,
     isPublic: true,
     needsApproval: true,
     name: 'Organizer Event',
@@ -48,7 +45,6 @@ export const UPCOMING_EVENTS: EventDataWithStatus[] = [
 
 export const PAST_EVENTS: EventDataWithStatus[] = [
   {
-    bump: 4,
     isPublic: true,
     needsApproval: false,
     name: 'Lorem ipsum',

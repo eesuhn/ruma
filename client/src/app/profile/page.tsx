@@ -23,7 +23,6 @@ interface Profile extends UserData {
 }
 
 const profile: Profile = {
-  bump: 0,
   name: 'Woods',
   hosted: 10,
   attended: 4,

@@ -93,6 +93,7 @@ describe('registerForEvent', () => {
     );
 
     expect(attendeeAcc.bump).toEqual(attendeeBump);
+    expect(attendeeAcc.user).toEqual(registrantUserPda);
     expect(attendeeAcc.status).toEqual({ pending: {} });
     expect(eventAcc.attendees[0]).toEqual(attendeePda);
   });

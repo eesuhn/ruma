@@ -8,7 +8,6 @@ import { RefObject } from 'react';
 interface DicebearProps {
   seed: string;
   style: 'profile' | 'event' | 'badge';
-  output: 'svg' | 'uri';
 }
 
 const styleMap = {
@@ -22,31 +21,26 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Generate a Dicebear SVG based on the seed and style
+ * Generate a Dicebear Avatar URI based on the seed and style
  *
  * @param {DicebearProps} seed
  * @param {DicebearProps} style 'profile' | 'event' | 'badge'
- * @param {DicebearProps} output 'svg' | 'uri'
- * @returns {string} SVG in XML format or URI
+ * @returns {string} Avatar URI
  */
-export function generateDicebearAvatar({
+export function generateDicebearAvatarUri({
   seed,
   style,
-  output,
 }: DicebearProps): string {
-  const avatar = createAvatar(styleMap[style], {
+  return createAvatar(styleMap[style], {
     seed,
-  });
-
-  return output === 'svg' ? avatar.toString() : avatar.toDataUri();
+  }).toDataUri();
 }
 
 export function handleImageChange(
   event: React.ChangeEvent<HTMLInputElement>,
   form: UseFormReturn<any, any, undefined>,
   formFieldName: string,
-  setProfileImage: (image: string) => void,
-  setIsCustomImage: (isCustom: boolean) => void
+  setProfileImageUri: (image: string) => void
 ) {
   const file = event.target.files?.[0];
 
@@ -55,15 +49,25 @@ export function handleImageChange(
 
     const reader = new FileReader();
 
-    reader.onloadend = () => {
-      setProfileImage(reader.result as string);
-      setIsCustomImage(true);
-    };
-
     reader.readAsDataURL(file);
+
+    reader.onloadend = () => {
+      setProfileImageUri(reader.result as string);
+    };
   }
 }
 
 export function handleImageClick(ref: RefObject<HTMLInputElement>) {
   ref.current?.click();
 }
+
+export const statusStyles = {
+  going: 'bg-[#79be79] text-white',
+  pending: 'bg-[#f77f00] text-white',
+  rejected: 'bg-[#e5383b] text-white',
+  'checked-in': 'bg-[#91d1ce] text-white',
+} as const;
+
+export const formatStatus = (status: string): string => {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+};

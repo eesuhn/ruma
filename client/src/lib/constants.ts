@@ -1,14 +1,13 @@
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
 import idl from '@/idl/ruma.json';
 
 export const RUMA_PROGRAM_ID = new PublicKey(idl.address);
 export const RUMA_WALLET = Keypair.fromSecretKey(
   new Uint8Array(JSON.parse(process.env.NEXT_PUBLIC_RUMA_WALLET!))
 );
+export const CONNECTION = new Connection(process.env.NEXT_PUBLIC_RPC_URL ?? clusterApiUrl('devnet'));
 export const USER_SEED = 'user';
-export const USER_DATA_SEED = 'user_data';
 export const EVENT_SEED = 'event';
-export const EVENT_DATA_SEED = 'event_data';
 export const ATTENDEE_SEED = 'attendee';
 export const MIN_USER_NAME_LENGTH = 3;
 export const MAX_USER_NAME_LENGTH = 32;

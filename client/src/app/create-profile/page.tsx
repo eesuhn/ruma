@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { z } from 'zod';
 import { createProfileFormSchema } from '@/lib/formSchemas';
 import {
-  generateDicebearAvatar,
+  generateDicebearAvatarUri,
   handleImageChange,
   handleImageClick,
 } from '@/lib/utils';
@@ -22,14 +22,18 @@ import {
   Input,
 } from '@/components/ui';
 import { toast } from '@/hooks/use-toast';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorProgram } from '@/hooks/useAnchorProgram';
+import { getExplorerLink } from '@solana-developers/helpers';
+import { Cluster, Transaction } from '@solana/web3.js';
+import { uploadFile } from '@/actions/umi';
 
 export default function Page() {
-  const { publicKey } = useWallet();
-  const [profileImage, setProfileImage] = useState<string>('');
-  const [isCustomImage, setIsCustomImage] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
+  const { getCreateProfileIx } = useAnchorProgram();
+  const [profileImageUri, setProfileImageUri] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof createProfileFormSchema>>({
@@ -41,39 +45,54 @@ export default function Page() {
   });
 
   useEffect(() => {
-    if (publicKey) {
-      const svg = generateDicebearAvatar({
+    if (publicKey && !form.getValues('profileImage')) {
+      const uri = generateDicebearAvatarUri({
         seed: publicKey.toBase58(),
         style: 'profile',
-        output: 'svg',
       });
 
-      form.setValue('profileImage', svg);
-      setProfileImage(svg);
-      setIsLoading(false);
+      setProfileImageUri(uri);
     }
   }, [publicKey, form]);
 
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
     try {
-      setIsSubmitting(true);
-      console.log('Form submission data:', values);
+      setIsUploading(true);
+      const [uploadedImageUri] = await uploadFile([profileImageUri]);
+      setIsUploading(false);
+      const { blockhash, lastValidBlockHeight } =
+        await connection.getLatestBlockhash();
+      const ix = await getCreateProfileIx(values.name, uploadedImageUri);
+      const tx = new Transaction().add(ix);
+      tx.recentBlockhash = blockhash;
+      tx.lastValidBlockHeight = lastValidBlockHeight;
 
-      // TODO: Add your API call here
+      const signature = await sendTransaction(tx, connection);
+
+      await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight,
+      });
 
       toast({
-        title: 'Success',
-        description: 'Profile created successfully!',
+        title: 'Profile created successfully',
+        description: getExplorerLink(
+          'tx',
+          signature,
+          process.env.NEXT_PUBLIC_CLUSTER! as Cluster
+        ),
       });
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error(error);
+
       toast({
         title: 'Error',
         description: 'Failed to create profile. Please try again.',
         variant: 'destructive',
       });
-    } finally {
-      setIsSubmitting(false);
+
+      setIsUploading(false);
     }
   }
 
@@ -113,20 +132,15 @@ export default function Page() {
                       className="relative h-36 w-36 cursor-pointer overflow-hidden rounded-lg"
                       onClick={() => handleImageClick(fileInputRef)}
                     >
-                      {isLoading ? (
-                        <div className="h-full w-full bg-muted" />
-                      ) : isCustomImage ? (
+                      {profileImageUri ? (
                         <Image
-                          src={profileImage}
+                          src={profileImageUri}
                           alt="Profile preview"
                           layout="fill"
                           objectFit="cover"
                         />
                       ) : (
-                        <div
-                          className="h-full w-full"
-                          dangerouslySetInnerHTML={{ __html: profileImage }}
-                        />
+                        <div className="h-full w-full bg-muted" />
                       )}
                     </div>
                     <input
@@ -137,8 +151,7 @@ export default function Page() {
                           e,
                           form,
                           'profileImage',
-                          setProfileImage,
-                          setIsCustomImage
+                          setProfileImageUri
                         )
                       }
                       className="hidden"
@@ -154,9 +167,13 @@ export default function Page() {
             <Button
               type="submit"
               className="w-full rounded-xl bg-black text-white hover:bg-black/90"
-              disabled={isSubmitting}
+              disabled={form.formState.isSubmitting}
             >
-              {isSubmitting ? 'Creating...' : 'Create'}
+              {isUploading
+                ? 'Uploading files...'
+                : form.formState.isSubmitting
+                  ? 'Waiting for signature...'
+                  : 'Create'}
             </Button>
           </form>
         </Form>
