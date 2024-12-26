@@ -43,28 +43,24 @@ interface ParticipantInfo extends UserData {
 const participants: ParticipantInfo[] = [
   {
     publicKey: '4b2j...w6oZ',
-    bump: 1,
     name: 'Jeff Bezos',
     image: '/sample/profile.png',
     status: 'going',
   },
   {
     publicKey: 'K9Tx...2x9a',
-    bump: 1,
     name: 'Mary Lane',
     image: '/sample/profile.png',
     status: 'pending',
   },
   {
     publicKey: 'J7gC...x41k',
-    bump: 1,
     name: 'David Jackson',
     image: '/sample/profile.png',
     status: 'rejected',
   },
   {
     publicKey: 'mBm...6q1e',
-    bump: 1,
     name: 'Amy Lau',
     image: '/sample/profile.png',
     status: 'checked-in',

@@ -20,7 +20,6 @@ interface EventDetails extends EventData {
 }
 
 const eventDetailsSample: EventDetails = {
-  bump: 1,
   isPublic: true,
   needsApproval: false,
   name: 'SuperteamMY Meetup #24',
