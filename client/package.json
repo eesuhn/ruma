@@ -15,6 +15,7 @@
     "@dicebear/converter": "^9.2.2",
     "@dicebear/core": "^9.2.2",
     "@hookform/resolvers": "^3.9.1",
+    "@metaplex-foundation/mpl-token-metadata": "^3.3.0",
     "@metaplex-foundation/umi": "^0.9.2",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
     "@metaplex-foundation/umi-uploader-irys": "^0.10.0-beta.0",
