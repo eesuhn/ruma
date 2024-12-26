@@ -5,8 +5,7 @@ export interface Attendee {
   status: { pending: {} } | { approved: {} } | { rejected: {} };
 }
 
-export interface EventData {
-  bump: number;
+interface EventData {
   isPublic: boolean;
   needsApproval: boolean;
   name: string;
@@ -21,19 +20,18 @@ export interface EventData {
 export interface Event {
   bump: number;
   organizer: PublicKey;
-  data: PublicKey;
+  data: EventData;
   badge: PublicKey | null | undefined;
   attendees: PublicKey[];
 }
 
-export interface UserData {
-  bump: number;
+interface UserData {
   name: string;
   image: string;
 }
 
 export interface User {
   bump: number;
-  data: PublicKey;
+  data: UserData;
   badges: PublicKey[] | null | undefined;
 }
