@@ -23,9 +23,7 @@ export default function QRScanner({ onScan }: QRScannerProps) {
 
   const handleScan = useCallback(
     (result: Result | null | undefined, error: Error | null | undefined) => {
-      if (error) {
-        return;
-      }
+      if (error) return;
       if (result && !scannerRef.current) {
         const text = result.getText();
         onScan?.(text);
@@ -38,6 +36,7 @@ export default function QRScanner({ onScan }: QRScannerProps) {
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
+    if (!open) window.location.reload();
   };
 
   return (
