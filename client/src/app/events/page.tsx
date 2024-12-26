@@ -24,7 +24,7 @@ export default function Page() {
         <TabsContent value="upcoming" className="space-y-4">
           {UPCOMING_EVENTS.map((event) => (
             <EventCard
-              key={event.bump}
+              key={event.name}
               {...event}
               showManage={event.showManage}
             />
@@ -32,7 +32,7 @@ export default function Page() {
         </TabsContent>
         <TabsContent value="past" className="space-y-4">
           {PAST_EVENTS.map((event) => (
-            <EventCard key={event.bump} {...event} />
+            <EventCard key={event.name} {...event} />
           ))}
         </TabsContent>
       </Tabs>

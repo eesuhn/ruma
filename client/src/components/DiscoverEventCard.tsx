@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { EventData } from '@/types/state';
 
 export default function DiscoverEventCard({
-  bump,
   isPublic,
   needsApproval,
   name,
@@ -22,7 +21,7 @@ export default function DiscoverEventCard({
   void about;
   return (
     <div className="rounded-lg bg-[#F6F6F6] p-4 shadow-lg ease-in-out hover:bg-slate-300">
-      <Link href={`/events/${bump}`} className="group flex gap-6">
+      <Link href={`/events/${name}`} className="group flex gap-6">
         <div className="relative h-[120px] w-[120px] flex-shrink-0 overflow-hidden rounded-lg">
           <Image src={image} alt={name} fill className="object-cover" />
         </div>

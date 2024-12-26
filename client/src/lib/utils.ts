@@ -62,11 +62,11 @@ export function handleImageClick(ref: RefObject<HTMLInputElement>) {
 }
 
 export const statusStyles = {
-  going: 'bg-green-100 text-green-800 hover:bg-green-200',
-  pending: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
-  rejected: 'bg-red-100 text-red-800 hover:bg-red-200',
-  'checked-in': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-};
+  going: 'bg-[#79be79] text-white',
+  pending: 'bg-[#f77f00] text-white',
+  rejected: 'bg-[#e5383b] text-white',
+  'checked-in': 'bg-[#91d1ce] text-white',
+} as const;
 
 export const formatStatus = (status: string): string => {
   return status.charAt(0).toUpperCase() + status.slice(1);
