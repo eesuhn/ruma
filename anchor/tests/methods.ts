@@ -21,11 +21,7 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { Umi } from '@metaplex-foundation/umi';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
-import {
-  getAttendeeAcc,
-  getEventAcc,
-  getUserAcc,
-} from './accounts';
+import { getAttendeeAcc, getEventAcc, getUserAcc } from './accounts';
 import { RUMA_MASTER_WALLET } from './constants';
 
 export async function createProfile(
@@ -142,7 +138,7 @@ export async function createBadge(
 export async function registerForEvent(
   program: Program<Ruma>,
   registrantUserPda: PublicKey,
-  eventPda: PublicKey,
+  eventPda: PublicKey
 ) {
   await program.methods
     .registerForEvent()

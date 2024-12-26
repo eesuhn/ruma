@@ -91,11 +91,7 @@ describe('checkIntoEvent', () => {
 
     [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
 
-    await registerForEvent(
-      program,
-      registrantUserPda,
-      eventPda,
-    );
+    await registerForEvent(program, registrantUserPda, eventPda);
   });
 
   test('checking into event', async () => {

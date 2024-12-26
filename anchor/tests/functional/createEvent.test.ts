@@ -3,10 +3,7 @@ import { AnchorError, BN, ProgramError } from '@coral-xyz/anchor';
 import { Keypair } from '@solana/web3.js';
 import { getFundedKeypair, program } from '../utils';
 import { createEvent, createProfile } from '../methods';
-import {
-  getEventPdaAndBump,
-  getUserPdaAndBump,
-} from '../pda';
+import { getEventPdaAndBump, getUserPdaAndBump } from '../pda';
 import { MAX_EVENT_IMAGE_LENGTH, MAX_EVENT_NAME_LENGTH } from '../constants';
 
 describe('createEvent', () => {
@@ -50,10 +47,7 @@ describe('createEvent', () => {
     );
 
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
-    const eventBump = getEventPdaAndBump(
-      organizerUserPda,
-      eventName
-    )[1];
+    const eventBump = getEventPdaAndBump(organizerUserPda, eventName)[1];
 
     expect(eventAcc.bump).toEqual(eventBump);
     expect(eventAcc.data.isPublic).toEqual(isPublic);
@@ -96,11 +90,8 @@ describe('createEvent', () => {
     );
 
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
-    const eventBump = getEventPdaAndBump(
-      organizerUserPda,
-      eventName
-    )[1];
-    
+    const eventBump = getEventPdaAndBump(organizerUserPda, eventName)[1];
+
     expect(eventAcc.bump).toEqual(eventBump);
     expect(eventAcc.data.isPublic).toEqual(isPublic);
     expect(eventAcc.data.needsApproval).toEqual(needsApproval);

@@ -81,11 +81,7 @@ describe('end-to-end', () => {
 
     const [registrantUserPda] = getUserPdaAndBump(registrant.publicKey);
 
-    await registerForEvent(
-      program,
-      registrantUserPda,
-      eventPda,
-    );
+    await registerForEvent(program, registrantUserPda, eventPda);
 
     await changeAttendeeStatus(
       program,
