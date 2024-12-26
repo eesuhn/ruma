@@ -3,6 +3,7 @@
   "scripts": {
     "format": "prettier . -w",
     "format:check": "prettier . --check",
+    "local": "solana-test-validator",
     "replaceIdl": "mkdir -p ../client/src/idl; cp target/idl/ruma.json ../client/src/idl/ruma.json; cp target/types/ruma.ts ../client/src/types/ruma.ts"
   },
   "devDependencies": {

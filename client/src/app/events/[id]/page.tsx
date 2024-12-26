@@ -1,14 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { ArrowRight, CalendarIcon, Clock, MapPin, Ticket } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { EventData } from '@/types/state';
+import {
+  EventStatusType,
+  getEventStatusDetails,
+  getNftStatusContent,
+} from './action';
+import { useRouter } from 'next/navigation';
 
 interface EventDetails extends EventData {
-  condition: 'register' | 'registered' | 'manage' | 'checked-in';
-  registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
+  statusType: EventStatusType;
   nft: {
     image: string;
     title: string;
@@ -28,12 +31,11 @@ const eventDetailsSample: EventDetails = {
   location: 'Sunway University',
   about:
     'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placer',
-  condition: 'register',
-  registrationStatus: 'going',
+  statusType: 'ready_for_checkin',
   nft: {
     image: '/sample/nft.svg',
-    title: 'Event Attendee',
-    symbol: 'EVT',
+    title: 'Chill Guy',
+    symbol: 'CHG',
   },
 };
 
@@ -42,68 +44,22 @@ export default function Page({ params }: { params: { id: string } }) {
   const router = useRouter();
 
   const getButtonContent = () => {
-    switch (eventDetailsSample.condition) {
-      case 'registered':
-        return (
-          <Button className="h-8" onClick={() => console.log('Check in')}>
-            Check in
-          </Button>
-        );
-      case 'register':
-        return (
-          <Button
-            className="h-8"
-            onClick={() => console.log('Register for event')}
-          >
-            Register
-            <Ticket className="h-4 w-4" />
-          </Button>
-        );
-      case 'manage':
-        return (
-          <Button
-            className="h-8"
-            onClick={() =>
-              router.push(`/events/${eventDetailsSample.bump}/manage`)
-            }
-          >
-            Manage Event
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        );
-    }
-  };
-
-  const getNFTContent = () => {
-    switch (eventDetailsSample.condition) {
-      case 'register':
-        return (
-          <div className="ml-2">
-            <h3 className="mb-1 font-semibold">
-              {eventDetailsSample.nft.title}
-            </h3>
-            <p className="ml-[1px] text-left text-sm text-muted-foreground">
-              {eventDetailsSample.nft.symbol}
-            </p>
-          </div>
-        );
-      case 'registered':
-        return (
-          <p className="text-center font-medium">
-            Earn this badge when you check in this event!
-          </p>
-        );
-      case 'checked-in':
-        return (
-          <p className="text-center font-medium text-green-600">
-            Badge earned!
-          </p>
-        );
-    }
+    const { button, badge } = getEventStatusDetails(
+      eventDetailsSample.statusType,
+      () => router.push(`/events/${eventDetailsSample.bump}/manage`), // TODO: Update this to event ID
+      () => console.log('Register for event'),
+      () => console.log('Check in')
+    );
+    return (
+      <div className="flex w-full items-center">
+        <div className="flex-1">{button}</div>
+        <div>{badge}</div>
+      </div>
+    );
   };
 
   return (
-    <div className="container mx-auto max-w-6xl space-y-8 px-40 py-8">
+    <div className="container mx-auto max-w-5xl space-y-8 px-40 py-8">
       <div className="grid gap-8 md:grid-cols-[1fr,2fr]">
         <div className="space-y-6">
           <div className="relative aspect-square w-full">
@@ -168,7 +124,13 @@ export default function Page({ params }: { params: { id: string } }) {
                   className="rounded-lg object-cover"
                 />
               </div>
-              <div>{getNFTContent()}</div>
+              <div>
+                {getNftStatusContent(
+                  eventDetailsSample.statusType,
+                  eventDetailsSample.nft.title,
+                  eventDetailsSample.nft.symbol
+                )}
+              </div>
             </div>
           </div>
         </div>

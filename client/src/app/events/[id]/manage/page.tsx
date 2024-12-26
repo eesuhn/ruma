@@ -19,6 +19,7 @@ import {
 } from '@/components/ui';
 import Image from 'next/image';
 import { UserData } from '@/types/state';
+import { statusStyles, formatStatus } from '@/lib/utils';
 
 type Status = 'going' | 'pending' | 'rejected' | 'checked-in';
 
@@ -58,13 +59,6 @@ const participants: ParticipantInfo[] = [
   },
 ];
 
-const statusStyles = {
-  going: 'bg-green-100 text-green-800 hover:bg-green-200',
-  pending: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
-  rejected: 'bg-red-100 text-red-800 hover:bg-red-200',
-  'checked-in': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-};
-
 export default function Page() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -83,8 +77,9 @@ export default function Page() {
 
   const handleStatusChange = (status: Status) => {
     if (selectedParticipant) {
-      // In a real app, you would update this in your backend
+      // TODO: Update participant status
       console.log(`Updating ${selectedParticipant.name}'s status to ${status}`);
+
       setEditStatus('');
       setSelectedParticipant(null); // This will close the dialog
     }
@@ -148,8 +143,7 @@ export default function Page() {
                   </div>
                 </div>
                 <Badge className={statusStyles[participant.status]}>
-                  {participant.status.charAt(0).toUpperCase() +
-                    participant.status.slice(1)}
+                  {formatStatus(participant.status)}
                 </Badge>
               </button>
             </DialogTrigger>
