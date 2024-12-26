@@ -78,7 +78,8 @@ export function useAnchorProgram() {
     badgeName: string,
     badgeSymbol: string,
     badgeUri: string,
-    maxSupply: number | null
+    maxSupply: number | null,
+    masterMint: Keypair
   ): Promise<TransactionInstruction> {
     const userPda = getUserPda(publicKey!);
 
@@ -92,7 +93,7 @@ export function useAnchorProgram() {
       .accounts({
         authority: publicKey!,
         event: getEventPda(userPda, eventName),
-        masterMint: Keypair.generate().publicKey,
+        masterMint: masterMint.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .instruction();
