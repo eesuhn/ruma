@@ -9,13 +9,13 @@ export const UPCOMING_EVENTS: EventDataWithStatus[] = [
   {
     isPublic: true,
     needsApproval: false,
-    name: 'SuperteamMY Meetup #24',
+    name: 'Superteam',
     image: '/sample/event-cover2.png',
     capacity: 100,
-    startTimestamp: 1732132800000, // Nov 20, 2024 12:00pm
-    endTimestamp: 1732144400000,
+    startTimestamp: 1735286400,
+    endTimestamp: 1735300800,
     location: 'Sunway University',
-    about: 'SuperteamMY Meetup #24',
+    about: 'Superteam',
     registrationStatus: 'going',
   },
   {
@@ -24,8 +24,8 @@ export const UPCOMING_EVENTS: EventDataWithStatus[] = [
     name: 'Lorem ipsum',
     image: '/sample/event-cover2.png',
     capacity: 50,
-    startTimestamp: 1729454400000, // Oct 20, 2024 7:00pm
-    endTimestamp: 1729465200000,
+    startTimestamp: 1729454400, // Oct 20, 2024 7:00pm
+    endTimestamp: 1729465200,
     location: 'Sunway University',
     about: 'Lorem ipsum event',
   },
@@ -35,8 +35,8 @@ export const UPCOMING_EVENTS: EventDataWithStatus[] = [
     name: 'Organizer Event',
     image: '/sample/event-cover2.png',
     capacity: 200,
-    startTimestamp: 1733116800000, // Dec 1, 2024 2:00pm
-    endTimestamp: 1733127600000,
+    startTimestamp: 1733116800, // Dec 1, 2024 2:00pm
+    endTimestamp: 1733127600,
     location: 'Virtual',
     about: 'Organizer event',
     showManage: true,

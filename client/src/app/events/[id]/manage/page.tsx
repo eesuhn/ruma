@@ -104,7 +104,8 @@ export default function Page() {
 
   const handleQRScan = useCallback((data: string) => {
     // TODO: Handle QR code scan
-    console.log('QR Code scanned:', data);
+    window.alert('Verified');
+    window.location.reload();
   }, []);
 
   return (

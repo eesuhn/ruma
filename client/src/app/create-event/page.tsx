@@ -48,7 +48,12 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Cluster, ComputeBudgetProgram, Keypair, Transaction } from '@solana/web3.js';
+import {
+  Cluster,
+  ComputeBudgetProgram,
+  Keypair,
+  Transaction,
+} from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { uploadFile } from '@/actions/umi';
 
@@ -106,10 +111,9 @@ export default function Page() {
     if (publicKey) {
       try {
         setIsUploading(true);
-        const [uploadedEventImageUri, uploadedBadgeImageUri] = await uploadFile([
-          eventImageUri,
-          badgeImageUri,
-        ]);
+        const [uploadedEventImageUri, uploadedBadgeImageUri] = await uploadFile(
+          [eventImageUri, badgeImageUri]
+        );
         setIsUploading(false);
         const { blockhash, lastValidBlockHeight } =
           await connection.getLatestBlockhash();
@@ -147,7 +151,7 @@ export default function Page() {
           badgeSymbol,
           uploadedBadgeImageUri,
           capacity,
-          masterMint,
+          masterMint
         );
 
         const tx = new Transaction().add(
