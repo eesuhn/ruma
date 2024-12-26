@@ -3,7 +3,7 @@
   "scripts": {
     "format": "prettier . -w",
     "format:check": "prettier . --check",
-    "replaceIdl": "cp target/idl/ruma.json ../client/src/idl/ruma.json; cp target/types/ruma.ts ../client/src/types/ruma.ts"
+    "replaceIdl": "mkdir -p ../client/src/idl; cp target/idl/ruma.json ../client/src/idl/ruma.json; cp target/types/ruma.ts ../client/src/types/ruma.ts"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.30.1",
