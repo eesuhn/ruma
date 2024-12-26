@@ -1,11 +1,12 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
+import { Card, CardContent } from '@/components/ui';
+import { UserData } from '@/types/state';
 import {
   Tooltip,
   TooltipContent,
-  TooltipTrigger,
   TooltipProvider,
+  TooltipTrigger,
 } from '@/components/ui/tooltip';
 
 interface Badge {
@@ -13,15 +14,16 @@ interface Badge {
   name: string;
   image: string;
   earnedDate: string;
+  event: string; // Add this line
 }
 
-interface Profile {
-  name: string;
+interface Profile extends UserData {
   hosted: number;
   attended: number;
-  image: string;
 }
+
 const profile: Profile = {
+  bump: 0,
   name: 'Woods',
   hosted: 10,
   attended: 4,
@@ -35,12 +37,14 @@ const badges: Badge[] = [
     name: 'Early Adopter',
     image: '/sample/nft.svg',
     earnedDate: '2023-01-15',
+    event: 'First Launch Event',
   },
   {
     id: '2',
     name: 'Top Contributor',
     image: '/sample/nft.svg',
     earnedDate: '2023-03-20',
+    event: 'Spring Meetup',
   },
 ];
 
@@ -85,33 +89,40 @@ export default function Page() {
         </CardContent>
       </Card>
 
-      <div className="cursor-default">
+      <div className="">
         {badges.length > 0 ? (
           <div>
             <h2 className="mb-4 text-xl font-semibold">Badges Collection</h2>
-            <TooltipProvider>
-              <div className="grid cursor-default grid-cols-6 items-center gap-8 p-2">
-                {badges.map((badge) => (
-                  <Tooltip key={badge.id}>
-                    <TooltipTrigger asChild>
-                      <div className="flex h-20 w-20 items-center justify-center">
+            <div className="grid grid-cols-6">
+              {badges.map((badge) => (
+                <TooltipProvider key={badge.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild className="cursor-default">
+                      <div>
                         <Image
                           src={badge.image}
                           alt={badge.name}
                           width={80}
                           height={80}
-                          className="h-full w-full cursor-default rounded-xl object-cover"
+                          className="rounded-xl"
                         />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{badge.name}</p>
-                      <p>Earned on: {badge.earnedDate}</p>
+                      <p>
+                        <strong>{badge.name}</strong>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        From: {badge.event}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Earned: {badge.earnedDate}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
-                ))}
-              </div>
-            </TooltipProvider>
+                </TooltipProvider>
+              ))}
+            </div>
           </div>
         ) : (
           <h2 className="mt-12 text-center text-xl font-bold">

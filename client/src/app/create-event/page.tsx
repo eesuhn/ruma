@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import { z } from 'zod';
+import { createEventFormSchema } from '@/lib/formSchemas';
 import {
   CalendarIcon,
   Users,
@@ -14,10 +15,17 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
+  cn,
+  generateDicebearAvatar,
+  handleImageChange,
+  handleImageClick,
+} from '@/lib/utils';
+import {
+  Button,
+  Calendar,
+  Card,
+  CardContent,
   Form,
   FormControl,
   FormDescription,
@@ -25,46 +33,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
+  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { generateDicebear } from '@/hooks/useDicebear';
-
-const formSchema = z.object({
-  eventName: z.string().min(2, {
-    message: 'Event name must be at least 2 characters.',
-  }),
-  visibility: z.string(),
-  startDate: z.date().nullable(),
-  endDate: z.date().nullable(),
-  location: z.string().min(1, {
-    message: 'Location is required.',
-  }),
-  about: z.string(),
-  requireApproval: z.boolean().default(false),
-  capacity: z.string().default('unlimited'),
-  badgeName: z.string().min(2, {
-    message: 'Badge name must be at least 2 characters.',
-  }),
-  badgeSymbol: z.string().min(1, {
-    message: 'Badge symbol is required.',
-  }),
-});
+  Textarea,
+  Switch,
+  Separator,
+  SelectValue,
+} from '@/components/ui';
+import { toast } from '@/hooks/use-toast';
 
 export default function Page() {
   const [eventImage, setEventImage] = useState<string | null>(null);
@@ -72,56 +54,91 @@ export default function Page() {
   const [isCustomEventImage, setIsCustomEventImage] = useState(false);
   const [isCustomBadgeImage, setIsCustomBadgeImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof createEventFormSchema>>({
+    resolver: zodResolver(createEventFormSchema),
     defaultValues: {
+      eventName: '',
       visibility: 'public',
+      location: '',
+      about: '',
       requireApproval: false,
-      capacity: '',
+      capacity: null,
+      badgeName: '',
+      badgeSymbol: '',
       startDate: null,
       endDate: null,
+      eventImage: undefined,
+      badgeImage: undefined,
     },
   });
 
   useEffect(() => {
+    // TODO: use eventPda as eventSeed and badgeSeed
     const eventSeed = Math.random().toString(36).substring(7);
     const badgeSeed = Math.random().toString(36).substring(7);
 
-    const eventSvg = generateDicebear({ seed: eventSeed, style: 'event' });
-    const badgeSvg = generateDicebear({ seed: badgeSeed, style: 'badge' });
+    const eventSvg = generateDicebearAvatar({
+      seed: eventSeed,
+      style: 'event',
+      output: 'svg',
+    });
+    const badgeSvg = generateDicebearAvatar({
+      seed: badgeSeed,
+      style: 'badge',
+      output: 'svg',
+    });
 
     setEventImage(eventSvg);
     setBadgeImage(badgeSvg);
+
+    // Set the SVG strings directly as form values
+    form.setValue('eventImage', eventSvg);
+    form.setValue('badgeImage', badgeSvg);
+
     setIsLoading(false);
-  }, []);
+  }, [form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ ...values, eventImage, badgeImage });
+  async function onSubmit(values: z.infer<typeof createEventFormSchema>) {
+    try {
+      setIsSubmitting(true);
+
+      // Handle image submissions
+      const finalEventImage = isCustomEventImage
+        ? values.eventImage
+        : eventImage;
+      const finalBadgeImage = isCustomBadgeImage
+        ? values.badgeImage
+        : badgeImage;
+
+      // Debug print form data
+      const formData = {
+        ...values,
+        eventImage: finalEventImage,
+        badgeImage: finalBadgeImage,
+      };
+      console.log('Form submission data:', formData);
+
+      // TODO: Add your API call here
+
+      toast({
+        title: 'Success',
+        description: 'Event created successfully!',
+      });
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create event. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
-
-  const handleImageChange =
-    (
-      setter: React.Dispatch<React.SetStateAction<string | null>>,
-      setCustom: (value: boolean) => void
-    ) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setter(reader.result as string);
-          setCustom(true);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-
-  const handleImageClick = (ref: React.RefObject<HTMLInputElement>) => () => {
-    ref.current?.click();
-  };
 
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">
@@ -135,7 +152,7 @@ export default function Page() {
                 <div className="w-1/3">
                   <div
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
-                    onClick={handleImageClick(eventImageInputRef)}
+                    onClick={() => handleImageClick(eventImageInputRef)}
                   >
                     {isLoading ? (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
@@ -156,15 +173,33 @@ export default function Page() {
                       />
                     )}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange(
-                      setEventImage,
-                      setIsCustomEventImage
+                  <FormField
+                    control={form.control}
+                    name="eventImage"
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleImageChange(
+                              e,
+                              form,
+                              'eventImage',
+                              setEventImage,
+                              setIsCustomEventImage
+                            )
+                          }
+                          className="hidden"
+                          ref={eventImageInputRef}
+                        />
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </>
                     )}
-                    className="hidden"
-                    ref={eventImageInputRef}
                   />
                 </div>
                 <div className="w-2/3 space-y-4">
@@ -427,11 +462,23 @@ export default function Page() {
                           type="text"
                           placeholder="Unlimited"
                           className="w-40 pl-8 text-right"
-                          {...field}
+                          value={field.value === null ? '' : field.value}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                              field.onChange(null);
+                            } else {
+                              const num = parseInt(value, 10);
+                              if (!isNaN(num)) {
+                                field.onChange(num);
+                              }
+                            }
+                          }}
                         />
                         <Pen className="absolute left-2 h-4 w-4 text-muted-foreground" />
                       </div>
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -446,7 +493,7 @@ export default function Page() {
                 <div className="w-1/4">
                   <div
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
-                    onClick={handleImageClick(badgeImageInputRef)}
+                    onClick={() => handleImageClick(badgeImageInputRef)}
                   >
                     {isLoading ? (
                       <div className="flex h-full w-full flex-col items-center justify-center bg-muted text-muted-foreground">
@@ -467,15 +514,33 @@ export default function Page() {
                       />
                     )}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange(
-                      setBadgeImage,
-                      setIsCustomBadgeImage
+                  <FormField
+                    control={form.control}
+                    name="badgeImage"
+                    render={({ field }) => (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleImageChange(
+                              e,
+                              form,
+                              'badgeImage',
+                              setBadgeImage,
+                              setIsCustomBadgeImage
+                            )
+                          }
+                          className="hidden"
+                          ref={badgeImageInputRef}
+                        />
+                        <input
+                          type="hidden"
+                          {...field}
+                          value={field.value || ''}
+                        />
+                      </>
                     )}
-                    className="hidden"
-                    ref={badgeImageInputRef}
                   />
                 </div>
                 <div className="w-3/4 space-y-4">
@@ -510,8 +575,8 @@ export default function Page() {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full">
-            Create Event
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating Event...' : 'Create Event'}
           </Button>
         </form>
       </Form>

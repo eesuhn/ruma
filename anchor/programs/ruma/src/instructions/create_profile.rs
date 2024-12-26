@@ -13,16 +13,10 @@ pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) 
         RumaError::UserImageTooLong
     );
 
-    let user_data = &mut ctx.accounts.user_data;
-
-    user_data.bump = ctx.bumps.user_data;
-    user_data.name = name;
-    user_data.image = image;
-
     let user = &mut ctx.accounts.user;
 
     user.bump = ctx.bumps.user;
-    user.data = ctx.accounts.user_data.key();
+    user.data = UserData { name, image };
     user.badges = Vec::new();
 
     Ok(())
@@ -32,22 +26,14 @@ pub fn create_profile(ctx: Context<CreateProfile>, name: String, image: String) 
 #[instruction(name: String, image: String)]
 pub struct CreateProfile<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
     #[account(
         init,
-        space = User::MIN_SPACE,
-        seeds = [USER_SEED, payer.key().as_ref()],
+        space = User::MIN_SPACE + name.len() + image.len(),
+        seeds = [USER_SEED, authority.key().as_ref()],
         bump,
-        payer = payer,
+        payer = authority,
     )]
     pub user: Account<'info, User>,
-    #[account(
-        init,
-        space = UserData::MIN_SPACE + name.len() + image.len(),
-        seeds = [USER_DATA_SEED, user.key().as_ref()],
-        bump,
-        payer = payer,
-    )]
-    pub user_data: Account<'info, UserData>,
     pub system_program: Program<'info, System>,
 }

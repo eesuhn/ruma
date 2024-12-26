@@ -6,7 +6,6 @@ use anchor_spl::{
         mpl_token_metadata::{
             instructions::{CreateV1CpiBuilder, MintV1CpiBuilder},
             types::{Creator, PrintSupply, TokenStandard},
-            MAX_NAME_LENGTH, MAX_SYMBOL_LENGTH, MAX_URI_LENGTH,
         },
         Metadata,
     },
@@ -22,22 +21,22 @@ pub fn create_badge(
 ) -> Result<()> {
     require!(!badge_name.is_empty(), RumaError::BadgeNameRequired);
     require!(
-        badge_name.len() <= MAX_NAME_LENGTH,
+        badge_name.len() <= MAX_BADGE_NAME_LENGTH,
         RumaError::BadgeNameTooLong
     );
     require!(!badge_symbol.is_empty(), RumaError::BadgeSymbolRequired);
     require!(
-        badge_symbol.len() <= MAX_SYMBOL_LENGTH,
+        badge_symbol.len() <= MAX_BADGE_SYMBOL_LENGTH,
         RumaError::BadgeSymbolTooLong
     );
     require!(!badge_uri.is_empty(), RumaError::BadgeUriRequired);
     require!(
-        badge_uri.len() <= MAX_URI_LENGTH,
+        badge_uri.len() <= MAX_BADGE_URI_LENGTH,
         RumaError::BadgeUriTooLong
     );
 
     CreateV1CpiBuilder::new(&ctx.accounts.token_metadata_program.to_account_info())
-        .payer(&ctx.accounts.payer.to_account_info())
+        .payer(&ctx.accounts.authority.to_account_info())
         .metadata(&ctx.accounts.master_metadata.to_account_info())
         .master_edition(Some(&ctx.accounts.master_edition.to_account_info()))
         .mint(&ctx.accounts.master_mint.to_account_info(), true)
@@ -64,12 +63,12 @@ pub fn create_badge(
         })
         .invoke_signed(&[&[
             USER_SEED,
-            ctx.accounts.payer.key().as_ref(),
+            ctx.accounts.authority.key().as_ref(),
             &[ctx.accounts.organizer.bump],
         ]])?;
 
     MintV1CpiBuilder::new(&ctx.accounts.token_metadata_program.to_account_info())
-        .payer(&ctx.accounts.payer.to_account_info())
+        .payer(&ctx.accounts.authority.to_account_info())
         .mint(&ctx.accounts.master_mint.to_account_info())
         .authority(&ctx.accounts.organizer.to_account_info())
         .token(&ctx.accounts.master_token_account.to_account_info())
@@ -82,7 +81,7 @@ pub fn create_badge(
         .sysvar_instructions(&ctx.accounts.rent.to_account_info())
         .invoke_signed(&[&[
             USER_SEED,
-            ctx.accounts.payer.key().as_ref(),
+            ctx.accounts.authority.key().as_ref(),
             &[ctx.accounts.organizer.bump],
         ]])?;
 
@@ -94,9 +93,9 @@ pub fn create_badge(
 #[derive(Accounts)]
 pub struct CreateBadge<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
     #[account(
-        seeds = [USER_SEED, payer.key().as_ref()],
+        seeds = [USER_SEED, authority.key().as_ref()],
         bump = organizer.bump,
     )]
     pub organizer: Account<'info, User>,
@@ -104,7 +103,7 @@ pub struct CreateBadge<'info> {
     pub event: Account<'info, Event>,
     #[account(
         init,
-        payer = payer,
+        payer = authority,
         mint::decimals = 0,
         mint::authority = organizer,
         mint::freeze_authority = organizer,
@@ -113,7 +112,7 @@ pub struct CreateBadge<'info> {
     pub master_mint: InterfaceAccount<'info, Mint>,
     #[account(
         init,
-        payer = payer,
+        payer = authority,
         associated_token::mint = master_mint,
         associated_token::authority = organizer,
         associated_token::token_program = token_program,

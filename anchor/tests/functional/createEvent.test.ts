@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
-import { AnchorError, BN } from '@coral-xyz/anchor';
+import { AnchorError, BN, ProgramError } from '@coral-xyz/anchor';
 import { Keypair } from '@solana/web3.js';
 import { getFundedKeypair, program } from '../utils';
 import { createEvent, createProfile } from '../methods';
 import {
-  getEventDataPdaAndBump,
   getEventPdaAndBump,
   getUserPdaAndBump,
 } from '../pda';
@@ -36,7 +35,7 @@ describe('createEvent', () => {
     const location = 'Sunway University, Subang Jaya';
     const about = 'This is a test event';
 
-    const { eventAcc, eventDataAcc } = await createEvent(
+    const { eventAcc } = await createEvent(
       program,
       isPublic,
       needsApproval,
@@ -51,26 +50,24 @@ describe('createEvent', () => {
     );
 
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
-    const [eventPda, eventBump] = getEventPdaAndBump(
+    const eventBump = getEventPdaAndBump(
       organizerUserPda,
       eventName
-    );
-    const [eventDataPda, eventDataBump] = getEventDataPdaAndBump(eventPda);
+    )[1];
 
     expect(eventAcc.bump).toEqual(eventBump);
+    expect(eventAcc.data.isPublic).toEqual(isPublic);
+    expect(eventAcc.data.needsApproval).toEqual(needsApproval);
+    expect(eventAcc.data.name).toEqual(eventName);
+    expect(eventAcc.data.image).toEqual(eventImage);
+    expect(eventAcc.organizer).toEqual(organizerUserPda);
+    expect(eventAcc.data.capacity).toEqual(capacity);
+    expect(eventAcc.data.startTimestamp).toEqual(startTimestamp);
+    expect(eventAcc.data.endTimestamp).toEqual(endTimestamp);
+    expect(eventAcc.data.location).toEqual(location);
+    expect(eventAcc.data.about).toEqual(about);
     expect(eventAcc.badge).toEqual(null);
-    expect(eventAcc.data).toEqual(eventDataPda);
     expect(eventAcc.attendees).toEqual([]);
-    expect(eventDataAcc.bump).toEqual(eventDataBump);
-    expect(eventDataAcc.isPublic).toEqual(isPublic);
-    expect(eventDataAcc.needsApproval).toEqual(needsApproval);
-    expect(eventDataAcc.name).toEqual(eventName);
-    expect(eventDataAcc.image).toEqual(eventImage);
-    expect(eventDataAcc.capacity).toEqual(capacity);
-    expect(eventDataAcc.startTimestamp).toEqual(startTimestamp);
-    expect(eventDataAcc.endTimestamp).toEqual(endTimestamp);
-    expect(eventDataAcc.location).toEqual(location);
-    expect(eventDataAcc.about).toEqual(about);
   });
 
   test('creates an event with optional values', async () => {
@@ -84,7 +81,7 @@ describe('createEvent', () => {
     const location = null;
     const about = null;
 
-    const { eventAcc, eventDataAcc } = await createEvent(
+    const { eventAcc } = await createEvent(
       program,
       isPublic,
       needsApproval,
@@ -99,26 +96,23 @@ describe('createEvent', () => {
     );
 
     const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
-    const [eventPda, eventBump] = getEventPdaAndBump(
+    const eventBump = getEventPdaAndBump(
       organizerUserPda,
       eventName
-    );
-    const [eventDataPda, eventDataBump] = getEventDataPdaAndBump(eventPda);
-
+    )[1];
+    
     expect(eventAcc.bump).toEqual(eventBump);
+    expect(eventAcc.data.isPublic).toEqual(isPublic);
+    expect(eventAcc.data.needsApproval).toEqual(needsApproval);
+    expect(eventAcc.data.name).toEqual(eventName);
+    expect(eventAcc.data.image).toEqual(eventImage);
+    expect(eventAcc.data.capacity).toEqual(capacity);
+    expect(eventAcc.data.startTimestamp).toEqual(startTimestamp);
+    expect(eventAcc.data.endTimestamp).toEqual(endTimestamp);
+    expect(eventAcc.data.location).toEqual(location);
+    expect(eventAcc.data.about).toEqual(about);
     expect(eventAcc.badge).toEqual(null);
-    expect(eventAcc.data).toEqual(eventDataPda);
     expect(eventAcc.attendees).toEqual([]);
-    expect(eventDataAcc.bump).toEqual(eventDataBump);
-    expect(eventDataAcc.isPublic).toEqual(isPublic);
-    expect(eventDataAcc.needsApproval).toEqual(needsApproval);
-    expect(eventDataAcc.name).toEqual(eventName);
-    expect(eventDataAcc.image).toEqual(eventImage);
-    expect(eventDataAcc.capacity).toEqual(capacity);
-    expect(eventDataAcc.startTimestamp).toEqual(startTimestamp);
-    expect(eventDataAcc.endTimestamp).toEqual(endTimestamp);
-    expect(eventDataAcc.location).toEqual(location);
-    expect(eventDataAcc.about).toEqual(about);
   });
 
   test('throws when creating an event with empty name', async () => {
@@ -150,7 +144,7 @@ describe('createEvent', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('EventNameRequired');
-      expect(err.error.errorCode.number).toEqual(6004);
+      expect(err.error.errorCode.number).toEqual(6200);
     }
   });
 
@@ -212,7 +206,7 @@ describe('createEvent', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('EventImageRequired');
-      expect(err.error.errorCode.number).toEqual(6006);
+      expect(err.error.errorCode.number).toEqual(6202);
     }
   });
 
@@ -245,7 +239,7 @@ describe('createEvent', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('EventImageTooLong');
-      expect(err.error.errorCode.number).toEqual(6007);
+      expect(err.error.errorCode.number).toEqual(6203);
     }
   });
 });

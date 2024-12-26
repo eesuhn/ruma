@@ -52,8 +52,8 @@ pub mod ruma {
         instructions::create_badge(ctx, badge_name, badge_symbol, badge_uri, max_supply)
     }
 
-    pub fn register_for_event(ctx: Context<RegisterForEvent>, name: String) -> Result<()> {
-        instructions::register_for_event(ctx, name)
+    pub fn register_for_event(ctx: Context<RegisterForEvent>) -> Result<()> {
+        instructions::register_for_event(ctx)
     }
 
     pub fn change_attendee_status(

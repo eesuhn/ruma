@@ -20,6 +20,7 @@ export interface EventData {
 
 export interface Event {
   bump: number;
+  organizer: PublicKey;
   data: PublicKey;
   badge: PublicKey | null | undefined;
   attendees: PublicKey[];

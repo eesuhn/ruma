@@ -3,9 +3,7 @@ import { Ruma } from '../target/types/ruma';
 import { BN, Program } from '@coral-xyz/anchor';
 import {
   getAttendeePdaAndBump,
-  getEventDataPdaAndBump,
   getEventPdaAndBump,
-  getUserDataPdaAndBump,
   getUserPdaAndBump,
 } from './pda';
 import {
@@ -26,9 +24,7 @@ import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import {
   getAttendeeAcc,
   getEventAcc,
-  getEventDataAcc,
   getUserAcc,
-  getUserDataAcc,
 } from './accounts';
 import { RUMA_MASTER_WALLET } from './constants';
 
@@ -36,22 +32,20 @@ export async function createProfile(
   program: Program<Ruma>,
   userName: string,
   userImage: string,
-  user: Keypair
+  authority: Keypair
 ) {
   await program.methods
     .createProfile(userName, userImage)
     .accounts({
-      payer: user.publicKey,
+      authority: authority.publicKey,
     })
-    .signers([user])
+    .signers([authority])
     .rpc();
 
-  const [userPda] = getUserPdaAndBump(user.publicKey);
-  const [userDataPda] = getUserDataPdaAndBump(userPda);
+  const [userPda] = getUserPdaAndBump(authority.publicKey);
 
   return {
     userAcc: await getUserAcc(program, userPda),
-    userDataAcc: await getUserDataAcc(program, userDataPda),
   };
 }
 
@@ -66,7 +60,7 @@ export async function createEvent(
   endTimeStamp: BN | null,
   location: string | null,
   about: string | null,
-  organizer: Keypair
+  authority: Keypair
 ) {
   await program.methods
     .createEvent(
@@ -81,18 +75,16 @@ export async function createEvent(
       about
     )
     .accounts({
-      payer: organizer.publicKey,
+      authority: authority.publicKey,
     })
-    .signers([organizer])
+    .signers([authority])
     .rpc();
 
-  const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
+  const [organizerUserPda] = getUserPdaAndBump(authority.publicKey);
   const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
-  const [eventDataPda] = getEventDataPdaAndBump(eventPda);
 
   return {
     eventAcc: await getEventAcc(program, eventPda),
-    eventDataAcc: await getEventDataAcc(program, eventDataPda),
   };
 }
 
@@ -103,19 +95,19 @@ export async function createBadge(
   badgeSymbol: string,
   badgeUri: string,
   maxSupply: BN | null,
-  organizer: Keypair,
+  authority: Keypair,
   eventPda: PublicKey,
   masterMint: Keypair
 ) {
   await program.methods
     .createBadge(badgeName, badgeSymbol, badgeUri, maxSupply)
     .accounts({
-      payer: organizer.publicKey,
+      authority: authority.publicKey,
       event: eventPda,
       masterMint: masterMint.publicKey,
       tokenProgram: TOKEN_PROGRAM_ID,
     })
-    .signers([organizer, masterMint])
+    .signers([authority, masterMint])
     .preInstructions(
       [
         ComputeBudgetProgram.setComputeUnitLimit({
@@ -126,7 +118,7 @@ export async function createBadge(
     )
     .rpc();
 
-  const [organizerUserPda] = getUserPdaAndBump(organizer.publicKey);
+  const [organizerUserPda] = getUserPdaAndBump(authority.publicKey);
   const [masterMetadataPda] = findMetadataPda(umi, {
     mint: fromWeb3JsPublicKey(masterMint.publicKey),
   });
@@ -149,20 +141,18 @@ export async function createBadge(
 
 export async function registerForEvent(
   program: Program<Ruma>,
-  eventName: string,
-  organizerUserPda: PublicKey,
-  registrantUserPda: PublicKey
+  registrantUserPda: PublicKey,
+  eventPda: PublicKey,
 ) {
   await program.methods
-    .registerForEvent(eventName)
+    .registerForEvent()
     .accounts({
-      organizer: organizerUserPda,
       registrant: registrantUserPda,
+      event: eventPda,
     })
     .signers([RUMA_MASTER_WALLET])
     .rpc();
 
-  const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
   const [attendeePda] = getAttendeePdaAndBump(registrantUserPda, eventPda);
 
   return {
@@ -180,7 +170,7 @@ export async function changeAttendeeStatus(
   await program.methods
     .changeAttendeeStatus(status)
     .accounts({
-      user: registrantUserPda,
+      registrant: registrantUserPda,
       event: eventPda,
     })
     .signers([RUMA_MASTER_WALLET])
@@ -217,7 +207,7 @@ export async function checkIntoEvent(
   await program.methods
     .checkIntoEvent(new BN(editionNumber))
     .accountsPartial({
-      host: organizer.publicKey,
+      authority: organizer.publicKey,
       registrant: registrantUserPda,
       attendee: attendeePda,
       editionMint: editionMint.publicKey,
