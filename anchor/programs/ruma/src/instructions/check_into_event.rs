@@ -29,7 +29,7 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Re
         )
         .with_signer(&[&[
             USER_SEED,
-            ctx.accounts.host.key.as_ref(),
+            ctx.accounts.authority.key.as_ref(),
             &[ctx.accounts.organizer.bump],
         ]]),
         1,
@@ -56,7 +56,7 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Re
         .sysvar_instructions(&ctx.accounts.sysvar_instructions.to_account_info())
         .invoke_signed(&[&[
             USER_SEED,
-            ctx.accounts.host.key.as_ref(),
+            ctx.accounts.authority.key.as_ref(),
             &[ctx.accounts.organizer.bump],
         ]])?;
 
@@ -76,9 +76,9 @@ pub struct CheckIntoEvent<'info> {
         address = RUMA_WALLET @ RumaError::UnauthorizedMasterWallet
     )]
     pub payer: Signer<'info>,
-    pub host: Signer<'info>,
+    pub authority: Signer<'info>,
     #[account(
-        seeds = [USER_SEED, host.key().as_ref()],
+        seeds = [USER_SEED, authority.key().as_ref()],
         bump = organizer.bump,
     )]
     pub organizer: Box<Account<'info, User>>,

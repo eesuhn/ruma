@@ -5,9 +5,7 @@ pub fn change_attendee_status(
     ctx: Context<ChangeAttendeeStatus>,
     status: AttendeeStatus,
 ) -> Result<()> {
-    let attendee = &mut ctx.accounts.attendee;
-
-    attendee.status = status;
+    ctx.accounts.attendee.status = status;
 
     Ok(())
 }
@@ -19,11 +17,14 @@ pub struct ChangeAttendeeStatus<'info> {
         address = RUMA_WALLET @ RumaError::UnauthorizedMasterWallet
     )]
     pub payer: Signer<'info>,
-    pub user: Account<'info, User>,
+    pub registrant: Account<'info, User>,
+    #[account(
+        constraint = event.attendees.iter().any(|a| *a == attendee.key()) @ RumaError::AttendeeNotRegisteredForEvent,
+    )]
     pub event: Account<'info, Event>,
     #[account(
         mut,
-        seeds = [ATTENDEE_SEED, user.key().as_ref(), event.key().as_ref()],
+        seeds = [ATTENDEE_SEED, registrant.key().as_ref(), event.key().as_ref()],
         bump = attendee.bump,
     )]
     pub attendee: Account<'info, Attendee>,

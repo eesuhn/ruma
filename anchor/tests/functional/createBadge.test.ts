@@ -140,7 +140,7 @@ describe('createBadge', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('BadgeNameRequired');
-      expect(err.error.errorCode.number).toEqual(6008);
+      expect(err.error.errorCode.number).toEqual(6300);
     }
   });
 
@@ -169,7 +169,7 @@ describe('createBadge', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('BadgeNameTooLong');
-      expect(err.error.errorCode.number).toEqual(6009);
+      expect(err.error.errorCode.number).toEqual(6301);
     }
   });
 
@@ -198,7 +198,7 @@ describe('createBadge', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('BadgeSymbolRequired');
-      expect(err.error.errorCode.number).toEqual(6010);
+      expect(err.error.errorCode.number).toEqual(6302);
     }
   });
 
@@ -227,7 +227,7 @@ describe('createBadge', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('BadgeSymbolTooLong');
-      expect(err.error.errorCode.number).toEqual(6011);
+      expect(err.error.errorCode.number).toEqual(6303);
     }
   });
 
@@ -256,7 +256,7 @@ describe('createBadge', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('BadgeUriRequired');
-      expect(err.error.errorCode.number).toEqual(6012);
+      expect(err.error.errorCode.number).toEqual(6304);
     }
   });
 
@@ -285,7 +285,7 @@ describe('createBadge', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('BadgeUriTooLong');
-      expect(err.error.errorCode.number).toEqual(6013);
+      expect(err.error.errorCode.number).toEqual(6305);
     }
   });
 

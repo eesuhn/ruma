@@ -2,8 +2,10 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum RumaError {
+    #[msg("Signer not authorized")]
+    UnauthorizedMasterWallet,
     #[msg("User name is required")]
-    UserNameRequired,
+    UserNameRequired = 100,
     #[msg("User name can not be longer than 32 characters")]
     UserNameTooLong,
     #[msg("User image is required")]
@@ -11,15 +13,17 @@ pub enum RumaError {
     #[msg("User image can not be longer than 200 characters")]
     UserImageTooLong,
     #[msg("Event name is required")]
-    EventNameRequired,
+    EventNameRequired = 200,
     #[msg("Event name can not be longer than 128 characters")]
     EventNameTooLong,
     #[msg("Image is required")]
     EventImageRequired,
     #[msg("Image can not be longer than 200 characters")]
     EventImageTooLong,
+    #[msg("Event capacity has reached maximum")]
+    EventCapacityMaxReached,
     #[msg("Badge name is required")]
-    BadgeNameRequired,
+    BadgeNameRequired = 300,
     #[msg("Badge name can not be longer than 32 characters")]
     BadgeNameTooLong,
     #[msg("Badge symbol is required")]
@@ -30,10 +34,8 @@ pub enum RumaError {
     BadgeUriRequired,
     #[msg("Badge URI can not be longer than 200 characters")]
     BadgeUriTooLong,
-    #[msg("Signer not authorized")]
-    UnauthorizedMasterWallet,
-    #[msg("Event capacity has reached maximum")]
-    EventCapacityMaxReached,
+    #[msg("Attendee is not registered for this event")]
+    AttendeeNotRegisteredForEvent = 400,
     #[msg("Attendee is not approved for this event")]
     AttendeeNotApproved,
 }

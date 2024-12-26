@@ -6,9 +6,7 @@ export const RUMA_MASTER_WALLET = Keypair.fromSecretKey(
 );
 export const RUMA_PROGRAM_ID = new PublicKey(idl.address);
 export const USER_SEED = 'user';
-export const USER_DATA_SEED = 'user_data';
 export const EVENT_SEED = 'event';
-export const EVENT_DATA_SEED = 'event_data';
 export const ATTENDEE_SEED = 'attendee';
 export const MAX_USER_NAME_LENGTH = 32;
 export const MAX_USER_IMAGE_LENGTH = 200;
