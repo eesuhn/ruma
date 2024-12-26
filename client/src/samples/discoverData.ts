@@ -2,7 +2,6 @@ import { EventData } from '@/types/state';
 
 export const events: EventData[] = [
   {
-    bump: 1,
     isPublic: true,
     needsApproval: false,
     name: 'Sample Event',
@@ -14,7 +13,6 @@ export const events: EventData[] = [
     about: 'This is a sample event description.',
   },
   {
-    bump: 2,
     isPublic: true,
     needsApproval: false,
     name: 'Another Sample Event',

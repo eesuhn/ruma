@@ -40,7 +40,7 @@ export default function EventCard({
         registrationStatus.slice(1);
       return (
         <Badge
-          className={`${badgeColor} hover:${badgeColor} inline-block rounded-full px-3 py-1 text-sm font-semibold`}
+          className={`${badgeColor} hover:${badgeColor} inline-block rounded-full px-3 py-1 text-sm font-normal`}
         >
           {badgeName}
         </Badge>
