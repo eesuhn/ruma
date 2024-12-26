@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Camera, Search } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Search } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -28,6 +28,7 @@ import Image from 'next/image';
 import { UserData } from '@/types/state';
 import { statusStyles, formatStatus } from '@/lib/utils';
 import { Status } from '@/types/event';
+import QRScanner from '@/components/QRScanner';
 
 const statusFormSchema = z.object({
   status: z.enum(['going', 'pending', 'rejected', 'checked-in'] as const),
@@ -92,7 +93,6 @@ export default function Page() {
 
   const handleStatusChange = (values: StatusFormValues) => {
     if (selectedParticipant) {
-      // TODO: Update participant status on chain
       console.log(
         `Updating ${selectedParticipant.name}'s status to ${values.status}`
       );
@@ -101,6 +101,11 @@ export default function Page() {
       setIsDialogOpen(false);
     }
   };
+
+  const handleQRScan = useCallback((data: string) => {
+    // TODO: Handle QR code scan
+    console.log('QR Code scanned:', data);
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -131,9 +136,7 @@ export default function Page() {
             )}
           </SelectContent>
         </Select>
-        <Button variant="default" className="bg-black">
-          <Camera className="mr-2 h-4 w-4" /> Scan Ticket
-        </Button>
+        <QRScanner onScan={handleQRScan} />
       </div>
 
       <div className="divide-y rounded-lg border">
