@@ -1,6 +1,7 @@
 import { ArrowRight, QrCode, Ticket } from 'lucide-react';
 import { Button, Badge } from '@/components/ui';
 import { statusStyles, formatStatus } from '@/lib/utils';
+import { Status } from '@/types/event';
 
 export type EventStatusType =
   | 'organizer'
@@ -14,7 +15,7 @@ export type EventStatusType =
 export interface EventStatusResult {
   button: JSX.Element | null;
   badge: JSX.Element | null;
-  registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
+  registrationStatus?: Status;
 }
 
 export function getEventStatusDetails(

@@ -31,7 +31,7 @@ const eventDetailsSample: EventDetails = {
   location: 'Sunway University',
   about:
     'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placer',
-  statusType: 'ready_for_checkin',
+  statusType: 'organizer',
   nft: {
     image: '/sample/nft.svg',
     title: 'Chill Guy',
