@@ -26,7 +26,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { Cluster, Transaction } from '@solana/web3.js';
-import { uploadFile } from '@/actions';
+import { uploadFile } from '@/actions/umi';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();

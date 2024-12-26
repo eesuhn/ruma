@@ -48,9 +48,9 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Cluster, ComputeBudgetProgram, Transaction } from '@solana/web3.js';
+import { Cluster, ComputeBudgetProgram, Keypair, Transaction } from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
-import { uploadFile } from '@/actions';
+import { uploadFile } from '@/actions/umi';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -103,85 +103,93 @@ export default function Page() {
   }, [publicKey, form]);
 
   async function onSubmit(values: z.infer<typeof createEventFormSchema>) {
-    try {
-      setIsUploading(true);
-      const [uploadedEventImageUri, uploadedBadgeImageUri] = await uploadFile([
-        eventImageUri,
-        badgeImageUri,
-      ]);
-      setIsUploading(false);
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash();
+    if (publicKey) {
+      try {
+        setIsUploading(true);
+        const [uploadedEventImageUri, uploadedBadgeImageUri] = await uploadFile([
+          eventImageUri,
+          badgeImageUri,
+        ]);
+        setIsUploading(false);
+        const { blockhash, lastValidBlockHeight } =
+          await connection.getLatestBlockhash();
 
-      const {
-        visibility,
-        requireApproval,
-        eventName,
-        capacity,
-        startDate,
-        endDate,
-        location,
-        about,
-        badgeName,
-        badgeSymbol,
-      } = values;
+        const {
+          visibility,
+          requireApproval,
+          eventName,
+          capacity,
+          startDate,
+          endDate,
+          location,
+          about,
+          badgeName,
+          badgeSymbol,
+        } = values;
 
-      const createEventIx = await getCreateEventIx(
-        visibility === 'public',
-        requireApproval,
-        eventName,
-        uploadedEventImageUri,
-        capacity,
-        startDate?.getTime() ?? null,
-        endDate?.getTime() ?? null,
-        location,
-        about
-      );
+        const createEventIx = await getCreateEventIx(
+          visibility === 'public',
+          requireApproval,
+          eventName,
+          uploadedEventImageUri,
+          capacity,
+          startDate?.getTime() ?? null,
+          endDate?.getTime() ?? null,
+          location,
+          about
+        );
 
-      const createBadgeIx = await getCreateBadgeIx(
-        eventName,
-        badgeName,
-        badgeSymbol,
-        uploadedBadgeImageUri,
-        capacity
-      );
+        const masterMint = Keypair.generate();
 
-      const tx = new Transaction().add(
-        ComputeBudgetProgram.setComputeUnitLimit({
-          units: 400000,
-        }),
-        createEventIx,
-        createBadgeIx
-      );
+        const createBadgeIx = await getCreateBadgeIx(
+          eventName,
+          badgeName,
+          badgeSymbol,
+          uploadedBadgeImageUri,
+          capacity,
+          masterMint,
+        );
 
-      tx.recentBlockhash = blockhash;
-      tx.lastValidBlockHeight = lastValidBlockHeight;
+        const tx = new Transaction().add(
+          ComputeBudgetProgram.setComputeUnitLimit({
+            units: 600000,
+          }),
+          createEventIx,
+          createBadgeIx
+        );
 
-      const signature = await sendTransaction(tx, connection);
+        tx.recentBlockhash = blockhash;
+        tx.lastValidBlockHeight = lastValidBlockHeight;
+        tx.feePayer = publicKey;
+        tx.sign(masterMint);
 
-      await connection.confirmTransaction({
-        signature,
-        blockhash,
-        lastValidBlockHeight,
-      });
+        const signature = await sendTransaction(tx, connection);
 
-      toast({
-        title: 'Event create successfully',
-        description: getExplorerLink(
-          'tx',
+        await connection.confirmTransaction({
           signature,
-          process.env.NEXT_PUBLIC_CLUSTER! as Cluster
-        ),
-      });
-    } catch (error) {
-      console.error('Form submission error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create event. Please try again.',
-        variant: 'destructive',
-      });
+          blockhash,
+          lastValidBlockHeight,
+        });
 
-      setIsUploading(false);
+        toast({
+          title: 'Event create successfully',
+          description: getExplorerLink(
+            'tx',
+            signature,
+            process.env.NEXT_PUBLIC_CLUSTER! as Cluster
+          ),
+        });
+      } catch (error) {
+        console.error(error);
+
+        toast({
+          title: 'Error',
+          description: 'Failed to create event. Please try again.',
+          variant: 'destructive',
+        });
+
+        setIsUploading(false);
+      }
     }
   }
 

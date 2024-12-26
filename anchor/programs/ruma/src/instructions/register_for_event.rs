@@ -12,6 +12,7 @@ pub fn register_for_event(ctx: Context<RegisterForEvent>) -> Result<()> {
     let attendee = &mut ctx.accounts.attendee;
 
     attendee.bump = ctx.bumps.attendee;
+    attendee.user = ctx.accounts.registrant.key();
     attendee.status = AttendeeStatus::default();
 
     event.attendees.push(attendee.key());
