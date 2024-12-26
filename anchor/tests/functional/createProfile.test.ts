@@ -24,9 +24,7 @@ describe('createProfile', () => {
       organizer
     );
 
-    const organizerUserBump = getUserPdaAndBump(
-      organizer.publicKey
-    )[1];
+    const organizerUserBump = getUserPdaAndBump(organizer.publicKey)[1];
 
     expect(userAcc.bump).toEqual(organizerUserBump);
     expect(userAcc.data.name).toEqual(organizerName);

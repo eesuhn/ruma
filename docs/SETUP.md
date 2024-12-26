@@ -1,10 +1,13 @@
 ## Getting started...
 
+> [!WARNING]
+> <i>Remember to `bun install`...</i>
+
 ### Setting up Solana in `anchor/`
 
-1. Install [Solana CLI](https://solana.com/docs/intro/installation)
+1. Install [Solana CLI](https://solana.com/docs/intro/installation) v1.18.17:
 
-   > Install with `sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"`, instead of `sh -c "$(curl -sSfL https://release.solana.com/stable/install)"`
+   > Install with `sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"`
 
 2. Set cluster to local network:
 
@@ -18,13 +21,15 @@
    touch ruma-wallet.json
    ```
 
+   > Or generate a new keypair with `solana-keygen new -o ruma-wallet.json`
+
 4. Create folder `tests/fixtures`
 
    ```bash
    mkdir -p tests/fixtures
    ```
 
-5. Create a dump of Metaplex Token Metadata from Mainnet:
+5. Create a dump of Metaplex Token Metadata:
 
    ```bash
    solana program dump metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s tests/fixtures/mpl_token_metadata.so -u m
@@ -86,10 +91,17 @@
    bun test endToEnd
    ```
 
-7. In root directory, run this command to sync IDL and program types:
+   > If you ran into errors, try: <br>
+   > ```bash
+   > anchor clean && anchor build && anchor keys sync  # to clean, build, and sync keys
+   > anchor deploy -p ruma --program-keypair target/deploy/ruma-keypair.json  # to deploy program again
+   > ```
+   > or sometimes you just need to restart the local validator
+
+7. In `anchor/`, run this command to sync IDL and program types:
 
    ```bash
-   bash docs/sync-idl.sh
+   bun run sync
    ```
 
    > You need to run this command every time you update the IDL or program types.

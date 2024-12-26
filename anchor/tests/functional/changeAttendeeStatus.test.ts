@@ -79,12 +79,8 @@ describe('changeAttendeeStatus', () => {
 
   test('changing attendee status', async () => {
     const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
-    
-    await registerForEvent(
-      program,
-      registrantUserPda,
-      eventPda,
-    );
+
+    await registerForEvent(program, registrantUserPda, eventPda);
 
     const newStatus = { approved: {} };
 
