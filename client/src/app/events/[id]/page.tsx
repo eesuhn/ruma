@@ -45,7 +45,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const getButtonContent = () => {
     const { button, badge } = getEventStatusDetails(
       eventDetailsSample.statusType,
-      () => router.push(`/events/${eventDetailsSample.bump}/manage`), // TODO: Update this to event ID
+      () => router.push(`/events/${eventDetailsSample.name}/manage`), // TODO: Update this to event ID
       () => console.log('Register for event'),
       () => console.log('Check in')
     );
