@@ -5,7 +5,7 @@ import {
   useConnection,
   useWallet,
 } from '@solana/wallet-adapter-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import idl from '@/idl/ruma.json';
 import {
   Keypair,
@@ -154,37 +154,7 @@ export function useAnchorProgram() {
       .instruction();
   }
 
-  const getUserAcc = useCallback(
-    async (userPda: PublicKey) => {
-      if (program) {
-        return await program.account.user.fetchNullable(userPda);
-      }
-    },
-    [program]
-  );
-
-  const getEventAcc = useCallback(
-    async (eventPda: PublicKey) => {
-      if (program) {
-        return await program.account.event.fetchNullable(eventPda);
-      }
-    },
-    [program]
-  );
-
-  const getAttendeeAcc = useCallback(
-    async (attendeePda: PublicKey) => {
-      if (program) {
-        return await program.account.attendee.fetchNullable(attendeePda);
-      }
-    },
-    [program]
-  );
-
   return {
-    getUserAcc,
-    getEventAcc,
-    getAttendeeAcc,
     getCreateProfileIx,
     getCreateEventIx,
     getCreateBadgeIx,

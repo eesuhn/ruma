@@ -50,7 +50,7 @@ import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Cluster, ComputeBudgetProgram, Keypair, Transaction } from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
-import { uploadFile } from '@/actions';
+import { uploadFile } from '@/actions/umi';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -181,7 +181,7 @@ export default function Page() {
         });
       } catch (error) {
         console.error(error);
-        
+
         toast({
           title: 'Error',
           description: 'Failed to create event. Please try again.',
