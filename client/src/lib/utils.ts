@@ -67,3 +67,14 @@ export function handleImageChange(
 export function handleImageClick(ref: RefObject<HTMLInputElement>) {
   ref.current?.click();
 }
+
+export const statusStyles = {
+  going: 'bg-green-100 text-green-800 hover:bg-green-200',
+  pending: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+  rejected: 'bg-red-100 text-red-800 hover:bg-red-200',
+  'checked-in': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+};
+
+export const formatStatus = (status: string): string => {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+};
