@@ -134,18 +134,10 @@ describe('registerForEvent', () => {
       masterMint
     );
 
-    await registerForEvent(
-      program,
-      registrantUserPda,
-      eventPda,
-    );
+    await registerForEvent(program, registrantUserPda, eventPda);
 
     try {
-      await registerForEvent(
-        program,
-        registrantUserPda,
-        eventPda,
-      );
+      await registerForEvent(program, registrantUserPda, eventPda);
     } catch (err) {
       expect(err).toBeInstanceOf(SendTransactionError);
       expect(err.logs).toEqual(
@@ -196,11 +188,7 @@ describe('registerForEvent', () => {
       masterMint
     );
 
-    await registerForEvent(
-      program,
-      registrantUserPda,
-      eventPda,
-    );
+    await registerForEvent(program, registrantUserPda, eventPda);
 
     const newRegistrant = await getFundedKeypair();
     const [newRegistrantUserPda] = getUserPdaAndBump(newRegistrant.publicKey);
@@ -213,11 +201,7 @@ describe('registerForEvent', () => {
     );
 
     try {
-      await registerForEvent(
-        program,
-        newRegistrantUserPda,
-        eventPda,
-      );
+      await registerForEvent(program, newRegistrantUserPda, eventPda);
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('EventCapacityMaxReached');
