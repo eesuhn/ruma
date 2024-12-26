@@ -4,12 +4,12 @@ export const events: EventData[] = [
   {
     isPublic: true,
     needsApproval: false,
-    name: 'Sample Event',
-    image: '/sample/event-cover1.png',
+    name: 'Superteam',
+    image: '/sample/event-cover2.png',
     capacity: 100,
-    startTimestamp: 1672531200,
-    endTimestamp: 1672617600,
-    location: '123 Event Street, City',
+    startTimestamp: 1735286400,
+    endTimestamp: 1735300800,
+    location: 'Sunway University',
     about: 'This is a sample event description.',
   },
   {

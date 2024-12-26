@@ -22,14 +22,13 @@ interface EventDetails extends EventData {
 const eventDetailsSample: EventDetails = {
   isPublic: true,
   needsApproval: false,
-  name: 'SuperteamMY Meetup #24',
+  name: 'Superteam',
   image: '/sample/event-cover2.png',
   capacity: 100,
-  startTimestamp: 1637385600,
-  endTimestamp: 1637400000,
+  startTimestamp: 1735286400, // 27th December 2024, 00:00:00 UTC
+  endTimestamp: 1735300800, // 27th December 2024, 04:00:00 UTC
   location: 'Sunway University',
-  about:
-    'Lorem ipsum dolor sit amet consectetur. Mattis sed viverra nunc rutrum. Et neque suscipit sagittis maecenas. Posuere fermentum pulvinar amet placer',
+  about: 'About meeting up',
   statusType: 'organizer',
   nft: {
     image: '/sample/nft.svg',
