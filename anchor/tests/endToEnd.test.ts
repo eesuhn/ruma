@@ -83,9 +83,8 @@ describe('end-to-end', () => {
 
     await registerForEvent(
       program,
-      eventName,
-      organizerUserPda,
-      registrantUserPda
+      registrantUserPda,
+      eventPda,
     );
 
     await changeAttendeeStatus(

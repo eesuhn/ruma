@@ -78,14 +78,13 @@ describe('changeAttendeeStatus', () => {
   });
 
   test('changing attendee status', async () => {
+    const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
+    
     await registerForEvent(
       program,
-      eventName,
-      organizerUserPda,
-      registrantUserPda
+      registrantUserPda,
+      eventPda,
     );
-
-    const [eventPda] = getEventPdaAndBump(organizerUserPda, eventName);
 
     const newStatus = { approved: {} };
 

@@ -83,9 +83,8 @@ describe('registerForEvent', () => {
 
     const { eventAcc, attendeeAcc } = await registerForEvent(
       program,
-      eventName,
-      organizerUserPda,
-      registrantUserPda
+      registrantUserPda,
+      eventPda
     );
 
     const [attendeePda, attendeeBump] = getAttendeePdaAndBump(
@@ -136,17 +135,15 @@ describe('registerForEvent', () => {
 
     await registerForEvent(
       program,
-      eventName,
-      organizerUserPda,
-      registrantUserPda
+      registrantUserPda,
+      eventPda,
     );
 
     try {
       await registerForEvent(
         program,
-        eventName,
-        organizerUserPda,
-        registrantUserPda
+        registrantUserPda,
+        eventPda,
       );
     } catch (err) {
       expect(err).toBeInstanceOf(SendTransactionError);
@@ -200,9 +197,8 @@ describe('registerForEvent', () => {
 
     await registerForEvent(
       program,
-      eventName,
-      organizerUserPda,
-      registrantUserPda
+      registrantUserPda,
+      eventPda,
     );
 
     const newRegistrant = await getFundedKeypair();
@@ -218,14 +214,13 @@ describe('registerForEvent', () => {
     try {
       await registerForEvent(
         program,
-        eventName,
-        organizerUserPda,
-        newRegistrantUserPda
+        newRegistrantUserPda,
+        eventPda,
       );
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('EventCapacityMaxReached');
-      expect(err.error.errorCode.number).toEqual(6015);
+      expect(err.error.errorCode.number).toEqual(6204);
     }
   });
 });

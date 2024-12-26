@@ -3,7 +3,7 @@ use num_derive::*;
 
 #[account]
 pub struct Attendee {
-    pub bump: u8, // 1
+    pub bump: u8,               // 1
     pub status: AttendeeStatus, // 1 + 1
 }
 
@@ -13,9 +13,18 @@ impl Attendee {
 }
 
 #[derive(
-    AnchorSerialize, AnchorDeserialize, FromPrimitive, ToPrimitive, Copy, Clone, PartialEq, Eq,
+    AnchorSerialize,
+    AnchorDeserialize,
+    FromPrimitive,
+    ToPrimitive,
+    Copy,
+    Clone,
+    PartialEq,
+    Eq,
+    Default,
 )]
 pub enum AttendeeStatus {
+    #[default]
     Pending,
     Approved,
     Rejected,

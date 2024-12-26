@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { AnchorError } from '@coral-xyz/anchor';
 import { Keypair } from '@solana/web3.js';
 import { createProfile } from '../methods';
-import { getUserDataPdaAndBump, getUserPdaAndBump } from '../pda';
+import { getUserPdaAndBump } from '../pda';
 import { MAX_USER_IMAGE_LENGTH, MAX_USER_NAME_LENGTH } from '../constants';
 import { getFundedKeypair, program } from '../utils';
 
@@ -17,25 +17,21 @@ describe('createProfile', () => {
     const organizerName = 'Jeff';
     const organizerImage = 'https://example.com/image.png';
 
-    const { userAcc, userDataAcc } = await createProfile(
+    const { userAcc } = await createProfile(
       program,
       organizerName,
       organizerImage,
       organizer
     );
 
-    const [organizerUserPda, organizerUserBump] = getUserPdaAndBump(
+    const organizerUserBump = getUserPdaAndBump(
       organizer.publicKey
-    );
-    const [organizerUserDataPda, organizerUserDataBump] =
-      getUserDataPdaAndBump(organizerUserPda);
+    )[1];
 
     expect(userAcc.bump).toEqual(organizerUserBump);
-    expect(userAcc.data).toEqual(organizerUserDataPda);
+    expect(userAcc.data.name).toEqual(organizerName);
+    expect(userAcc.data.image).toEqual(organizerImage);
     expect(userAcc.badges).toEqual([]);
-    expect(userDataAcc.bump).toEqual(organizerUserDataBump);
-    expect(userDataAcc.name).toEqual(organizerName);
-    expect(userDataAcc.image).toEqual(organizerImage);
   });
 
   test('throws when creating a profile with empty name', async () => {
@@ -47,7 +43,7 @@ describe('createProfile', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('UserNameRequired');
-      expect(err.error.errorCode.number).toEqual(6000);
+      expect(err.error.errorCode.number).toEqual(6100);
     }
   });
 
@@ -64,7 +60,7 @@ describe('createProfile', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('UserNameTooLong');
-      expect(err.error.errorCode.number).toEqual(6001);
+      expect(err.error.errorCode.number).toEqual(6101);
     }
   });
 
@@ -77,7 +73,7 @@ describe('createProfile', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('UserImageRequired');
-      expect(err.error.errorCode.number).toEqual(6002);
+      expect(err.error.errorCode.number).toEqual(6102);
     }
   });
 
@@ -94,7 +90,7 @@ describe('createProfile', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('UserImageTooLong');
-      expect(err.error.errorCode.number).toEqual(6003);
+      expect(err.error.errorCode.number).toEqual(6103);
     }
   });
 });

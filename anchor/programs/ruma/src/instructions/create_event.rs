@@ -22,24 +22,21 @@ pub fn create_event(
         RumaError::EventImageTooLong
     );
 
-    let event_data = &mut ctx.accounts.event_data;
-
-    event_data.bump = ctx.bumps.event_data;
-    event_data.is_public = is_public;
-    event_data.needs_approval = needs_approval;
-    event_data.name = name;
-    event_data.image = image;
-    event_data.capacity = capacity;
-    event_data.start_timestamp = start_timestamp;
-    event_data.end_timestamp = end_timestamp;
-    event_data.location = location;
-    event_data.about = about;
-
     let event = &mut ctx.accounts.event;
 
     event.bump = ctx.bumps.event;
     event.organizer = ctx.accounts.organizer.key();
-    event.data = ctx.accounts.event_data.key();
+    event.data = EventData {
+        is_public,
+        needs_approval,
+        name,
+        image,
+        capacity,
+        start_timestamp,
+        end_timestamp,
+        location,
+        about,
+    };
     event.badge = None;
     event.attendees = Vec::new();
 
@@ -60,28 +57,20 @@ pub fn create_event(
 )]
 pub struct CreateEvent<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
+    pub authority: Signer<'info>,
     #[account(
-        seeds = [USER_SEED, payer.key().as_ref()],
+        seeds = [USER_SEED, authority.key().as_ref()],
         bump = organizer.bump,
     )]
     pub organizer: Account<'info, User>,
     #[account(
         constraint = name.len() <= MAX_EVENT_NAME_LENGTH @ RumaError::EventNameTooLong,
         init,
-        space = Event::MIN_SPACE,
+        space = Event::MIN_SPACE + name.len() + image.len() + location.map(|s| s.len()).unwrap_or(0) + about.map(|s| s.len()).unwrap_or(0),
         seeds = [EVENT_SEED, organizer.key().as_ref(), name.as_bytes()],
         bump,
-        payer = payer,
+        payer = authority,
     )]
     pub event: Account<'info, Event>,
-    #[account(
-        init,
-        space = EventData::MIN_SPACE + name.len() + image.len() + location.map(|s| s.len()).unwrap_or(0) + about.map(|s| s.len()).unwrap_or(0),
-        seeds = [EVENT_DATA_SEED, event.key().as_ref()],
-        bump,
-        payer = payer,
-    )]
-    pub event_data: Account<'info, EventData>,
     pub system_program: Program<'info, System>,
 }

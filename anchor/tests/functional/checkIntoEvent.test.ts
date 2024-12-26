@@ -93,9 +93,8 @@ describe('checkIntoEvent', () => {
 
     await registerForEvent(
       program,
-      eventName,
-      organizerUserPda,
-      registrantUserPda
+      registrantUserPda,
+      eventPda,
     );
   });
 
@@ -174,7 +173,7 @@ describe('checkIntoEvent', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(AnchorError);
       expect(err.error.errorCode.code).toEqual('AttendeeNotApproved');
-      expect(err.error.errorCode.number).toEqual(6016);
+      expect(err.error.errorCode.number).toEqual(6401);
     }
   });
 });
