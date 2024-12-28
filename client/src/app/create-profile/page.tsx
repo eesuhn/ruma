@@ -7,9 +7,9 @@ import Image from 'next/image';
 import { z } from 'zod';
 import { createProfileFormSchema } from '@/lib/formSchemas';
 import {
-  generateDicebearAvatarUri,
   handleImageChange,
   handleImageClick,
+  setComputeUnitLimitAndPrice,
 } from '@/lib/utils';
 import {
   Button,
@@ -25,14 +25,15 @@ import { toast } from '@/hooks/use-toast';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { getExplorerLink } from '@solana-developers/helpers';
-import { Cluster, Transaction } from '@solana/web3.js';
-import { uploadFile } from '@/actions/umi';
+import { Cluster } from '@solana/web3.js';
+import { upload } from '@/actions/irys';
+import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const { getCreateProfileIx } = useAnchorProgram();
-  const [profileImageUri, setProfileImageUri] = useState<string>('');
+  const [profileImageSrc, setProfileImageSrc] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -45,25 +46,24 @@ export default function Page() {
   });
 
   useEffect(() => {
-    if (publicKey && !form.getValues('profileImage')) {
-      const uri = generateDicebearAvatarUri({
-        seed: publicKey.toBase58(),
-        style: 'profile',
-      });
-
-      setProfileImageUri(uri);
+    if (publicKey) {
+      setProfileImageSrc(getRandomDicebearLink('profile', publicKey.toBase58()));
     }
-  }, [publicKey, form]);
+  }, [publicKey]);
 
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
     try {
       setIsUploading(true);
-      const [uploadedImageUri] = await uploadFile([profileImageUri]);
+      const uploadedImageUri = await upload(
+        values.profileImage ?? fetchDicebearAsFile('profile', publicKey!.toBase58())
+      )
       setIsUploading(false);
+
+      const ix = await getCreateProfileIx(values.name, uploadedImageUri);
+      const tx = await setComputeUnitLimitAndPrice(connection, [ix], publicKey!);
+      
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash();
-      const ix = await getCreateProfileIx(values.name, uploadedImageUri);
-      const tx = new Transaction().add(ix);
       tx.recentBlockhash = blockhash;
       tx.lastValidBlockHeight = lastValidBlockHeight;
 
@@ -80,7 +80,7 @@ export default function Page() {
         description: getExplorerLink(
           'tx',
           signature,
-          process.env.NEXT_PUBLIC_CLUSTER! as Cluster
+          process.env.NEXT_PUBLIC_RPC_CLUSTER! as Cluster
         ),
       });
     } catch (error) {
@@ -132,9 +132,9 @@ export default function Page() {
                       className="relative h-36 w-36 cursor-pointer overflow-hidden rounded-lg"
                       onClick={() => handleImageClick(fileInputRef)}
                     >
-                      {profileImageUri ? (
+                      {profileImageSrc ? (
                         <Image
-                          src={profileImageUri}
+                          src={profileImageSrc}
                           alt="Profile preview"
                           layout="fill"
                           objectFit="cover"
@@ -151,7 +151,7 @@ export default function Page() {
                           e,
                           form,
                           'profileImage',
-                          setProfileImageUri
+                          setProfileImageSrc
                         )
                       }
                       className="hidden"

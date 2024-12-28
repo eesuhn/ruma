@@ -16,9 +16,9 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import {
   cn,
-  generateDicebearAvatarUri,
   handleImageChange,
   handleImageClick,
+  setComputeUnitLimitAndPrice,
 } from '@/lib/utils';
 import {
   Button,
@@ -48,21 +48,17 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import {
-  Cluster,
-  ComputeBudgetProgram,
-  Keypair,
-  Transaction,
-} from '@solana/web3.js';
+import { Cluster, Keypair } from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
-import { uploadFile } from '@/actions/umi';
+import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
+import { upload } from '@/actions/irys';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const { getCreateEventIx, getCreateBadgeIx } = useAnchorProgram();
-  const [eventImageUri, setEventImageUri] = useState<string>('');
-  const [badgeImageUri, setBadgeImageUri] = useState<string>('');
+  const [eventImageSrc, setEventImageSrc] = useState<string>('');
+  const [badgeImageSrc, setBadgeImageSrc] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
@@ -85,36 +81,18 @@ export default function Page() {
     },
   });
 
-  useEffect(() => {
-    if (publicKey) {
-      if (!form.getValues('eventImage')) {
-        const eventUri = generateDicebearAvatarUri({
-          seed: publicKey.toBase58(),
-          style: 'event',
-        });
-
-        setEventImageUri(eventUri);
-      }
-
-      if (!form.getValues('badgeImage')) {
-        const badgeUri = generateDicebearAvatarUri({
-          seed: publicKey.toBase58(),
-          style: 'badge',
-        });
-
-        setBadgeImageUri(badgeUri);
-      }
-    }
-  }, [publicKey, form]);
-
   async function onSubmit(values: z.infer<typeof createEventFormSchema>) {
     if (publicKey) {
       try {
         setIsUploading(true);
-        const [uploadedEventImageUri, uploadedBadgeImageUri] = await uploadFile(
-          [eventImageUri, badgeImageUri]
-        );
+        const uploadedEventImageUri = await upload(
+          values.eventImage ?? fetchDicebearAsFile('event', values.eventName)
+        )
+        const uploadedBadgeImageUri = await upload(
+          values.badgeImage ?? fetchDicebearAsFile('badge', values.badgeName)
+        )
         setIsUploading(false);
+
         const { blockhash, lastValidBlockHeight } =
           await connection.getLatestBlockhash();
 
@@ -154,13 +132,7 @@ export default function Page() {
           masterMint
         );
 
-        const tx = new Transaction().add(
-          ComputeBudgetProgram.setComputeUnitLimit({
-            units: 600000,
-          }),
-          createEventIx,
-          createBadgeIx
-        );
+        const tx = await setComputeUnitLimitAndPrice(connection, [createEventIx, createBadgeIx], publicKey!);
 
         tx.recentBlockhash = blockhash;
         tx.lastValidBlockHeight = lastValidBlockHeight;
@@ -197,6 +169,13 @@ export default function Page() {
     }
   }
 
+  useEffect(() => {
+    if (publicKey) {
+      setEventImageSrc(getRandomDicebearLink('event', publicKey.toBase58()))
+      setBadgeImageSrc(getRandomDicebearLink('badge', publicKey.toBase58()))
+    }
+  }, [publicKey])
+
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">
       <h1 className="mb-6 text-3xl font-bold">Create Event</h1>
@@ -211,9 +190,9 @@ export default function Page() {
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
                     onClick={() => handleImageClick(eventImageInputRef)}
                   >
-                    {eventImageUri ? (
+                    {eventImageSrc ? (
                       <Image
-                        src={eventImageUri}
+                        src={eventImageSrc}
                         alt="Event image preview"
                         layout="fill"
                         objectFit="cover"
@@ -235,7 +214,7 @@ export default function Page() {
                               e,
                               form,
                               'eventImage',
-                              setEventImageUri
+                              setEventImageSrc
                             )
                           }
                           className="hidden"
@@ -543,9 +522,9 @@ export default function Page() {
                     className="relative aspect-square w-full cursor-pointer overflow-hidden rounded-lg border-2 border-dashed border-gray-300 transition-colors hover:border-gray-400"
                     onClick={() => handleImageClick(badgeImageInputRef)}
                   >
-                    {badgeImageUri ? (
+                    {badgeImageSrc ? (
                       <Image
-                        src={badgeImageUri}
+                        src={badgeImageSrc}
                         alt="Badge image preview"
                         layout="fill"
                         objectFit="cover"
@@ -567,7 +546,7 @@ export default function Page() {
                               e,
                               form,
                               'badgeImage',
-                              setBadgeImageUri
+                              setBadgeImageSrc
                             )
                           }
                           className="hidden"

@@ -31,5 +31,7 @@ export async function upload(dataUri: File): Promise<string> {
     }
   );
 
-  return `https://gateway.irys.xyz/${response.id}`;
+  const link = `https://gateway.irys.xyz/${response.id}`;
+  console.log(`Uploaded to ${link}`);
+  return link;
 }
