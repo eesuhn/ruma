@@ -57,6 +57,11 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        'badge-pending': 'var(--badge-pending)',
+        'badge-going': 'var(--badge-going)',
+        'badge-checked-in': 'var(--badge-checked-in)',
+        'badge-rejected': 'var(--badge-rejected)',
+        'badge-default': 'black',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -1,27 +1,40 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { ArrowRight, Badge, CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { BN } from '@coral-xyz/anchor';
+import { RegistrationStatus } from '@/types/event';
+import { Button } from './ui/button';
 
-const getBadgeVariant = (status?: string) => {
-  switch (status) {
-    case 'pending':
-      return 'bg-[#f77f00]';
-    case 'going':
-      return 'bg-[#79be79]';
-    case 'checked-in':
-      return 'bg-[#91d1ce]';
-    case 'rejected':
-      return 'bg-[#e5383b]';
-    default:
-      return 'bg-black';
+function EventButtonTab({
+  registrationStatus,
+  isOrganizer,
+}: {
+  registrationStatus?: RegistrationStatus;
+  isOrganizer: boolean;
+}) {
+  if (registrationStatus) {
+    const badgeName =
+      registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1);
+
+    return (
+      <Badge
+        className={`bg-${registrationStatus} hover:bg-${registrationStatus} inline-block rounded-full px-3 py-1 text-sm font-normal`}
+      >
+        {badgeName}
+      </Badge>
+    );
   }
-};
 
-type RegistrationStatus = 'pending' | 'going' | 'checked-in' | 'rejected';
+  if (isOrganizer) {
+    return (
+      <Button size="sm" className="h-9">
+        Manage Event
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+    );
+  }
+}
 
 export function EventCard({
   name,
@@ -29,41 +42,17 @@ export function EventCard({
   startTimestamp,
   location,
   registrationStatus,
-  showManage,
+  isOrganizer,
 }: {
   name: string;
   image: string;
   startTimestamp: BN | null;
   location: string;
   registrationStatus?: RegistrationStatus;
-  showManage?: boolean;
+  isOrganizer: boolean;
 }) {
-  const getButtonContent = () => {
-    if (registrationStatus) {
-      const badgeColor = getBadgeVariant(registrationStatus);
-      const badgeName =
-        registrationStatus.charAt(0).toUpperCase() +
-        registrationStatus.slice(1);
-      return (
-        <Badge
-          className={`${badgeColor} hover:${badgeColor} inline-block rounded-full px-3 py-1 text-sm font-normal`}
-        >
-          {badgeName}
-        </Badge>
-      );
-    }
-    if (showManage) {
-      return (
-        <Button size="sm" className="h-9">
-          Manage Event
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      );
-    }
-  };
-
   return (
-    <Link href={showManage ? `/events/${name}/manage` : `/events/${name}`}>
+    <Link href={isOrganizer ? `/events/${name}/manage` : `/events/${name}`}>
       <Card className="mb-2 overflow-hidden transition-shadow hover:shadow-lg">
         <div className="grid gap-4 p-4 md:grid-cols-[1fr,200px]">
           <div className="space-y-3">
@@ -86,7 +75,10 @@ export function EventCard({
                 <span>{location || 'TBA'}</span>
               </div>
             </div>
-            {getButtonContent()}
+            <EventButtonTab
+              registrationStatus={registrationStatus}
+              isOrganizer={isOrganizer}
+            />
           </div>
           <div className="relative aspect-[4/3] w-full">
             <Image

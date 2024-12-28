@@ -11,6 +11,7 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 import { getSimulationComputeUnits } from '@solana-developers/helpers';
+import { DisplayedEvent } from '@/types/event';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -41,16 +42,9 @@ export function handleImageClick(ref: RefObject<HTMLInputElement>) {
   ref.current?.click();
 }
 
-export const statusStyles = {
-  going: 'bg-[#79be79] text-white',
-  pending: 'bg-[#f77f00] text-white',
-  rejected: 'bg-[#e5383b] text-white',
-  'checked-in': 'bg-[#91d1ce] text-white',
-} as const;
-
-export const formatStatus = (status: string): string => {
-  return status.charAt(0).toUpperCase() + status.slice(1);
-};
+export function capitalizeFirstLetter(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 export async function setComputeUnitLimitAndPrice(
   connection: Connection,
@@ -90,4 +84,8 @@ export async function setComputeUnitLimitAndPrice(
   );
 
   return tx;
+}
+
+export function sortEventsByTimestamp(events: DisplayedEvent[]): DisplayedEvent[] {
+  return events.sort((a, b) => Number(a.event.account.data.startTimestamp) - Number(b.event.account.data.startTimestamp));
 }
