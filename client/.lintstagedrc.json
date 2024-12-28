@@ -1,0 +1,4 @@
+{
+  "src/**/*.{js,jsx,ts,tsx}": "next lint . --fix",
+  "src/**/*.{js,jsx,ts,tsx,md,html,css}": "prettier . -w"
+}
