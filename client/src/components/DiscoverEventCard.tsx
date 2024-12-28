@@ -1,23 +1,22 @@
 import { Calendar, Pin } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { EventData } from '@/types/state';
+import { BN } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
 
 export function DiscoverEventCard({
   eventPda,
   name,
   image,
-  capacity,
   startTimestamp,
-  endTimestamp,
   location,
-  about,
-}: EventData) {
-  void isPublic;
-  void needsApproval;
-  void capacity;
-  void endTimestamp;
-  void about;
+}: {
+  eventPda: PublicKey;
+  name: string;
+  image: string;
+  startTimestamp: BN | null;
+  location: string | null;
+}) {
   return (
     <div className="rounded-lg bg-[#F6F6F6] p-4 shadow-lg ease-in-out hover:bg-slate-300">
       <Link
