@@ -2,7 +2,14 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { UseFormReturn } from 'react-hook-form';
 import { RefObject } from 'react';
-import { AddressLookupTableAccount, ComputeBudgetProgram, Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js';
+import {
+  AddressLookupTableAccount,
+  ComputeBudgetProgram,
+  Connection,
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import { getSimulationComputeUnits } from '@solana-developers/helpers';
 
 export function cn(...inputs: ClassValue[]) {
@@ -53,17 +60,28 @@ export async function setComputeUnitLimitAndPrice(
 ): Promise<Transaction> {
   const tx = new Transaction();
 
-  const units = await getSimulationComputeUnits(connection, instructions, payer, lookupTables);
+  const units = await getSimulationComputeUnits(
+    connection,
+    instructions,
+    payer,
+    lookupTables
+  );
 
   if (units) {
-    tx.add(ComputeBudgetProgram.setComputeUnitLimit({
-      units: Math.ceil(units * 1.1)
-    }))
+    tx.add(
+      ComputeBudgetProgram.setComputeUnitLimit({
+        units: Math.ceil(units * 1.1),
+      })
+    );
   }
 
   const recentFees = await connection.getRecentPrioritizationFees();
-  const priorityFee = recentFees.reduce((acc, { prioritizationFee }) => acc + prioritizationFee, 0) / recentFees.length;
-  
+  const priorityFee =
+    recentFees.reduce(
+      (acc, { prioritizationFee }) => acc + prioritizationFee,
+      0
+    ) / recentFees.length;
+
   tx.add(
     ComputeBudgetProgram.setComputeUnitPrice({
       microLamports: BigInt(Math.ceil(priorityFee)),

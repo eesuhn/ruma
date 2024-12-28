@@ -25,13 +25,9 @@ export function useAnchorProgram() {
   const [program, setProgram] = useState<Program<Ruma>>(
     new Program(
       idl as Ruma,
-      new AnchorProvider(
-        connection,
-        wallet as AnchorWallet,
-        {
-          commitment: 'confirmed',
-        }
-      )
+      new AnchorProvider(connection, wallet as AnchorWallet, {
+        commitment: 'confirmed',
+      })
     )
   );
 
@@ -39,15 +35,11 @@ export function useAnchorProgram() {
     setProgram(
       new Program(
         idl as Ruma,
-        new AnchorProvider(
-          connection,
-          wallet as AnchorWallet,
-          {
-            commitment: 'confirmed',
-          }
-        )
+        new AnchorProvider(connection, wallet as AnchorWallet, {
+          commitment: 'confirmed',
+        })
       )
-    )
+    );
   }, [connection, wallet]);
 
   async function getCreateProfileIx(
@@ -176,25 +168,34 @@ export function useAnchorProgram() {
     return await program.account.user.all();
   }, [program]);
 
-  const getUserAcc = useCallback(async (userPda: PublicKey) => {
-    return await program.account.user.fetchNullable(userPda);
-  }, [program]);
+  const getUserAcc = useCallback(
+    async (userPda: PublicKey) => {
+      return await program.account.user.fetchNullable(userPda);
+    },
+    [program]
+  );
 
   const getAllEventAcc = useCallback(async () => {
     return await program.account.event.all();
   }, [program]);
 
-  const getEventAcc = useCallback(async (eventPda: PublicKey) => {
-    return await program.account.event.fetchNullable(eventPda);
-  }, [program]);
+  const getEventAcc = useCallback(
+    async (eventPda: PublicKey) => {
+      return await program.account.event.fetchNullable(eventPda);
+    },
+    [program]
+  );
 
   const getAllAttendeeAcc = useCallback(async () => {
     return await program.account.attendee.all();
   }, [program]);
 
-  const getAttendeeAcc = useCallback(async (attendeePda: PublicKey) => {
-    return await program.account.attendee.fetchNullable(attendeePda);
-  }, [program]);
+  const getAttendeeAcc = useCallback(
+    async (attendeePda: PublicKey) => {
+      return await program.account.attendee.fetchNullable(attendeePda);
+    },
+    [program]
+  );
 
   return {
     getCreateProfileIx,

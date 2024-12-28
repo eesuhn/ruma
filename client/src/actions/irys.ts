@@ -1,9 +1,9 @@
 'use server';
 
-import { CONNECTION, RUMA_WALLET } from "@/lib/constants";
-import { Uploader } from "@irys/upload";
-import { Solana } from "@irys/upload-solana";
-import bs58 from "bs58";
+import { CONNECTION, RUMA_WALLET } from '@/lib/constants';
+import { Uploader } from '@irys/upload';
+import { Solana } from '@irys/upload-solana';
+import bs58 from 'bs58';
 
 const base58 = bs58.encode(RUMA_WALLET.secretKey);
 const irysUploader = await Uploader(Solana)
@@ -21,13 +21,13 @@ export async function upload(dataUri: File): Promise<string> {
       tags: [
         {
           name: 'Content-Type',
-          value: dataUri.type
+          value: dataUri.type,
         },
         {
           name: 'Filename',
-          value: dataUri.name
-        }
-      ]
+          value: dataUri.name,
+        },
+      ],
     }
   );
 

@@ -1,20 +1,23 @@
 'use server';
 
 import { CONNECTION } from '@/lib/constants';
-import {
-  PublicKey as UmiPublicKey,
-} from '@metaplex-foundation/umi';
+import { PublicKey as UmiPublicKey } from '@metaplex-foundation/umi';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-import { DigitalAsset, fetchDigitalAsset, fetchMasterEdition, findMasterEditionPda, MasterEdition } from '@metaplex-foundation/mpl-token-metadata';
+import {
+  DigitalAsset,
+  fetchDigitalAsset,
+  fetchMasterEdition,
+  findMasterEditionPda,
+  MasterEdition,
+} from '@metaplex-foundation/mpl-token-metadata';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { PublicKey } from '@solana/web3.js';
 
-const umi = createUmi(
-  CONNECTION.rpcEndpoint,
-  'confirmed'
-)
+const umi = createUmi(CONNECTION.rpcEndpoint, 'confirmed');
 
-export async function getMasterEditionPda(masterMintPubkey: PublicKey): Promise<UmiPublicKey> {
+export async function getMasterEditionPda(
+  masterMintPubkey: PublicKey
+): Promise<UmiPublicKey> {
   return findMasterEditionPda(umi, {
     mint: fromWeb3JsPublicKey(masterMintPubkey),
   })[0];
@@ -26,9 +29,8 @@ export async function getMasterEditionAcc(
   return await fetchMasterEdition(umi, masterEditionPda);
 }
 
-export async function getEditionAcc(editionMintPubkey: PublicKey): Promise<DigitalAsset> {
-  return await fetchDigitalAsset(
-    umi,
-    fromWeb3JsPublicKey(editionMintPubkey)
-  )
+export async function getEditionAcc(
+  editionMintPubkey: PublicKey
+): Promise<DigitalAsset> {
+  return await fetchDigitalAsset(umi, fromWeb3JsPublicKey(editionMintPubkey));
 }
