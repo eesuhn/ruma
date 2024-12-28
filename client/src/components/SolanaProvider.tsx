@@ -16,7 +16,7 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 import { toast } from '@/hooks/use-toast';
 import { CONNECTION } from '@/lib/constants';
 
-export default function SolanaProvider({ children }: { children: ReactNode }) {
+export function SolanaProvider({ children }: { children: ReactNode }) {
   const endpoint = useMemo(() => CONNECTION.rpcEndpoint, []);
   const wallets = useMemo(
     () => [

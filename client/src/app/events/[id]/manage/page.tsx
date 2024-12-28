@@ -5,30 +5,17 @@ import { Search } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Badge,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-} from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
 import { UserData } from '@/types/idlAccounts';
 import { statusStyles, formatStatus } from '@/lib/utils';
 import { Status } from '@/types/event';
-import QRScanner from '@/components/QRScanner';
+import { QRScanner } from '@/components/QRScanner';
 
 const statusFormSchema = z.object({
   status: z.enum(['going', 'pending', 'rejected', 'checked-in'] as const),

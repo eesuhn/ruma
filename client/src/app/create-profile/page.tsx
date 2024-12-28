@@ -11,16 +11,9 @@ import {
   handleImageClick,
   setComputeUnitLimitAndPrice,
 } from '@/lib/utils';
-import {
-  Button,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-} from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
@@ -47,7 +40,9 @@ export default function Page() {
 
   useEffect(() => {
     if (publicKey) {
-      setProfileImageSrc(getRandomDicebearLink('profile', publicKey.toBase58()));
+      setProfileImageSrc(
+        getRandomDicebearLink('profile', publicKey.toBase58())
+      );
     }
   }, [publicKey]);
 
@@ -55,13 +50,18 @@ export default function Page() {
     try {
       setIsUploading(true);
       const uploadedImageUri = await upload(
-        values.profileImage ?? fetchDicebearAsFile('profile', publicKey!.toBase58())
-      )
+        values.profileImage ??
+          fetchDicebearAsFile('profile', publicKey!.toBase58())
+      );
       setIsUploading(false);
 
       const ix = await getCreateProfileIx(values.name, uploadedImageUri);
-      const tx = await setComputeUnitLimitAndPrice(connection, [ix], publicKey!);
-      
+      const tx = await setComputeUnitLimitAndPrice(
+        connection,
+        [ix],
+        publicKey!
+      );
+
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash();
       tx.recentBlockhash = blockhash;

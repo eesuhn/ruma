@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { Card, Button, Badge } from '@/components/ui';
-import { EventData } from '@/types/idlAccounts';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { BN } from '@coral-xyz/anchor';
 
 const getBadgeVariant = (status?: string) => {
   switch (status) {
@@ -19,19 +21,23 @@ const getBadgeVariant = (status?: string) => {
   }
 };
 
-interface EventCardProps extends EventData {
-  registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
-  showManage?: boolean;
-}
+type RegistrationStatus = 'pending' | 'going' | 'checked-in' | 'rejected';
 
-export default function EventCard({
+export function EventCard({
   name,
   image,
   startTimestamp,
   location,
   registrationStatus,
   showManage,
-}: EventCardProps) {
+}: {
+  name: string;
+  image: string;
+  startTimestamp: BN | null;
+  location: string;
+  registrationStatus?: RegistrationStatus;
+  showManage?: boolean;
+}) {
   const getButtonContent = () => {
     if (registrationStatus) {
       const badgeColor = getBadgeVariant(registrationStatus);

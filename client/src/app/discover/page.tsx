@@ -1,5 +1,8 @@
+'use client';
+
 import { events } from '@/samples/discoverData';
-import { DiscoverEventCard } from '@/components/';
+import { DiscoverEventCard } from '@/components/DiscoverEventCard';
+import { getAllEventAcc } from '@/actions/program';
 
 export default function Page() {
   return (

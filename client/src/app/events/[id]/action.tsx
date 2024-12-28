@@ -1,5 +1,6 @@
 import { ArrowRight, QrCode, Ticket } from 'lucide-react';
-import { Button, Badge } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { statusStyles, formatStatus } from '@/lib/utils';
 import { Status } from '@/types/event';
 

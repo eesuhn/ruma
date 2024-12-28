@@ -20,31 +20,17 @@ import {
   handleImageClick,
   setComputeUnitLimitAndPrice,
 } from '@/lib/utils';
-import {
-  Button,
-  Calendar,
-  Card,
-  CardContent,
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  Textarea,
-  Switch,
-  Separator,
-  SelectValue,
-} from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
@@ -87,10 +73,10 @@ export default function Page() {
         setIsUploading(true);
         const uploadedEventImageUri = await upload(
           values.eventImage ?? fetchDicebearAsFile('event', values.eventName)
-        )
+        );
         const uploadedBadgeImageUri = await upload(
           values.badgeImage ?? fetchDicebearAsFile('badge', values.badgeName)
-        )
+        );
         setIsUploading(false);
 
         const { blockhash, lastValidBlockHeight } =
@@ -132,7 +118,11 @@ export default function Page() {
           masterMint
         );
 
-        const tx = await setComputeUnitLimitAndPrice(connection, [createEventIx, createBadgeIx], publicKey!);
+        const tx = await setComputeUnitLimitAndPrice(
+          connection,
+          [createEventIx, createBadgeIx],
+          publicKey!
+        );
 
         tx.recentBlockhash = blockhash;
         tx.lastValidBlockHeight = lastValidBlockHeight;
@@ -171,10 +161,10 @@ export default function Page() {
 
   useEffect(() => {
     if (publicKey) {
-      setEventImageSrc(getRandomDicebearLink('event', publicKey.toBase58()))
-      setBadgeImageSrc(getRandomDicebearLink('badge', publicKey.toBase58()))
+      setEventImageSrc(getRandomDicebearLink('event', publicKey.toBase58()));
+      setBadgeImageSrc(getRandomDicebearLink('badge', publicKey.toBase58()));
     }
-  }, [publicKey])
+  }, [publicKey]);
 
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">

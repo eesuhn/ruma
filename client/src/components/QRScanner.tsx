@@ -17,7 +17,7 @@ interface QRScannerProps {
   onScan?: (data: string) => void;
 }
 
-export default function QRScanner({ onScan }: QRScannerProps) {
+export function QRScanner({ onScan }: QRScannerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const scannerRef = useRef<any>(false);
 
