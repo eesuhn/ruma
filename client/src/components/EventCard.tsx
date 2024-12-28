@@ -19,7 +19,7 @@ function EventButtonTab({
 
     return (
       <Badge
-        className={`bg-${registrationStatus} hover:bg-${registrationStatus} inline-block rounded-full px-3 py-1 text-sm font-normal`}
+        className={`bg-status-${registrationStatus} hover:bg-status-${registrationStatus} inline-block rounded-full px-3 py-1 text-sm font-normal`}
       >
         {badgeName}
       </Badge>

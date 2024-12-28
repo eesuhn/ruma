@@ -10,7 +10,7 @@ export type RegistrationStatus =
 export type DisplayedEvent = {
   event: ProgramAccount<Event>;
   isOrganizer: boolean;
-};
+}
 
 export type EventStatus =
   | 'organizer'

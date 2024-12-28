@@ -44,7 +44,7 @@ export function handleImageClick(ref: RefObject<HTMLInputElement>) {
 
 export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
-}
+};
 
 export async function setComputeUnitLimitAndPrice(
   connection: Connection,
