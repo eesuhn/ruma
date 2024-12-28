@@ -28,5 +28,6 @@ pub enum AttendeeStatus {
     #[default]
     Pending,
     Approved,
+    CheckedIn,
     Rejected,
 }

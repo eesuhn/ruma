@@ -227,5 +227,6 @@ export async function checkIntoEvent(
       fromWeb3JsPublicKey(editionMint.publicKey)
     ),
     registrantUserAcc: await getUserAcc(program, registrantUserPda),
+    attendeeAcc: await getAttendeeAcc(program, attendeePda),
   };
 }
