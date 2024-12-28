@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { EventData } from '@/types/state';
+import { EventData } from '@/types/idlAccounts';
 import {
   EventStatusType,
   getEventStatusDetails,

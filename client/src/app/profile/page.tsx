@@ -1,13 +1,13 @@
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui';
-import { UserData } from '@/types/state';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 
 interface Badge {
   id: string;
@@ -48,6 +48,7 @@ const badges: Badge[] = [
 ];
 
 export default function Page() {
+  const { getUserAcc, getAllEventAcc } = useAnchorProgram();
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
       <Card>

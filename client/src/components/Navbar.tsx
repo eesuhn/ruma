@@ -3,17 +3,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { Button } from '@/components/ui/button';
 import {
-  Button,
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui';
+} from '@/components/ui/sheet';
 import { FiPlusCircle } from 'react-icons/fi';
 import { MenuSquareIcon, Ticket, Compass, User } from 'lucide-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+
+const WalletMultiButtonDynamic = dynamic(
+  async () =>
+    (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
 
 const navItems = [
   { name: 'Events', href: '/events', icon: Ticket },
@@ -21,7 +26,7 @@ const navItems = [
   { name: 'Profile', href: '/profile', icon: User },
 ] as const;
 
-export default function Navbar() {
+export function Navbar() {
   const pathname = usePathname();
   const isActive = (path: string) => (pathname === path ? ' text-black' : '');
 
@@ -64,7 +69,7 @@ export default function Navbar() {
                 Create Event
               </Button>
             </Link>
-            <WalletMultiButton />
+            <WalletMultiButtonDynamic />
           </div>
           <div className="flex items-center md:hidden">
             <Sheet>
@@ -79,7 +84,7 @@ export default function Navbar() {
                   <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col space-y-4">
-                  <WalletMultiButton />
+                  <WalletMultiButtonDynamic />
                   {navItems.map((item) => (
                     <Link
                       key={item.name}

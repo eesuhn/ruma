@@ -13,14 +13,11 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { ReactNode, useMemo } from 'react';
 import '@solana/wallet-adapter-react-ui/styles.css';
-import { clusterApiUrl } from '@solana/web3.js';
 import { toast } from '@/hooks/use-toast';
+import { CONNECTION } from '@/lib/constants';
 
-export default function SolanaProvider({ children }: { children: ReactNode }) {
-  const endpoint = useMemo(
-    () => process.env.NEXT_PUBLIC_RPC_URL ?? clusterApiUrl('devnet'),
-    []
-  );
+export function SolanaProvider({ children }: { children: ReactNode }) {
+  const endpoint = useMemo(() => CONNECTION.rpcEndpoint, []);
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
