@@ -2,10 +2,11 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EventCard } from '@/components/EventCard';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState('upcoming');
+  const { getAllEventAcc } = useAnchorProgram();
+  const [activeTab, setActiveTab] = useState<string>('upcoming');
 
   return (
     <div className="container mx-auto px-72">

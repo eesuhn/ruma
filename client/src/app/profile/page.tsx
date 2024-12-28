@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 
 interface Badge {
   id: string;
@@ -47,6 +48,7 @@ const badges: Badge[] = [
 ];
 
 export default function Page() {
+  const { getUserAcc, getAllEventAcc } = useAnchorProgram();
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
       <Card>
