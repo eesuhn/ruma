@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CalendarIcon, Clock, MapPin } from 'lucide-react';
 import { Card, Button, Badge } from '@/components/ui';
-import { EventData } from '@/types/state';
+import { EventData } from '@/types/idlAccounts';
 
 const getBadgeVariant = (status?: string) => {
   switch (status) {

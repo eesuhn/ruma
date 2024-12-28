@@ -1,7 +1,6 @@
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui';
-import { UserData } from '@/types/state';
 import {
   Tooltip,
   TooltipContent,

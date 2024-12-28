@@ -25,7 +25,7 @@ import {
   FormItem,
 } from '@/components/ui';
 import Image from 'next/image';
-import { UserData } from '@/types/state';
+import { UserData } from '@/types/idlAccounts';
 import { statusStyles, formatStatus } from '@/lib/utils';
 import { Status } from '@/types/event';
 import QRScanner from '@/components/QRScanner';
