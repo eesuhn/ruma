@@ -88,7 +88,7 @@ export async function setComputeUnitLimitAndPrice(
 
 export async function uploadFile(file: File): Promise<string> {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.set('file', file);
 
   const response = await fetch('/api/upload', {
     method: 'POST',

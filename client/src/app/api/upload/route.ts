@@ -14,14 +14,14 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
-  
+
     if (!file) {
       return NextResponse.json(
         { error: "No file uploaded." },
         { status: 400 }
       );
     }
-  
+
     const price = await irysUploader.getPrice(file.size);
     await irysUploader.fund(price);
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
             value: file.type,
           },
           {
-            name: "Filename",
+            name: "Name",
             value: file.name,
           },
         ],
