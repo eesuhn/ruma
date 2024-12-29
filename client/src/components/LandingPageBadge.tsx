@@ -2,49 +2,31 @@
 
 import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
-import { Event } from '@/types/idlAccounts';
-import { ProgramAccount } from '@coral-xyz/anchor';
 import Image from 'next/image';
-import { useState } from 'react';
 import useSWR from 'swr';
-
-type RandomBadge = {
-  name: string;
-  uri: string;
-};
 
 export function LandingPageBadge() {
   const { getAllEventAcc } = useAnchorProgram();
-  const [randomBadge, setRandomBadge] = useState<RandomBadge>({
-    name: '/sample/landing-hero.jpg',
-    uri: 'Default Landing Badge',
-  });
-  const { data: events, error: eventError } = useSWR(getAllEventAcc);
-  const { data: metadataAcc, error: metadataError } = useSWR(
-    events,
-    async (events: ProgramAccount<Event>[]) => {
-      const randomEvent = events[Math.floor(Math.random() * events.length)];
-      const metadataPda = getMetadataPda(randomEvent.account.data.image);
-      return await getMetadataAcc(metadataPda);
+  const { data: metadataAcc, error } = useSWR(
+    '/landing-page-badge',
+    async () => {
+      const events = await getAllEventAcc();
+      const { badge: randomBadge } =
+        events[Math.floor(Math.random() * events.length)].account;
+
+      if (!randomBadge) return null;
+      return await getMetadataAcc(getMetadataPda(randomBadge));
     }
   );
 
-  if (eventError) {
-    console.error(eventError);
-  }
-
-  if (metadataError) {
-    console.error(metadataError);
-  }
-
-  if (metadataAcc) {
-    setRandomBadge({ name: metadataAcc.name, uri: metadataAcc.uri });
+  if (error) {
+    console.error(error);
   }
 
   return (
     <Image
-      src={randomBadge.uri}
-      alt={randomBadge.name}
+      src={metadataAcc?.uri ?? '/sample/landing-hero.jpg'}
+      alt={metadataAcc?.name ?? 'Default Landing Badge'}
       fill
       className="rounded-3xl object-cover shadow-xl"
       priority
