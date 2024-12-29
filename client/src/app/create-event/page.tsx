@@ -77,7 +77,7 @@ export default function Page() {
       capacity: null,
       badgeName: '',
       badgeSymbol: '',
-      startDate: null,
+      startDate: new Date(),
       endDate: null,
       eventImage: undefined,
       badgeImage: undefined,
