@@ -1,25 +1,22 @@
-import { irysUploader } from "@/lib/irys";
-import { NextRequest, NextResponse } from "next/server";
+import { irysUploader } from '@/lib/irys';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-  const contentType = req.headers.get("content-type");
+  const contentType = req.headers.get('content-type');
 
-  if (!contentType || !contentType.includes("multipart/form-data")) {
+  if (!contentType || !contentType.includes('multipart/form-data')) {
     return NextResponse.json(
-      { error: "Content-Type must be multipart/form-data." },
+      { error: 'Content-Type must be multipart/form-data.' },
       { status: 400 }
     );
   }
 
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file uploaded." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
     }
 
     const price = await irysUploader.getPrice(file.size);
@@ -30,11 +27,11 @@ export async function POST(req: NextRequest) {
       {
         tags: [
           {
-            name: "Content-Type",
+            name: 'Content-Type',
             value: file.type,
           },
           {
-            name: "Name",
+            name: 'Name',
             value: file.name,
           },
         ],
@@ -46,6 +43,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ link });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Failed to upload file." }, { status: 500 });
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'Failed to upload file.' },
+      { status: 500 }
+    );
   }
 }

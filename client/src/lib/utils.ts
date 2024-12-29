@@ -44,7 +44,7 @@ export function handleImageClick(ref: RefObject<HTMLInputElement>) {
 
 export function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
-};
+}
 
 export async function setComputeUnitLimitAndPrice(
   connection: Connection,
@@ -93,7 +93,7 @@ export async function uploadFile(file: File): Promise<string> {
   const response = await fetch('/api/upload', {
     method: 'POST',
     body: formData,
-  })
+  });
 
   if (!response.ok) {
     throw new Error('Failed to upload image.');
@@ -103,6 +103,12 @@ export async function uploadFile(file: File): Promise<string> {
   return link;
 }
 
-export function sortEventsByTimestamp(events: DisplayedEvent[]): DisplayedEvent[] {
-  return events.sort((a, b) => Number(a.event.account.data.startTimestamp) - Number(b.event.account.data.startTimestamp));
+export function sortEventsByTimestamp(
+  events: DisplayedEvent[]
+): DisplayedEvent[] {
+  return events.sort(
+    (a, b) =>
+      Number(a.event.account.data.startTimestamp) -
+      Number(b.event.account.data.startTimestamp)
+  );
 }

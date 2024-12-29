@@ -51,7 +51,10 @@ export function Navbar() {
                 <Link
                   key={name}
                   href={href}
-                  className={cn(pathname === href ? 'text-black' : '', 'rounded-md px-3 py-2 text-base text-[#999999] hover:text-black flex items-center gap-2')}
+                  className={cn(
+                    pathname === href ? 'text-black' : '',
+                    'flex items-center gap-2 rounded-md px-3 py-2 text-base text-[#999999] hover:text-black'
+                  )}
                   prefetch={false}
                 >
                   <Icon size={20} className="mr-[2px] mt-[-2px]" />

@@ -128,13 +128,18 @@ export default function Page() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Guests</SelectItem>
-            {(['going', 'pending', 'rejected', 'checked-in'] as RegistrationStatus[]).map(
-              (status) => (
-                <SelectItem key={status} value={status}>
-                  {formatStatus(status)}
-                </SelectItem>
-              )
-            )}
+            {(
+              [
+                'going',
+                'pending',
+                'rejected',
+                'checked-in',
+              ] as RegistrationStatus[]
+            ).map((status) => (
+              <SelectItem key={status} value={status}>
+                {formatStatus(status)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <QRScanner onScan={handleQRScan} />

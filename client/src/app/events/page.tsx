@@ -15,7 +15,11 @@ import { sortEventsByTimestamp } from '@/lib/utils';
 export default function Page() {
   const { publicKey } = useWallet();
   const { getAllEventAcc } = useAnchorProgram();
-  const { data: registeredEvents, isLoading, error } = useSWR(async () => {
+  const {
+    data: registeredEvents,
+    isLoading,
+    error,
+  } = useSWR(async () => {
     const userPda = getUserPda(publicKey!);
     const allEvents = await getAllEventAcc();
 
@@ -75,35 +79,47 @@ export default function Page() {
 
         <Tabs value={activeTab}>
           <TabsContent value="upcoming" className="space-y-4">
-            {upcoming.map((
-              { event, isOrganizer }:
-                { event: ProgramAccount<Event>, isOrganizer: boolean }) => (
-              <EventCard
-                key={event.publicKey.toBase58()}
-                name={event.account.data.name}
-                image={event.account.data.image}
-                startTimestamp={event.account.data.startTimestamp}
-                location={event.account.data.location}
-                isOrganizer={isOrganizer}
-              />
-            ))}
+            {upcoming.map(
+              ({
+                event,
+                isOrganizer,
+              }: {
+                event: ProgramAccount<Event>;
+                isOrganizer: boolean;
+              }) => (
+                <EventCard
+                  key={event.publicKey.toBase58()}
+                  name={event.account.data.name}
+                  image={event.account.data.image}
+                  startTimestamp={event.account.data.startTimestamp}
+                  location={event.account.data.location}
+                  isOrganizer={isOrganizer}
+                />
+              )
+            )}
           </TabsContent>
           <TabsContent value="past" className="space-y-4">
-            {past.map((
-              { event, isOrganizer }:
-                { event: ProgramAccount<Event>, isOrganizer: boolean }) => (
-              <EventCard
-                key={event.publicKey.toBase58()}
-                name={event.account.data.name}
-                image={event.account.data.image}
-                startTimestamp={event.account.data.startTimestamp}
-                location={event.account.data.location}
-                isOrganizer={isOrganizer}
-              />
-            ))}
+            {past.map(
+              ({
+                event,
+                isOrganizer,
+              }: {
+                event: ProgramAccount<Event>;
+                isOrganizer: boolean;
+              }) => (
+                <EventCard
+                  key={event.publicKey.toBase58()}
+                  name={event.account.data.name}
+                  image={event.account.data.image}
+                  startTimestamp={event.account.data.startTimestamp}
+                  location={event.account.data.location}
+                  isOrganizer={isOrganizer}
+                />
+              )
+            )}
           </TabsContent>
         </Tabs>
       </div>
-    )
+    );
   }
 }
