@@ -18,7 +18,7 @@
 3. In `anchor/` directory, create a custom keypair file `ruma-wallet.json`, and paste in the secret key:
 
    ```bash
-   touch ruma-wallet.json
+   touch ruma-wallet.json  # Contact the team for secret key
    ```
 
    > Or generate a new keypair with `solana-keygen new -o ruma-wallet.json`
@@ -91,12 +91,9 @@
    bun test endToEnd
    ```
 
-   > If you ran into errors, try: <br>
-   > ```bash
-   > anchor clean && anchor build && anchor keys sync  # to clean, build, and sync keys
-   > anchor deploy -p ruma --program-keypair target/deploy/ruma-keypair.json  # to deploy program again
-   > ```
-   > or sometimes you just need to restart the local validator
+   > In case of errors, try:
+   > 1. Restarting the local validator by running `bun run local`
+   > 2. Run `solana config set -k ruma-wallet.json` again
 
 7. In `anchor/`, run this command to sync IDL and program types:
 
