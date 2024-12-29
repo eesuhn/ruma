@@ -65,6 +65,8 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Re
         .badges
         .push(ctx.accounts.edition_mint.key());
 
+    ctx.accounts.attendee.status = AttendeeStatus::CheckedIn;
+
     Ok(())
 }
 
@@ -89,6 +91,7 @@ pub struct CheckIntoEvent<'info> {
         realloc::zero = false,
     )]
     pub registrant: Box<Account<'info, User>>,
+    #[account(mut)]
     pub attendee: Account<'info, Attendee>,
     #[account(
         init,

@@ -26,7 +26,7 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
 import { UserData } from '@/types/idlAccounts';
 import { statusStyles, formatStatus } from '@/lib/utils';
-import { Status } from '@/types/event';
+import { RegistrationStatus } from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
 
 const statusFormSchema = z.object({
@@ -37,7 +37,7 @@ type StatusFormValues = z.infer<typeof statusFormSchema>;
 
 interface ParticipantInfo extends UserData {
   publicKey: string;
-  status: Status;
+  status: RegistrationStatus;
 }
 
 const participants: ParticipantInfo[] = [
@@ -128,13 +128,18 @@ export default function Page() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Guests</SelectItem>
-            {(['going', 'pending', 'rejected', 'checked-in'] as Status[]).map(
-              (status) => (
-                <SelectItem key={status} value={status}>
-                  {formatStatus(status)}
-                </SelectItem>
-              )
-            )}
+            {(
+              [
+                'going',
+                'pending',
+                'rejected',
+                'checked-in',
+              ] as RegistrationStatus[]
+            ).map((status) => (
+              <SelectItem key={status} value={status}>
+                {formatStatus(status)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <QRScanner onScan={handleQRScan} />

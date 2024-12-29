@@ -57,6 +57,11 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        'status-pending': 'var(--status-pending)',
+        'status-going': 'var(--status-going)',
+        'status-checked-in': 'var(--status-checked-in)',
+        'status-rejected': 'var(--status-rejected)',
+        'status-default': 'black',
       },
       borderRadius: {
         lg: 'var(--radius)',

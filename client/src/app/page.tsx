@@ -1,11 +1,10 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { LandingPageBadge } from '@/components/LandingPageBadge';
 
 export default function Home() {
   return (
     <div className="mb-[-20px] mt-[-90px] flex min-h-screen items-center justify-center bg-background">
-      {/* Hero Section */}
       <section className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center gap-8 md:flex-row md:gap-12">
           <div className="flex-1 space-y-6 text-center md:text-left">
@@ -35,13 +34,7 @@ export default function Home() {
           </div>
           <div className="mx-auto w-full max-w-md flex-1 md:max-w-none">
             <div className="relative aspect-square">
-              <Image
-                src="/sample/landing-hero.jpg"
-                alt="Event Platform Interface"
-                fill
-                className="rounded-3xl object-cover shadow-xl"
-                priority
-              />
+              <LandingPageBadge />
             </div>
           </div>
         </div>
