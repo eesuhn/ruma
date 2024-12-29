@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { getExplorerLink } from '@solana-developers/helpers';
@@ -33,6 +33,7 @@ export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const { getCreateProfileIx } = useAnchorProgram();
+  const { toast } = useToast();
   const [profileImageSrc, setProfileImageSrc] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,7 +57,7 @@ export default function Page() {
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
     try {
       setIsUploading(true);
-      const uploadedImageUri = await uploadFile(values.profileImage ?? fetchDicebearAsFile('profile', publicKey!.toBase58()));
+      const uploadedImageUri = await uploadFile(values.profileImage ?? await fetchDicebearAsFile('profile', publicKey!.toBase58()));
       setIsUploading(false);
 
       const ix = await getCreateProfileIx(values.name, uploadedImageUri);

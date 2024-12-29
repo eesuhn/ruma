@@ -88,8 +88,8 @@ export default function Page() {
     if (publicKey) {
       try {
         setIsUploading(true);
-        const uploadedEventImageUri = await uploadFile(values.eventImage ?? fetchDicebearAsFile('event', publicKey!.toBase58()));
-        const uploadedBadgeImageUri = await uploadFile(values.badgeImage ?? fetchDicebearAsFile('badge', publicKey!.toBase58()));
+        const uploadedEventImageUri = await uploadFile(values.eventImage ?? await fetchDicebearAsFile('event', publicKey!.toBase58()));
+        const uploadedBadgeImageUri = await uploadFile(values.badgeImage ?? await fetchDicebearAsFile('badge', publicKey!.toBase58()));
         setIsUploading(false);
 
         const { blockhash, lastValidBlockHeight } =
