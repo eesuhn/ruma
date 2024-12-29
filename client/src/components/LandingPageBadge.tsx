@@ -1,6 +1,6 @@
 'use client';
 
-import { getMetadataAcc, getMetadataPda } from '@/actions/umi';
+import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { Event } from '@/types/idlAccounts';
 import { ProgramAccount } from '@coral-xyz/anchor';
@@ -24,7 +24,7 @@ export function LandingPageBadge() {
     events,
     async (events: ProgramAccount<Event>[]) => {
       const randomEvent = events[Math.floor(Math.random() * events.length)];
-      const metadataPda = await getMetadataPda(randomEvent.account.data.image);
+      const metadataPda = getMetadataPda(randomEvent.account.data.image);
       return await getMetadataAcc(metadataPda);
     }
   );

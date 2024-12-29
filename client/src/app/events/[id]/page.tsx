@@ -21,7 +21,7 @@ import { FC } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getUserPda } from '@/lib/pda';
 import { Event } from '@/types/idlAccounts';
-import { getMetadataAcc, getMetadataPda } from '@/actions/umi';
+import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 
 function EventStatusDetailsButton({
   onClick,
@@ -149,7 +149,7 @@ export default function Page() {
   const { data: eventBadge, error: badgeError } = useSWR(
     event,
     async (event) => {
-      const metadataPda = await getMetadataPda(event.badge!);
+      const metadataPda = getMetadataPda(event.badge!);
       return await getMetadataAcc(metadataPda);
     }
   );
