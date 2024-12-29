@@ -10,6 +10,7 @@ import {
   handleImageChange,
   handleImageClick,
   setComputeUnitLimitAndPrice,
+  uploadFile,
 } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +27,6 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { Cluster } from '@solana/web3.js';
-import { upload } from '@/actions/irys';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
 
 export default function Page() {
@@ -56,10 +56,7 @@ export default function Page() {
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
     try {
       setIsUploading(true);
-      const uploadedImageUri = await upload(
-        values.profileImage ??
-          fetchDicebearAsFile('profile', publicKey!.toBase58())
-      );
+      const uploadedImageUri = await uploadFile(values.profileImage ?? fetchDicebearAsFile('profile', publicKey!.toBase58()));
       setIsUploading(false);
 
       const ix = await getCreateProfileIx(values.name, uploadedImageUri);

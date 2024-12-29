@@ -86,6 +86,23 @@ export async function setComputeUnitLimitAndPrice(
   return tx;
 }
 
+export async function uploadFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to upload image.');
+  }
+
+  const { link } = await response.json();
+  return link;
+}
+
 export function sortEventsByTimestamp(events: DisplayedEvent[]): DisplayedEvent[] {
   return events.sort((a, b) => Number(a.event.account.data.startTimestamp) - Number(b.event.account.data.startTimestamp));
 }

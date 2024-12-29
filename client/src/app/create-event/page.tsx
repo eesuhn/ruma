@@ -19,6 +19,7 @@ import {
   handleImageChange,
   handleImageClick,
   setComputeUnitLimitAndPrice,
+  uploadFile,
 } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -54,7 +55,6 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Cluster, Keypair } from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
-import { upload } from '@/actions/irys';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -88,12 +88,8 @@ export default function Page() {
     if (publicKey) {
       try {
         setIsUploading(true);
-        const uploadedEventImageUri = await upload(
-          values.eventImage ?? fetchDicebearAsFile('event', values.eventName)
-        );
-        const uploadedBadgeImageUri = await upload(
-          values.badgeImage ?? fetchDicebearAsFile('badge', values.badgeName)
-        );
+        const uploadedEventImageUri = await uploadFile(values.eventImage ?? fetchDicebearAsFile('event', publicKey!.toBase58()));
+        const uploadedBadgeImageUri = await uploadFile(values.badgeImage ?? fetchDicebearAsFile('badge', publicKey!.toBase58()));
         setIsUploading(false);
 
         const { blockhash, lastValidBlockHeight } =
