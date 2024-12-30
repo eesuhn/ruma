@@ -1,4 +1,4 @@
-import { Calendar, Pin } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BN } from '@coral-xyz/anchor';
@@ -37,7 +37,7 @@ export function DiscoverEventCard({
           )}
           {location && (
             <p className="flex gap-2 text-gray-500">
-              <Pin className="mt-1 h-4 w-4" /> {location}
+              <MapPin className="mt-1 h-4 w-4" /> {location}
             </p>
           )}
         </div>
