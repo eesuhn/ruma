@@ -3,7 +3,7 @@ import { Event } from './idlAccounts';
 
 export type RegistrationStatus =
   | 'pending'
-  | 'going'
+  | 'approved'
   | 'checked-in'
   | 'rejected';
 
