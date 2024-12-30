@@ -93,3 +93,7 @@ export const createEventFormSchema = z.object({
     })
     .optional(),
 });
+
+export const statusFormSchema = z.object({
+  status: z.enum(['pending', 'approved', 'checked-in', 'rejected'] as const),
+});

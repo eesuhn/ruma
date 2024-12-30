@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,93 +24,89 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
-import { UserData } from '@/types/idlAccounts';
-import { statusStyles, formatStatus } from '@/lib/utils';
+import { capitalizeFirstLetter } from '@/lib/utils';
 import { RegistrationStatus } from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
+import { statusFormSchema } from '@/lib/formSchemas';
+import useSWR from 'swr';
+import { useAnchorProgram } from '@/hooks/useAnchorProgram';
+import { useParams } from 'next/navigation';
+import { PublicKey } from '@solana/web3.js';
 
-const statusFormSchema = z.object({
-  status: z.enum(['going', 'pending', 'rejected', 'checked-in'] as const),
-});
-
-type StatusFormValues = z.infer<typeof statusFormSchema>;
-
-interface ParticipantInfo extends UserData {
-  publicKey: string;
-  status: RegistrationStatus;
-}
-
-const participants: ParticipantInfo[] = [
-  {
-    publicKey: '4b2j...w6oZ',
-    name: 'Jeff Bezos',
-    image: '/sample/profile.png',
-    status: 'going',
-  },
-  {
-    publicKey: 'K9Tx...2x9a',
-    name: 'Mary Lane',
-    image: '/sample/profile.png',
-    status: 'pending',
-  },
-  {
-    publicKey: 'J7gC...x41k',
-    name: 'David Jackson',
-    image: '/sample/profile.png',
-    status: 'rejected',
-  },
-  {
-    publicKey: 'mBm...6q1e',
-    name: 'Amy Lau',
-    image: '/sample/profile.png',
-    status: 'checked-in',
-  },
-];
+const allowedRegistrationStatues = [
+  'approved',
+  'pending',
+  'checked-in',
+  'rejected',
+]
 
 export default function Page() {
-  const [search, setSearch] = useState('');
+  const params = useParams<{ id: string }>();
+  const { getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
+  const [search, setSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedParticipant, setSelectedParticipant] =
-    useState<ParticipantInfo | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedAttendee, setSelectedAttendee] = useState<any>(null);
+  const { data, isLoading, error } = useSWR([params.id, search], async () => {
+    const event = await getEventAcc(new PublicKey(params.id));
 
-  const form = useForm<StatusFormValues>({
+    if (!event) {
+      throw new Error('Event not found');
+    }
+
+    let attendees = [];
+
+    const attendeeAccs = (await getMultipleAttendeeAcc(event.attendees)).filter((acc) => acc !== null);
+    const userAccs = (await getMultipleUserAcc(attendeeAccs.map((acc) => acc.user))).filter((acc) => acc !== null)
+
+    attendees = attendeeAccs
+      .map((acc, i) => {
+        return {
+          pda: event.attendees[i].toBase58(),
+          status: Object.keys(acc.status)[0],
+          name: userAccs[i].data.name,
+          image: userAccs[i].data.image
+        }
+      })
+      .filter((attendee) => {
+        return attendee.name.toLowerCase().includes(search.toLowerCase())
+          && ['all', statusFilter].includes(attendee.status)
+      })
+
+    return {
+      eventName: event.data.name,
+      attendees,
+    }
+  })
+
+  const form = useForm<z.infer<typeof statusFormSchema>>({
     resolver: zodResolver(statusFormSchema),
     defaultValues: {
       status: undefined,
     },
   });
 
-  const filteredParticipants = participants.filter((participant) => {
-    const matchesSearch = participant.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' || participant.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleStatusChange = (values: StatusFormValues) => {
-    if (selectedParticipant) {
-      console.log(
-        `Updating ${selectedParticipant.name}'s status to ${values.status}`
-      );
+  function handleStatusChange(values: z.infer<typeof statusFormSchema>) {
+    if (selectedAttendee) {
+      // TODO: implement changeAttendeeStatus
       form.reset();
-      setSelectedParticipant(null);
-      setIsDialogOpen(false);
+      setSelectedAttendee(null);
     }
   };
 
   const handleQRScan = useCallback((data: string) => {
-    // TODO: Handle QR code scan
+    // TODO: implement checkIntoEvent
     void data;
     window.alert('Verified');
     window.location.reload();
   }, []);
 
-  return (
+  // TODO: add error and loading states
+  if (error) return <p>{error.message}</p>;
+  if (isLoading) return <p>Loading...</p>;
+
+  return data && (
     <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-3xl font-bold">Event Name</h1>
+      <h1 className="mb-8 text-3xl font-bold">{data.eventName}</h1>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
@@ -128,16 +124,9 @@ export default function Page() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Guests</SelectItem>
-            {(
-              [
-                'going',
-                'pending',
-                'rejected',
-                'checked-in',
-              ] as RegistrationStatus[]
-            ).map((status) => (
+            {allowedRegistrationStatues.map((status) => (
               <SelectItem key={status} value={status}>
-                {formatStatus(status)}
+                {capitalizeFirstLetter(status)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -146,17 +135,12 @@ export default function Page() {
       </div>
 
       <div className="divide-y rounded-lg border">
-        {filteredParticipants.map((participant) => (
+        {data.attendees.map((attendee) => (
           <Dialog
-            key={participant.publicKey}
-            open={
-              isDialogOpen &&
-              selectedParticipant?.publicKey === participant.publicKey
-            }
+            key={attendee.pda}
             onOpenChange={(open) => {
-              setIsDialogOpen(open);
               if (!open) {
-                setSelectedParticipant(null);
+                setSelectedAttendee(null);
                 form.reset();
               }
             }}
@@ -165,38 +149,37 @@ export default function Page() {
               <button
                 className="flex w-full items-center justify-between p-4 hover:bg-gray-50"
                 onClick={() => {
-                  setSelectedParticipant(participant);
-                  form.setValue('status', participant.status);
-                  setIsDialogOpen(true);
+                  setSelectedAttendee(attendee);
+                  form.setValue('status', attendee.status as RegistrationStatus);
                 }}
               >
                 <div className="flex items-center gap-3">
                   <Image
-                    src={participant.image}
-                    alt={participant.name}
+                    src={attendee.image}
+                    alt={attendee.name}
                     width={40}
                     height={40}
                     className="rounded-full"
                   />
                   <div className="text-left">
-                    <div className="font-medium">{participant.name}</div>
+                    <div className="font-medium">{attendee.name}</div>
                     <div className="text-sm text-gray-500">
-                      {participant.publicKey}
+                      {attendee.pda}
                     </div>
                   </div>
                 </div>
-                <Badge className={statusStyles[participant.status]}>
-                  {formatStatus(participant.status)}
+                <Badge className={`bg-badge-${attendee.status}`}>
+                  {capitalizeFirstLetter(attendee.status)}
                 </Badge>
               </button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  {selectedParticipant && (
+                  {selectedAttendee && (
                     <Image
-                      src={selectedParticipant.image}
-                      alt={selectedParticipant.name}
+                      src={selectedAttendee.image}
+                      alt={selectedAttendee.name}
                       width={40}
                       height={40}
                       className="rounded-full"
@@ -204,10 +187,10 @@ export default function Page() {
                   )}
                   <div>
                     <DialogTitle className="text-left">
-                      {selectedParticipant?.name}
+                      {selectedAttendee?.name}
                     </DialogTitle>
                     <p className="text-sm text-muted-foreground">
-                      {selectedParticipant?.publicKey}
+                      {selectedAttendee?.publicKey}
                     </p>
                   </div>
                 </div>
@@ -220,7 +203,7 @@ export default function Page() {
                   <FormField
                     control={form.control}
                     name="status"
-                    defaultValue={selectedParticipant?.status}
+                    defaultValue={selectedAttendee?.status}
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
@@ -232,16 +215,9 @@ export default function Page() {
                               <SelectValue placeholder="Choose new status" />
                             </SelectTrigger>
                             <SelectContent>
-                              {(
-                                [
-                                  'going',
-                                  'pending',
-                                  'rejected',
-                                  'checked-in',
-                                ] as const
-                              ).map((status) => (
+                              {allowedRegistrationStatues.map((status) => (
                                 <SelectItem key={status} value={status}>
-                                  {formatStatus(status)}
+                                  {capitalizeFirstLetter(status)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
