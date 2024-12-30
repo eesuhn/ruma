@@ -168,6 +168,10 @@ export function useAnchorProgram() {
     return await program.account.user.all();
   }, [program]);
 
+  const getMultipleUserAcc = useCallback(async (userPdas: PublicKey[]) => {
+    return await program.account.user.fetchMultiple(userPdas);
+  }, [program]);
+
   const getUserAcc = useCallback(
     async (userPda: PublicKey) => {
       return await program.account.user.fetchNullable(userPda);
@@ -179,6 +183,10 @@ export function useAnchorProgram() {
     return await program.account.event.all();
   }, [program]);
 
+  const getMultipleEventAcc = useCallback(async (eventPdas: PublicKey[]) => {
+    return await program.account.event.fetchMultiple(eventPdas);
+  }, [program]);
+
   const getEventAcc = useCallback(
     async (eventPda: PublicKey) => {
       return await program.account.event.fetchNullable(eventPda);
@@ -188,6 +196,10 @@ export function useAnchorProgram() {
 
   const getAllAttendeeAcc = useCallback(async () => {
     return await program.account.attendee.all();
+  }, [program]);
+
+  const getMultipleAttendeeAcc = useCallback(async (attendeePdas: PublicKey[]) => {
+    return await program.account.attendee.fetchMultiple(attendeePdas);
   }, [program]);
 
   const getAttendeeAcc = useCallback(
@@ -205,10 +217,13 @@ export function useAnchorProgram() {
     changeAttendeeStatus,
     getCheckIntoEventIx,
     getAllUserAcc,
+    getMultipleUserAcc,
     getUserAcc,
     getAllEventAcc,
+    getMultipleEventAcc,
     getEventAcc,
     getAllAttendeeAcc,
+    getMultipleAttendeeAcc,
     getAttendeeAcc,
   };
 }
