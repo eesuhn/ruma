@@ -19,22 +19,29 @@ import {
   getMetadataPda,
 } from '@/lib/umi';
 import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
-import { PublicKey } from '@solana/web3.js';
 
 export default function Page() {
   const { publicKey } = useWallet();
   const { getUserAcc, getAllEventAcc, getAttendeeAcc } = useAnchorProgram();
+  const { data: userData, isLoading: isUserLoading } = useSWR(publicKey, async (publicKey) => {
+    const userPda = getUserPda(publicKey);
+    const userAcc = await getUserAcc(userPda);
+
+    if (!userAcc) {
+      throw new Error('User not found.');
+    }
+
+    return { userPda, userAcc };
+  });
   const {
     data: profileData,
-    isLoading,
+    isLoading: isProfileLoading,
     error,
-  } = useSWR(async () => {
-    const userPda = getUserPda(publicKey!);
-    const userAcc = await getUserAcc(userPda);
+  } = useSWR(userData, async ({ userPda, userAcc }) => {
     const allEvents = await getAllEventAcc();
 
     const badges = await Promise.all(
-      userAcc!.badges.map(async (badge) => {
+      userAcc.badges.map(async (badge) => {
         const { name, uri } = await getMetadataAcc(getMetadataPda(badge));
         const { publicKey: userBadgePda, parent } = await getEditionAcc(
           getMasterOrPrintedEditionPda(badge)
@@ -80,76 +87,88 @@ export default function Page() {
     return { userAcc, badges, eventsHosted, eventsAttended };
   });
 
-  // TODO: add error and loading states
+  // TODO: add error state
   if (error) return <p>{error.message}</p>;
-  if (isLoading) return <p>Loading...</p>;
 
-  if (profileData) {
-    const { userAcc, badges, eventsHosted, eventsAttended } = profileData;
-
-    return (
-      profileData && (
-        <div className="mx-auto max-w-2xl space-y-8 p-6">
+  return (
+    <div className="mx-auto max-w-2xl space-y-8 p-6">
+      {isUserLoading ? (
+        // TODO: add loading state
+        <p>Loading...</p>
+      ) : (
+        userData && (
           <Card>
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
                   <div className="relative h-20 w-20">
                     <Image
-                      src={userAcc.data.image}
+                      src={userData.userAcc.data.image}
                       alt="Profile"
                       className="rounded-full"
                       width={80}
                       height={80}
                     />
                   </div>
-
                   <div>
                     <div className="flex items-center gap-2">
                       <h1 className="text-2xl font-bold">
-                        {userAcc.data.name}
+                        {userData.userAcc.data.name}
                       </h1>
                     </div>
-                    <div className="mt-2 flex gap-6">
-                      <div className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          <strong>{eventsHosted}</strong> Hosted
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          <strong>{eventsAttended}</strong> Attended
-                        </span>
-                      </div>
-                    </div>
+                    {isProfileLoading ? (
+                      // TODO: add loading state
+                      <p>Loading...</p>
+                    ) : (
+                      profileData && (
+                        <div className="mt-2 flex gap-6">
+                          <div className="flex items-center gap-2">
+                            <Trophy className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">
+                              <strong>{profileData.eventsHosted}</strong> Hosted
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">
+                              <strong>{profileData.eventsAttended}</strong> Attended
+                            </span>
+                          </div>
+                        </div>)
+                    )}
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+        )
+      )}
 
+      {isProfileLoading ? (
+        // TODO: add loading state
+        <p>Loading...</p>
+      ) : (
+        profileData && (
           <div>
-            {Boolean(badges.length) ? (
+            {profileData.badges.length ? (
               <div>
                 <h2 className="mb-4 text-xl font-semibold">
                   Badges Collection
                 </h2>
                 <div className="grid grid-cols-6">
-                  {badges.map(
+                  {profileData.badges.map(
                     ({
                       pda,
                       name,
                       image,
                       eventName,
                     }: {
-                      pda: PublicKey;
+                      pda: string;
                       name: string;
                       image: string;
                       eventName: string;
                     }) => (
-                      <TooltipProvider key={pda.toBase58()}>
+                      <TooltipProvider key={pda}>
                         <Tooltip>
                           <TooltipTrigger asChild className="cursor-default">
                             <div>
@@ -182,8 +201,7 @@ export default function Page() {
               </h2>
             )}
           </div>
-        </div>
-      )
-    );
-  }
+        ))}
+    </div>
+  )
 }

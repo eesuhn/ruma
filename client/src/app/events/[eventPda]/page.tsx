@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button';
 import { FC } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getUserPda } from '@/lib/pda';
-import { Event } from '@/types/idlAccounts';
 import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 
 function EventStatusDetailsButton({
@@ -50,69 +49,6 @@ function EventStatusDetailsBadge({ status }: { status: RegistrationStatus }) {
   );
 }
 
-function EventStatusDetails({
-  status,
-  onManageClick,
-  onRegisterClick,
-  onCheckInClick,
-}: {
-  status: EventStatus;
-  onManageClick?: () => void;
-  onRegisterClick?: () => void;
-  onCheckInClick?: () => void;
-}) {
-  return (
-    <div className="flex w-full items-center">
-      <div className="flex-1">
-        {!['checked-in', 'rejected'].includes(status) && (
-          <EventStatusDetailsButton
-            onClick={
-              status === 'organizer'
-                ? onManageClick
-                : status === 'not-registered'
-                  ? onRegisterClick
-                  : onCheckInClick
-            }
-            Icon={
-              status === 'organizer'
-                ? ArrowRight
-                : status === 'not-registered'
-                  ? Ticket
-                  : QrCode
-            }
-            text={
-              status === 'organizer'
-                ? 'Manage Event'
-                : status === 'not-registered'
-                  ? 'Register for Event'
-                  : ['pending', 'checked-in'].includes(status)
-                    ? 'Check-in'
-                    : ''
-            }
-          />
-        )}
-      </div>
-      <div>
-        {!['organizer', 'not-registered'].includes(status) && (
-          <EventStatusDetailsBadge
-            status={
-              status === 'pending'
-                ? 'pending'
-                : status === 'event-not-started'
-                  ? 'approved'
-                  : status === 'not-checked-in'
-                    ? 'approved'
-                    : status === 'checked-in'
-                      ? 'checked-in'
-                      : 'rejected'
-            }
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
 function EventBadge({
   status,
   title,
@@ -137,25 +73,18 @@ function EventBadge({
 }
 
 export default function Page() {
-  const { id } = useParams<{ id: string }>();
+  const { eventPda } = useParams<{ eventPda: string }>();
   const router = useRouter();
   const { publicKey } = useWallet();
-  const { getEventAcc, getAttendeeAcc } = useAnchorProgram();
+  const [isSendingTransaction, setIsSendingTransaction] = useState<boolean>(false);
+  const { getEventAcc, getAttendeeAcc, registerForEvent, getCheckIntoEventIx } = useAnchorProgram();
   const {
     data: event,
-    isLoading,
-    error: eventError,
-  } = useSWR(`/events/${id}`, (id) => getEventAcc(new PublicKey(id)));
-  const { data: eventBadge, error: badgeError } = useSWR(
-    event,
-    async (event) => {
-      const metadataPda = getMetadataPda(event.badge!);
-      return await getMetadataAcc(metadataPda);
-    }
-  );
-  const { data: status = 'not-registered' } = useSWR(
-    [event, publicKey],
-    async (event: Event, publicKey: PublicKey) => {
+    isLoading: isEventLoading,
+  } = useSWR(eventPda, (eventPda) => getEventAcc(new PublicKey(eventPda)));
+  const { data: status, isLoading: isStatusLoading, error: statusError } = useSWR(
+    event && publicKey ? [event, publicKey] : null,
+    async ([event, publicKey]) => {
       const userPda = getUserPda(publicKey);
 
       let status: EventStatus = 'not-registered';
@@ -194,15 +123,33 @@ export default function Page() {
       return status;
     }
   );
+  const { data: eventBadge, isLoading: isBadgeLoading, error: badgeError } = useSWR(
+    event,
+    async (event) => {
+      const metadataPda = getMetadataPda(event.badge!);
+      return await getMetadataAcc(metadataPda);
+    }
+  );
+
+  async function handleRegister() {
+    setIsSendingTransaction(true);
+    
+    setIsSendingTransaction(false);
+  }
+
+  async function handleCheckIn() {
+    setIsSendingTransaction(true);
+
+    setIsSendingTransaction(false);
+   }
 
   // TODO: add error and loading states
-  if (eventError) return <p>{eventError.message}</p>;
+  if (statusError) return <p>{statusError.message}</p>;
   if (badgeError) return <p>{badgeError.message}</p>;
-  if (isLoading) return <p>Loading...</p>;
+  if (isEventLoading) return <p>Loading...</p>;
 
   return (
-    event &&
-    eventBadge && (
+    event && (
       <div className="container mx-auto max-w-5xl space-y-8 px-40 py-8">
         <div className="grid gap-8 md:grid-cols-[1fr,2fr]">
           <div className="space-y-6">
@@ -231,8 +178,8 @@ export default function Page() {
                   <Clock className="h-4 w-4" />
                   <span>
                     {Number(event.data.startTimestamp) &&
-                    Number(event.data.endTimestamp)
-                      ? `${new Date(Number(event.data.startTimestamp) * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} to ${new Date(event.data.endTimestamp * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}`
+                      Number(event.data.endTimestamp)
+                      ? `${new Date(Number(event.data.startTimestamp) * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} to ${new Date(event.data.endTimestamp * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
                       : 'Time not available'}
                   </span>
                 </div>
@@ -243,13 +190,57 @@ export default function Page() {
               </div>
             </div>
 
-            <EventStatusDetails
-              status={status}
-              onManageClick={() => router.push(`/events/${id}/manage`)}
-              onRegisterClick={() => console.log('Register for event')} // TODO: implement registerForEvent
-              onCheckInClick={() => console.log('Check in')} // TODO: implement checkIntoEvent
-            />
-
+            {isStatusLoading ? (
+              // TODO: add loading state
+              <p>Loading...</p>
+            ) : (
+              status && <div className="flex w-full items-center">
+                <div className="flex-1">
+                  {!['checked-in', 'rejected'].includes(status) && (
+                    <EventStatusDetailsButton
+                      onClick={status === 'organizer'
+                        ? () => router.push(`/events/${eventPda}/manage`)
+                        : status === 'not-registered'
+                          ? handleRegister
+                          : handleCheckIn // TODO: change to handleQR
+                      }
+                      Icon={
+                        status === 'organizer'
+                          ? ArrowRight
+                          : status === 'not-registered'
+                            ? Ticket
+                            : QrCode
+                      }
+                      text={
+                        status === 'organizer'
+                          ? 'Manage Event'
+                          : status === 'not-registered'
+                            ? 'Register for Event'
+                            : ['pending', 'checked-in'].includes(status)
+                              ? 'Check-in'
+                              : ''
+                      }
+                      disabled={['pending', 'event-not-started'].includes(status) || isSendingTransaction}
+                    />
+                  )}
+                </div>
+                <div>
+                  {!['organizer', 'not-registered'].includes(status) && (
+                    <EventStatusDetailsBadge
+                      status={
+                        status === 'pending'
+                          ? 'pending'
+                          : ['event-not-started', 'not-checked-in'].includes(status)
+                            ? 'approved'
+                            : status === 'checked-in'
+                              ? 'checked-in'
+                              : 'rejected'
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <h2 className="text-xl font-semibold">About</h2>
               <p className="ml-[1px] text-justify text-muted-foreground">
@@ -257,25 +248,30 @@ export default function Page() {
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4 rounded-lg">
-                <div className="relative flex h-24 w-24">
-                  <Image
-                    src={eventBadge.uri}
-                    alt="NFT Badge"
-                    fill
-                    className="rounded-lg object-cover"
-                  />
-                </div>
-                <div>
-                  <EventBadge
-                    status={status}
-                    title={eventBadge.name}
-                    symbol={eventBadge.symbol}
-                  />
+            {isBadgeLoading ? (
+              // TODO: add loading state
+              <p>Loading...</p>
+            ) : (
+              eventBadge && status && <div className="space-y-4">
+                <div className="flex items-center space-x-4 rounded-lg">
+                  <div className="relative flex h-24 w-24">
+                    <Image
+                      src={eventBadge.uri}
+                      alt="NFT Badge"
+                      fill
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                  <div>
+                    <EventBadge
+                      status={status}
+                      title={eventBadge.name}
+                      symbol={eventBadge.symbol}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

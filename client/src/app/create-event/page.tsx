@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -55,6 +55,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Cluster, Keypair } from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
+import useSWR from 'swr';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -65,6 +66,11 @@ export default function Page() {
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const eventImageInputRef = useRef<HTMLInputElement>(null);
   const badgeImageInputRef = useRef<HTMLInputElement>(null);
+  const { isLoading, error } = useSWR(publicKey, async (publicKey) => {
+    setEventImageSrc(getRandomDicebearLink('event', publicKey.toBase58()));
+    setBadgeImageSrc(getRandomDicebearLink('badge', publicKey.toBase58()));
+    return;
+  });
 
   const form = useForm<z.infer<typeof createEventFormSchema>>({
     resolver: zodResolver(createEventFormSchema),
@@ -90,11 +96,11 @@ export default function Page() {
         setIsUploading(true);
         const uploadedEventImageUri = await uploadFile(
           values.eventImage ??
-            (await fetchDicebearAsFile('event', publicKey!.toBase58()))
+          (await fetchDicebearAsFile('event', publicKey!.toBase58()))
         );
         const uploadedBadgeImageUri = await uploadFile(
           values.badgeImage ??
-            (await fetchDicebearAsFile('badge', publicKey!.toBase58()))
+          (await fetchDicebearAsFile('badge', publicKey!.toBase58()))
         );
         setIsUploading(false);
 
@@ -178,12 +184,9 @@ export default function Page() {
     }
   }
 
-  useEffect(() => {
-    if (publicKey) {
-      setEventImageSrc(getRandomDicebearLink('event', publicKey.toBase58()));
-      setBadgeImageSrc(getRandomDicebearLink('badge', publicKey.toBase58()));
-    }
-  }, [publicKey]);
+  // TODO: add error and loading states
+  if (error) return <p>{error.message}</p>;
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <div className="mx-auto max-w-4xl px-6 pb-24 pt-6">

@@ -10,14 +10,22 @@ export default function Page() {
     data: events,
     isLoading,
     error,
-  } = useSWR('/discover', getAllEventAcc);
+  } = useSWR('/api/events', async () => {
+    const allEvents = await getAllEventAcc();
+
+    allEvents.filter(({ account }) => {
+      return Number(account.data.startTimestamp) > Date.now();
+    });
+
+    return allEvents;
+  });
 
   // TODO: add error and loading states
   if (error) return <p>{error.message}</p>;
   if (isLoading) return <p>Loading...</p>;
 
-  return (
-    events && (
+  if (events) {
+    return events.length ? (
       <div className="mb-6 mt-2 px-72">
         <h1 className="mb-4 text-3xl font-bold">Discover Events</h1>
         <div className="grid w-full grid-cols-2 gap-8 justify-self-center">
@@ -27,16 +35,19 @@ export default function Page() {
             return (
               <DiscoverEventCard
                 key={publicKey.toBase58()}
-                eventPda={publicKey}
+                eventPda={publicKey.toBase58()}
                 name={data.name}
                 image={data.image}
-                startTimestamp={data.startTimestamp}
+                startTimestamp={Number(data.startTimestamp)}
                 location={data.location}
               />
             );
           })}
         </div>
       </div>
+    ) : (
+      // TODO: add no events found state
+      <p>No new events. Check back later!</p>
     )
-  );
+  }
 }

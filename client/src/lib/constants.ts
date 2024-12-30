@@ -29,3 +29,9 @@ export const ACCEPTED_IMAGE_TYPES = [
   'image/png',
   'image/svg+xml',
 ];
+export const ALLOWED_REGISTRATION_STATUSES = [
+  'approved',
+  'pending',
+  'checked-in',
+  'rejected',
+]

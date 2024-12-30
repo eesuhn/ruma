@@ -32,27 +32,16 @@ import useSWR from 'swr';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useParams } from 'next/navigation';
 import { PublicKey } from '@solana/web3.js';
-
-const allowedRegistrationStatues = [
-  'approved',
-  'pending',
-  'checked-in',
-  'rejected',
-]
+import { ALLOWED_REGISTRATION_STATUSES } from '@/lib/constants';
 
 export default function Page() {
-  const params = useParams<{ id: string }>();
+  const { eventPda } = useParams<{ eventPda: string }>();
   const { getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
   const [search, setSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedAttendee, setSelectedAttendee] = useState<any>(null);
-  const { data, isLoading, error } = useSWR([params.id, search], async () => {
-    const event = await getEventAcc(new PublicKey(params.id));
-
-    if (!event) {
-      throw new Error('Event not found');
-    }
-
+  const { data: event } = useSWR(eventPda, async (eventPda) => await getEventAcc(new PublicKey(eventPda)));
+  const { data: manageData, isLoading, error } = useSWR(event ? [event, search] : null, async ([event, search]) => {
     let attendees = [];
 
     const attendeeAccs = (await getMultipleAttendeeAcc(event.attendees)).filter((acc) => acc !== null);
@@ -104,9 +93,9 @@ export default function Page() {
   if (error) return <p>{error.message}</p>;
   if (isLoading) return <p>Loading...</p>;
 
-  return data && (
+  return manageData && (
     <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-3xl font-bold">{data.eventName}</h1>
+      <h1 className="mb-8 text-3xl font-bold">{manageData.eventName}</h1>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
@@ -124,7 +113,7 @@ export default function Page() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Guests</SelectItem>
-            {allowedRegistrationStatues.map((status) => (
+            {ALLOWED_REGISTRATION_STATUSES.map((status) => (
               <SelectItem key={status} value={status}>
                 {capitalizeFirstLetter(status)}
               </SelectItem>
@@ -135,7 +124,7 @@ export default function Page() {
       </div>
 
       <div className="divide-y rounded-lg border">
-        {data.attendees.map((attendee) => (
+        {manageData.attendees.map((attendee) => (
           <Dialog
             key={attendee.pda}
             onOpenChange={(open) => {
@@ -215,7 +204,7 @@ export default function Page() {
                               <SelectValue placeholder="Choose new status" />
                             </SelectTrigger>
                             <SelectContent>
-                              {allowedRegistrationStatues.map((status) => (
+                              {ALLOWED_REGISTRATION_STATUSES.map((status) => (
                                 <SelectItem key={status} value={status}>
                                   {capitalizeFirstLetter(status)}
                                 </SelectItem>

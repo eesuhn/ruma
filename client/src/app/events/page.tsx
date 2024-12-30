@@ -19,8 +19,8 @@ export default function Page() {
     data: registeredEvents,
     isLoading,
     error,
-  } = useSWR(async () => {
-    const userPda = getUserPda(publicKey!);
+  } = useSWR(publicKey, async (publicKey) => {
+    const userPda = getUserPda(publicKey);
     const allEvents = await getAllEventAcc();
 
     const upcoming: DisplayedEvent[] = [];
@@ -29,25 +29,12 @@ export default function Page() {
     allEvents.forEach(async (event) => {
       const { startTimestamp } = event.account.data;
       const isOrganizer = userPda.equals(event.account.organizer);
+      const isAttendee = !isOrganizer &&
+        event.account.attendees.includes(getAttendeePda(userPda, event.publicKey));
 
-      if (isOrganizer) {
-        if (Number(startTimestamp) > Date.now()) {
-          upcoming.push({ event, isOrganizer });
-        } else {
-          past.push({ event, isOrganizer });
-        }
-
-        return;
-      } else {
-        const attendeePda = getAttendeePda(userPda, event.publicKey);
-
-        if (event.account.attendees.includes(attendeePda)) {
-          if (Number(startTimestamp) > Date.now()) {
-            upcoming.push({ event, isOrganizer });
-          } else {
-            past.push({ event, isOrganizer });
-          }
-        }
+      if (isOrganizer || isAttendee) {
+        const targetArray = Number(startTimestamp) > Date.now() ? upcoming : past;
+        targetArray.push({ event, isOrganizer });
       }
     });
 
@@ -63,8 +50,6 @@ export default function Page() {
   if (isLoading) return <p>Loading...</p>;
 
   if (registeredEvents) {
-    const { upcoming, past } = registeredEvents;
-
     return (
       <div className="container mx-auto px-72">
         <div className="mb-4 flex items-center justify-between">
@@ -79,7 +64,7 @@ export default function Page() {
 
         <Tabs value={activeTab}>
           <TabsContent value="upcoming" className="space-y-4">
-            {upcoming.map(
+            {registeredEvents.upcoming.map(
               ({
                 event,
                 isOrganizer,
@@ -99,7 +84,7 @@ export default function Page() {
             )}
           </TabsContent>
           <TabsContent value="past" className="space-y-4">
-            {past.map(
+            {registeredEvents.past.map(
               ({
                 event,
                 isOrganizer,
