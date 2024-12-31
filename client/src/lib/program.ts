@@ -3,7 +3,6 @@ import { AnchorProvider, Program, Wallet } from '@coral-xyz/anchor';
 import { CONNECTION } from './constants';
 import idl from '@/idl/ruma.json';
 import { PublicKey } from '@solana/web3.js';
-import { deserializeProgramAccount } from './utils';
 
 const provider = new AnchorProvider(CONNECTION, {} as Wallet);
 const program = new Program(idl as Ruma, provider);
@@ -11,7 +10,7 @@ const program = new Program(idl as Ruma, provider);
 export async function getAllUserAcc() {
   const allAccs = await program.account.user.all();
 
-  return allAccs.map((acc) => deserializeProgramAccount(acc));
+  return allAccs;
 }
 
 export async function getMultipleUserAcc(userPdas: string[]) {
@@ -19,19 +18,19 @@ export async function getMultipleUserAcc(userPdas: string[]) {
     userPdas.map((pda) => new PublicKey(pda))
   );
 
-  return accs.map((acc) => deserializeProgramAccount(acc));
+  return accs;
 }
 
 export async function getUserAcc(userPda: string) {
   const acc = await program.account.user.fetchNullable(new PublicKey(userPda));
 
-  return deserializeProgramAccount(acc);
+  return acc;
 }
 
 export async function getAllEventAcc() {
   const allAccs = await program.account.event.all();
 
-  return allAccs.map((acc) => deserializeProgramAccount(acc));
+  return allAccs;
 }
 
 export async function getMultipleEventAcc(eventPdas: string[]) {
@@ -39,7 +38,7 @@ export async function getMultipleEventAcc(eventPdas: string[]) {
     eventPdas.map((pda) => new PublicKey(pda))
   );
 
-  return accs.map((acc) => deserializeProgramAccount(acc));
+  return accs;
 }
 
 export async function getEventAcc(eventPda: string) {
@@ -47,13 +46,13 @@ export async function getEventAcc(eventPda: string) {
     new PublicKey(eventPda)
   );
 
-  return deserializeProgramAccount(acc);
+  return acc;
 }
 
 export async function getAllAttendeeAcc() {
   const allAccs = await program.account.attendee.all();
 
-  return allAccs.map((acc) => deserializeProgramAccount(acc));
+  return allAccs;
 }
 
 export async function getMultipleAttendeeAcc(attendeePdas: string[]) {
@@ -61,7 +60,7 @@ export async function getMultipleAttendeeAcc(attendeePdas: string[]) {
     attendeePdas.map((pda) => new PublicKey(pda))
   );
 
-  return accs.map((acc) => deserializeProgramAccount(acc));
+  return accs;
 }
 
 export async function getAttendeeAcc(attendeePda: string) {
@@ -69,5 +68,5 @@ export async function getAttendeeAcc(attendeePda: string) {
     new PublicKey(attendeePda)
   );
 
-  return deserializeProgramAccount(acc);
+  return acc;
 }

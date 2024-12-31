@@ -1,12 +1,14 @@
 import { VERIFICATION_PUBKEY } from '@/lib/constants';
 import { getAttendeeAcc, getEventAcc } from '@/lib/program';
 import { generateDataBytes } from '@/lib/utils';
+import { PublicKey } from '@solana/web3.js';
 import { NextRequest, NextResponse } from 'next/server';
 import { sign } from 'tweetnacl';
 
 export async function POST(req: NextRequest) {
   try {
-    const { payload } = await req.json();
+    const formData = await req.formData();
+    const payload = formData.get('payload') as string;
 
     if (!payload) {
       return NextResponse.json(
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (eventAcc.attendees.includes(attendeePda)) {
+    if (eventAcc.attendees.some(attendee => attendee.equals(new PublicKey(attendeePda)))) {
       // check if signature is signed by internal secret key
       const dataBytes = generateDataBytes(attendeePda, eventPda);
       const signatureBytes = new Uint8Array(Buffer.from(signature, 'hex'));

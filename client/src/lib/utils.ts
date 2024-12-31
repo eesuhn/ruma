@@ -147,7 +147,7 @@ export function deserializeProgramAccount(obj: { [key: string]: any } | null) {
     if (obj[key] instanceof PublicKey) {
       obj[key] = obj[key].toBase58();
     } else if (obj[key] instanceof BN) {
-      obj[key] = obj[key].toNumber();
+      obj[key] = Number(obj[key]);
     } else if (Array.isArray(obj[key])) {
       obj[key] = obj[key].map((item) => deserializeProgramAccount(item));
     } else if (obj[key] instanceof Object) {
