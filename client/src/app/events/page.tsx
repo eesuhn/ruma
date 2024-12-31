@@ -27,18 +27,19 @@ export default function Page() {
     const past: DisplayedEvent[] = [];
 
     allEvents.forEach(async (event) => {
-      const { startTimestamp } = event.account.data;
+      const { endTimestamp } = event.account.data;
+      console.log(endTimestamp)
       const isOrganizer = userPda.equals(event.account.organizer);
       const isAttendee =
         !isOrganizer &&
-        event.account.attendees.includes(
-          getAttendeePda(userPda, event.publicKey)
-        );
+        event.account.attendees.some((attendee) => attendee.equals(getAttendeePda(userPda, event.publicKey)));
 
       if (isOrganizer || isAttendee) {
-        const targetArray =
-          Number(startTimestamp) > Date.now() ? upcoming : past;
-        targetArray.push({ event, isOrganizer });
+        if (Number(endTimestamp) < Date.now()) {
+          upcoming.push({ event, isOrganizer });
+        } else {
+          past.push({ event, isOrganizer });
+        }
       }
     });
 
@@ -68,7 +69,7 @@ export default function Page() {
 
         <Tabs value={activeTab}>
           <TabsContent value="upcoming" className="space-y-4">
-            {registeredEvents.upcoming.map(
+            {registeredEvents.upcoming.length ? registeredEvents.upcoming.map(
               ({
                 event,
                 isOrganizer,
@@ -78,6 +79,7 @@ export default function Page() {
               }) => (
                 <EventCard
                   key={event.publicKey.toBase58()}
+                  eventPda={event.publicKey.toBase58()}
                   name={event.account.data.name}
                   image={event.account.data.image}
                   startTimestamp={event.account.data.startTimestamp}
@@ -85,10 +87,12 @@ export default function Page() {
                   isOrganizer={isOrganizer}
                 />
               )
+            ) : (
+              <p>No upcoming events</p>
             )}
           </TabsContent>
           <TabsContent value="past" className="space-y-4">
-            {registeredEvents.past.map(
+            {registeredEvents.past.length ? registeredEvents.past.map(
               ({
                 event,
                 isOrganizer,
@@ -98,6 +102,7 @@ export default function Page() {
               }) => (
                 <EventCard
                   key={event.publicKey.toBase58()}
+                  eventPda={event.publicKey.toBase58()}
                   name={event.account.data.name}
                   image={event.account.data.image}
                   startTimestamp={event.account.data.startTimestamp}
@@ -105,6 +110,8 @@ export default function Page() {
                   isOrganizer={isOrganizer}
                 />
               )
+            ) : (
+              <p>No past events</p>
             )}
           </TabsContent>
         </Tabs>
