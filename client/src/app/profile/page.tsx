@@ -21,9 +21,11 @@ import {
   getMetadataPda,
 } from '@/lib/umi';
 import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const { publicKey } = useWallet();
+  const router = useRouter();
   const { getUserAcc, getAllEventAcc, getAttendeeAcc } = useAnchorProgram();
   const { data: userData, isLoading: isUserLoading } = useSWR(
     publicKey,
@@ -32,7 +34,8 @@ export default function Page() {
       const userAcc = await getUserAcc(userPda);
 
       if (!userAcc) {
-        throw new Error('User not found.');
+        router.push('/create-profile');
+        return null;
       }
 
       return { userPda, userAcc };

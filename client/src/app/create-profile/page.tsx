@@ -47,6 +47,7 @@ export default function Page() {
 
     if (userAcc) {
       router.push('/profile');
+      return null;
     }
 
     setProfileImageSrc(getRandomDicebearLink('profile', publicKey.toBase58()));
