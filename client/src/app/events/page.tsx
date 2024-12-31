@@ -69,7 +69,7 @@ export default function Page() {
 
         <Tabs value={activeTab}>
           <TabsContent value="upcoming" className="space-y-4">
-            {registeredEvents.upcoming.length ? registeredEvents.upcoming.map(
+            {registeredEvents.upcoming && registeredEvents.upcoming.length ? registeredEvents.upcoming.map(
               ({
                 event,
                 isOrganizer,
@@ -92,7 +92,7 @@ export default function Page() {
             )}
           </TabsContent>
           <TabsContent value="past" className="space-y-4">
-            {registeredEvents.past.length ? registeredEvents.past.map(
+            {registeredEvents.past && registeredEvents.past.length ? registeredEvents.past.map(
               ({
                 event,
                 isOrganizer,
