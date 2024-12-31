@@ -25,7 +25,7 @@ export function QRTicket({
           disabled={disabled}
         >
           <Ticket className="mr-2 h-4 w-4" />
-          View Ticket
+          Check In
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
