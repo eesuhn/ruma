@@ -13,10 +13,9 @@ import {
   Keypair,
   PublicKey,
   TransactionInstruction,
-  TransactionSignature,
 } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { getEventPda, getUserPda } from '@/lib/pda';
+import { getUserPda } from '@/lib/pda';
 import { RUMA_WALLET } from '@/lib/constants';
 
 export function useAnchorProgram() {
@@ -84,15 +83,13 @@ export function useAnchorProgram() {
   }
 
   async function getCreateBadgeIx(
-    eventName: string,
     badgeName: string,
     badgeSymbol: string,
     badgeUri: string,
     maxSupply: number | null,
+    eventPda: PublicKey,
     masterMint: Keypair
   ): Promise<TransactionInstruction> {
-    const userPda = getUserPda(wallet.publicKey!);
-
     return await program.methods
       .createBadge(
         badgeName,
@@ -102,16 +99,16 @@ export function useAnchorProgram() {
       )
       .accounts({
         authority: wallet.publicKey!,
-        event: getEventPda(userPda, eventName),
+        event: eventPda,
         masterMint: masterMint.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .instruction();
   }
 
-  async function registerForEvent(
+  async function registerForEventIx(
     eventPda: PublicKey
-  ): Promise<TransactionSignature> {
+  ): Promise<TransactionInstruction> {
     return await program.methods
       .registerForEvent()
       .accounts({
@@ -119,14 +116,14 @@ export function useAnchorProgram() {
         event: eventPda,
       })
       .signers([RUMA_WALLET])
-      .rpc();
+      .instruction();
   }
 
-  async function changeAttendeeStatus(
+  async function changeAttendeeStatusIx(
     status: { approved: {} } | { rejected: {} },
     registrantPda: PublicKey,
     eventPda: PublicKey
-  ): Promise<TransactionSignature> {
+  ): Promise<TransactionInstruction> {
     return await program.methods
       .changeAttendeeStatus(status)
       .accounts({
@@ -134,7 +131,7 @@ export function useAnchorProgram() {
         event: eventPda,
       })
       .signers([RUMA_WALLET])
-      .rpc();
+      .instruction();
   }
 
   async function getCheckIntoEventIx(
@@ -213,8 +210,8 @@ export function useAnchorProgram() {
     getCreateProfileIx,
     getCreateEventIx,
     getCreateBadgeIx,
-    registerForEvent,
-    changeAttendeeStatus,
+    registerForEventIx,
+    changeAttendeeStatusIx,
     getCheckIntoEventIx,
     getAllUserAcc,
     getMultipleUserAcc,

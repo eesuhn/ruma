@@ -56,6 +56,7 @@ import { Cluster, Keypair } from '@solana/web3.js';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
 import useSWR from 'swr';
+import { getEventPda, getUserPda } from '@/lib/pda';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -96,11 +97,11 @@ export default function Page() {
         setIsUploading(true);
         const uploadedEventImageUri = await uploadFile(
           values.eventImage ??
-          (await fetchDicebearAsFile('event', publicKey!.toBase58()))
+          (await fetchDicebearAsFile('event', publicKey.toBase58()))
         );
         const uploadedBadgeImageUri = await uploadFile(
           values.badgeImage ??
-          (await fetchDicebearAsFile('badge', publicKey!.toBase58()))
+          (await fetchDicebearAsFile('badge', publicKey.toBase58()))
         );
         setIsUploading(false);
 
@@ -135,18 +136,18 @@ export default function Page() {
         const masterMint = Keypair.generate();
 
         const createBadgeIx = await getCreateBadgeIx(
-          eventName,
           badgeName,
           badgeSymbol,
           uploadedBadgeImageUri,
           capacity,
-          masterMint
+          getEventPda(getUserPda(publicKey), eventName),
+          masterMint,
         );
 
         const tx = await setComputeUnitLimitAndPrice(
           connection,
           [createEventIx, createBadgeIx],
-          publicKey!
+          publicKey
         );
 
         tx.recentBlockhash = blockhash;
