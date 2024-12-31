@@ -86,8 +86,8 @@ export default function Page() {
     isLoading,
     error,
   } = useSWR(
-    event && event.badge ? [event, event.badge, search] : null,
-    async ([event, badge, search]) => {
+    event && event.badge ? [event, event.badge] : null,
+    async ([event, badge]) => {
       let attendees: ManageAttendeeObject[] = [];
 
       const attendeeAccs = (
@@ -107,12 +107,6 @@ export default function Page() {
             image: userAccs[i].data.image,
           };
         })
-        .filter((attendee) => {
-          return (
-            attendee.name.toLowerCase().includes(search.toLowerCase()) &&
-            (statusFilter === 'all' || statusFilter === attendee.status)
-          );
-        });
 
       const masterMetadataPda = getMetadataPda(badge);
       const masterEditionPda = getMasterOrPrintedEditionPda(badge);
@@ -134,6 +128,14 @@ export default function Page() {
       };
     }
   );
+  const { data: filteredAttendees } = useSWR(eventData ? [eventData.attendees, search, statusFilter] : null, ([attendees, search, statusFilter]) => {
+    return attendees.filter((attendee) => {
+      return (
+        attendee.name.toLowerCase().includes(search.toLowerCase()) &&
+        (statusFilter === 'all' || statusFilter === attendee.status)
+      );
+    });
+  })
 
   const form = useForm<z.infer<typeof statusFormSchema>>({
     resolver: zodResolver(statusFormSchema),
@@ -315,8 +317,8 @@ export default function Page() {
         </div>
 
         <div className="divide-y rounded-lg border">
-          {eventData.attendees.length ? (
-            eventData.attendees.map((attendee) => (
+          {filteredAttendees && filteredAttendees.length ? (
+            filteredAttendees.map((attendee) => (
               <Dialog
                 key={attendee.attendeePda}
                 onOpenChange={(open) => {
