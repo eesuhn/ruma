@@ -62,52 +62,54 @@ export default function Page() {
   });
 
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
-    try {
-      setIsUploading(true);
-      const uploadedImageUri = await uploadFile(
-        values.profileImage ??
-        (await fetchDicebearAsFile('profile', publicKey!.toBase58()))
-      );
-      setIsUploading(false);
+    if (publicKey) {
+      try {
+        setIsUploading(true);
+        const uploadedImageUri = await uploadFile(
+          values.profileImage ??
+          (await fetchDicebearAsFile('profile', publicKey.toBase58()))
+        );
+        setIsUploading(false);
 
-      const ix = await getCreateProfileIx(values.name, uploadedImageUri);
-      const tx = await setComputeUnitLimitAndPrice(
-        connection,
-        [ix],
-        publicKey!
-      );
+        const ix = await getCreateProfileIx(values.name, uploadedImageUri);
+        const tx = await setComputeUnitLimitAndPrice(
+          connection,
+          [ix],
+          publicKey,
+        );
 
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash();
-      tx.recentBlockhash = blockhash;
-      tx.lastValidBlockHeight = lastValidBlockHeight;
+        const { blockhash, lastValidBlockHeight } =
+          await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.lastValidBlockHeight = lastValidBlockHeight;
 
-      const signature = await sendTransaction(tx, connection);
+        const signature = await sendTransaction(tx, connection);
 
-      await connection.confirmTransaction({
-        signature,
-        blockhash,
-        lastValidBlockHeight,
-      });
-
-      toast({
-        title: 'Profile created successfully',
-        description: getExplorerLink(
-          'tx',
+        await connection.confirmTransaction({
           signature,
-          process.env.NEXT_PUBLIC_RPC_CLUSTER! as Cluster
-        ),
-      });
-    } catch (error) {
-      console.error(error);
+          blockhash,
+          lastValidBlockHeight,
+        });
 
-      toast({
-        title: 'Error',
-        description: 'Failed to create profile. Please try again.',
-        variant: 'destructive',
-      });
+        toast({
+          title: 'Profile created successfully',
+          description: getExplorerLink(
+            'tx',
+            signature,
+            process.env.NEXT_PUBLIC_RPC_CLUSTER! as Cluster
+          ),
+        });
+      } catch (error) {
+        console.error(error);
 
-      setIsUploading(false);
+        toast({
+          title: 'Error',
+          description: 'Failed to create profile. Please try again.',
+          variant: 'destructive',
+        });
+
+        setIsUploading(false);
+      }
     }
   }
 
