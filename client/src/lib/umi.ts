@@ -14,7 +14,7 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 
-export const umi = createUmi(CONNECTION.rpcEndpoint, 'confirmed');
+const umi = createUmi(CONNECTION.rpcEndpoint, 'confirmed');
 
 export function getMasterOrPrintedEditionPda(
   mintPubkey: PublicKey
