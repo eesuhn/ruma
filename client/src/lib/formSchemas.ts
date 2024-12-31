@@ -59,8 +59,8 @@ export const createEventFormSchema = z.object({
     })
     .optional(),
   visibility: z.string(),
-  startDate: z.date(),
-  endDate: z.date().nullable(),
+  startDate: z.date().nullable(),
+  endDate: z.date().nullable().optional(),
   location: z.string().min(1, {
     message: 'Location is required.',
   }),
