@@ -44,7 +44,9 @@ export function handleImageClick(ref: RefObject<HTMLInputElement>) {
 }
 
 export function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^\w/, (c) => c.toUpperCase());
 }
 
 export function toCamelCase(str: string): string {
