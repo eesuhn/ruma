@@ -49,7 +49,7 @@ import {
   ALLOWED_REGISTRATION_STATUSES,
   RUMA_WALLET,
 } from '@/lib/constants';
-import { useConnection } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
   getMasterEditionAcc,
   getMasterOrPrintedEditionPda,
@@ -60,6 +60,7 @@ import { getUserPda } from '@/lib/pda';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
+  const { sendTransaction } = useWallet();
   const { connection } = useConnection();
   const {
     getChangeAttendeeStatusIx,
@@ -173,6 +174,7 @@ export default function Page() {
         }).compileToV0Message();
 
         const tx = new VersionedTransaction(messageV0);
+        tx.sign([RUMA_WALLET])
 
         const signature = await connection.sendTransaction(tx);
         await connection.confirmTransaction({
@@ -199,11 +201,13 @@ export default function Page() {
         setIsSendingTransaction(true);
 
         try {
+          const editionMint = Keypair.generate();
+
           const ix = await getCheckIntoEventIx(
             eventData.currentEdition + 1,
             userPda,
             attendeePda,
-            Keypair.generate(),
+            editionMint,
             eventData.masterMint,
             eventData.masterAtaPda,
             eventData.masterMetadataPda,
@@ -232,8 +236,9 @@ export default function Page() {
           }).compileToV0Message();
 
           const tx = new VersionedTransaction(messageV0);
+          tx.sign([RUMA_WALLET, editionMint])
 
-          const signature = await connection.sendTransaction(tx);
+          const signature = await sendTransaction(tx, connection);
           await connection.confirmTransaction({
             signature,
             blockhash,
@@ -249,7 +254,7 @@ export default function Page() {
         setIsSendingTransaction(false);
       }
     },
-    [connection, eventData, getCheckIntoEventIx]
+    [connection, eventData, getCheckIntoEventIx, sendTransaction]
   );
 
   const handleQRScan = useCallback(

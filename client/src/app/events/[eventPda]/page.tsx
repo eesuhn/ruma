@@ -198,6 +198,7 @@ export default function Page() {
       }).compileToV0Message();
 
       const tx = new VersionedTransaction(messageV0);
+      tx.sign([RUMA_WALLET]);
 
       const signature = await connection.sendTransaction(tx);
       await connection.confirmTransaction({

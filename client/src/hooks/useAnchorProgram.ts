@@ -12,7 +12,6 @@ import idl from '@/idl/ruma.json';
 import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { getUserPda } from '@/lib/pda';
-import { RUMA_WALLET } from '@/lib/constants';
 
 export function useAnchorProgram() {
   const { connection } = useConnection();
@@ -111,7 +110,6 @@ export function useAnchorProgram() {
         registrant: getUserPda(wallet.publicKey!),
         event: eventPda,
       })
-      .signers([RUMA_WALLET])
       .instruction();
   }
 
@@ -126,7 +124,6 @@ export function useAnchorProgram() {
         registrant: registrantPda,
         event: eventPda,
       })
-      .signers([RUMA_WALLET])
       .instruction();
   }
 
@@ -153,7 +150,6 @@ export function useAnchorProgram() {
         masterEdition: masterEditionPda,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([RUMA_WALLET, editionMint])
       .instruction();
   }
 
