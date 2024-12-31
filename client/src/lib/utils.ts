@@ -12,6 +12,7 @@ import {
 } from '@solana/web3.js';
 import { getSimulationComputeUnits } from '@solana-developers/helpers';
 import { DisplayedEvent } from '@/types/event';
+import { BN } from '@coral-xyz/anchor';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -138,4 +139,29 @@ export function sortEventsByTimestamp(
       Number(a.event.account.data.startTimestamp) -
       Number(b.event.account.data.startTimestamp)
   );
+}
+
+export function generateDataBytes(attendeePda: string, eventPda: string): Uint8Array {
+  const data = `${attendeePda}-${eventPda}`;
+  return new Uint8Array(Buffer.from(data));
+}
+
+export function deserializeProgramAccount(obj: { [key: string]: any } | null) {
+  if (obj === null) {
+    return null;
+  }
+
+  for (const key in obj) {
+    if (obj[key] instanceof PublicKey) {
+      obj[key] = obj[key].toBase58();
+    } else if (obj[key] instanceof BN) {
+      obj[key] = obj[key].toNumber();
+    } else if (Array.isArray(obj[key])) {
+      obj[key] = obj[key].map((item) => deserializeProgramAccount(item));
+    } else if (obj[key] instanceof Object) {
+      obj[key] = deserializeProgramAccount(obj[key]);
+    }
+  }
+
+  return obj;
 }

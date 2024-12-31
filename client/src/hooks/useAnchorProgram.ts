@@ -106,7 +106,7 @@ export function useAnchorProgram() {
       .instruction();
   }
 
-  async function registerForEventIx(
+  async function getRegisterForEventIx(
     eventPda: PublicKey
   ): Promise<TransactionInstruction> {
     return await program.methods
@@ -119,7 +119,7 @@ export function useAnchorProgram() {
       .instruction();
   }
 
-  async function changeAttendeeStatusIx(
+  async function getChangeAttendeeStatusIx(
     status: { approved: {} } | { rejected: {} },
     registrantPda: PublicKey,
     eventPda: PublicKey
@@ -210,8 +210,8 @@ export function useAnchorProgram() {
     getCreateProfileIx,
     getCreateEventIx,
     getCreateBadgeIx,
-    registerForEventIx,
-    changeAttendeeStatusIx,
+    getRegisterForEventIx,
+    getChangeAttendeeStatusIx,
     getCheckIntoEventIx,
     getAllUserAcc,
     getMultipleUserAcc,
