@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col">
-        <SWRConfig value={{ suspense: false }}>
+        <SWRConfig value={{ suspense: false, revalidateOnFocus: false }}>
           <SolanaProvider>
             <Navbar />
             <main className="mt-24 flex-grow">{children}</main>
