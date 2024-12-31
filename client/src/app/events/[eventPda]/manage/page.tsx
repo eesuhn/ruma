@@ -109,7 +109,7 @@ export default function Page() {
         .filter((attendee) => {
           return (
             attendee.name.toLowerCase().includes(search.toLowerCase()) &&
-            ['all', statusFilter].includes(attendee.status)
+            (statusFilter === 'all' || statusFilter === attendee.status)
           );
         });
 
