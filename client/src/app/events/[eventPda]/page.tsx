@@ -98,7 +98,15 @@ export default function Page() {
   } = useAnchorProgram();
   const { data: event, isLoading: isEventLoading } = useSWR(
     eventPda,
-    (eventPda) => getEventAcc(new PublicKey(eventPda))
+    async (eventPda) => {
+      const eventAcc = await getEventAcc(new PublicKey(eventPda))
+
+      if(!eventAcc) {
+        throw new Error('Event not found.');
+      }
+
+      return eventAcc;
+    }
   );
   const {
     data: attendeeData,
@@ -242,7 +250,7 @@ export default function Page() {
                   <Clock className="h-4 w-4" />
                   <span>
                     {Number(event.data.startTimestamp) &&
-                    Number(event.data.endTimestamp)
+                      Number(event.data.endTimestamp)
                       ? `${new Date(Number(event.data.startTimestamp) * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} to ${new Date(event.data.endTimestamp * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
                       : 'Time not available'}
                   </span>
@@ -264,69 +272,69 @@ export default function Page() {
                     {!['checked-in', 'rejected'].includes(
                       attendeeData.status
                     ) && (
-                      <EventStatusDetailsButton
-                        onClick={
-                          attendeeData.status === 'organizer'
-                            ? () => router.push(`/events/${eventPda}/manage`)
-                            : attendeeData.status === 'not-registered'
-                              ? handleRegister
-                              : undefined
-                        }
-                        Icon={
-                          attendeeData.status === 'organizer'
-                            ? ArrowRight
-                            : attendeeData.status === 'not-registered'
-                              ? Ticket
-                              : QrCode
-                        }
-                        text={
-                          attendeeData.status === 'organizer'
-                            ? 'Manage Event'
-                            : attendeeData.status === 'not-registered'
-                              ? 'Register for Event'
-                              : ['pending', 'checked-in'].includes(
-                                    attendeeData.status
-                                  )
-                                ? 'Check-in'
-                                : ''
-                        }
-                        disabled={
-                          ['pending', 'event-not-started'].includes(
-                            attendeeData.status
-                          ) || isSendingTransaction
-                        }
-                      />
-                    )}
+                        <EventStatusDetailsButton
+                          onClick={
+                            attendeeData.status === 'organizer'
+                              ? () => router.push(`/events/${eventPda}/manage`)
+                              : attendeeData.status === 'not-registered'
+                                ? handleRegister
+                                : undefined
+                          }
+                          Icon={
+                            attendeeData.status === 'organizer'
+                              ? ArrowRight
+                              : attendeeData.status === 'not-registered'
+                                ? Ticket
+                                : QrCode
+                          }
+                          text={
+                            attendeeData.status === 'organizer'
+                              ? 'Manage Event'
+                              : attendeeData.status === 'not-registered'
+                                ? 'Register for Event'
+                                : ['pending', 'checked-in'].includes(
+                                  attendeeData.status
+                                )
+                                  ? 'Check-in'
+                                  : ''
+                          }
+                          disabled={
+                            ['pending', 'event-not-started'].includes(
+                              attendeeData.status
+                            ) || isSendingTransaction
+                          }
+                        />
+                      )}
                     {['event-not-started', 'not-checked-in'].includes(
                       attendeeData.status
                     ) && (
-                      <QRTicket
-                        qrUri={attendeeData.qrUri}
-                        disabled={
-                          ['event-not-started'].includes(attendeeData.status) ||
-                          isSendingTransaction
-                        }
-                      />
-                    )}
+                        <QRTicket
+                          qrUri={attendeeData.qrUri}
+                          disabled={
+                            ['event-not-started'].includes(attendeeData.status) ||
+                            isSendingTransaction
+                          }
+                        />
+                      )}
                   </div>
                   <div>
                     {!['organizer', 'not-registered'].includes(
                       attendeeData.status
                     ) && (
-                      <EventStatusDetailsBadge
-                        status={
-                          attendeeData.status === 'pending'
-                            ? 'pending'
-                            : ['event-not-started', 'not-checked-in'].includes(
-                                  attendeeData.status
-                                )
-                              ? 'approved'
-                              : attendeeData.status === 'checked-in'
-                                ? 'checked-in'
-                                : 'rejected'
-                        }
-                      />
-                    )}
+                        <EventStatusDetailsBadge
+                          status={
+                            attendeeData.status === 'pending'
+                              ? 'pending'
+                              : ['event-not-started', 'not-checked-in'].includes(
+                                attendeeData.status
+                              )
+                                ? 'approved'
+                                : attendeeData.status === 'checked-in'
+                                  ? 'checked-in'
+                                  : 'rejected'
+                          }
+                        />
+                      )}
                   </div>
                 </div>
               )
