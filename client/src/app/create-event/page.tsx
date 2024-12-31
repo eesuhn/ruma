@@ -251,7 +251,7 @@ export default function Page() {
                         <FormLabel>Event Name</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="BuidlerHub: Blockchain 101"
+                            placeholder="Taco Tuesday w/ Friends"
                             {...field}
                           />
                         </FormControl>
@@ -443,7 +443,7 @@ export default function Page() {
                     <FormLabel>About</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Tell us about your event"
+                        placeholder="Tell the world about your event"
                         className="resize-none"
                         {...field}
                       />
@@ -582,7 +582,7 @@ export default function Page() {
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="Chill Guy" {...field} />
+                          <Input placeholder="Sirracha Senorita" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -595,7 +595,7 @@ export default function Page() {
                       <FormItem>
                         <FormLabel>Symbol</FormLabel>
                         <FormControl>
-                          <Input placeholder="CHG" {...field} />
+                          <Input placeholder="SEN" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
