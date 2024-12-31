@@ -52,6 +52,7 @@ import {
 } from '@/lib/constants';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import {
+  getEditionMarkerPda,
   getMasterEditionAcc,
   getMasterOrPrintedEditionPda,
   getMetadataPda,
@@ -62,7 +63,7 @@ import { statusColors } from '@/lib/colorsRecord';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
-  const { sendTransaction } = useWallet();
+  const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const {
     getChangeAttendeeStatusIx,
@@ -86,8 +87,8 @@ export default function Page() {
     isLoading,
     error,
   } = useSWR(
-    event && event.badge ? [event, event.badge] : null,
-    async ([event, badge]) => {
+    publicKey && event && event.badge ? [publicKey, event, event.badge] : null,
+    async ([publicKey, event, badge]) => {
       let attendees: ManageAttendeeObject[] = [];
 
       const attendeeAccs = (
@@ -111,17 +112,20 @@ export default function Page() {
       const masterMetadataPda = getMetadataPda(badge);
       const masterEditionPda = getMasterOrPrintedEditionPda(badge);
       const masterEditionAcc = await getMasterEditionAcc(masterEditionPda);
+      const nextEdition = Number(masterEditionAcc.supply) + 1;
+      const editionMarkerPda = getEditionMarkerPda(badge, nextEdition);
       const masterAtaPda = getAssociatedTokenAddressSync(
         badge,
-        getUserPda(event.organizer),
+        getUserPda(publicKey),
         true
       );
 
       return {
         eventName: event.data.name,
         attendees,
-        currentEdition: Number(masterEditionAcc.supply),
+        nextEdition,
         masterMint: badge,
+        editionMarkerPda: new PublicKey(editionMarkerPda),
         masterAtaPda,
         masterMetadataPda: new PublicKey(masterMetadataPda),
         masterEditionPda: new PublicKey(masterEditionPda),
@@ -187,6 +191,8 @@ export default function Page() {
           lastValidBlockHeight,
         });
 
+        // TODO: add mutation
+
         // TODO: add success toast
       } catch (err) {
         console.error(err);
@@ -208,9 +214,10 @@ export default function Page() {
           const editionMint = Keypair.generate();
 
           const ix = await getCheckIntoEventIx(
-            eventData.currentEdition + 1,
+            eventData.nextEdition,
             userPda,
             attendeePda,
+            eventData.editionMarkerPda,
             editionMint,
             eventData.masterMint,
             eventData.masterAtaPda,

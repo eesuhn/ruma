@@ -131,6 +131,7 @@ export function useAnchorProgram() {
     editionNumber: number,
     registrantUserPda: PublicKey,
     attendeePda: PublicKey,
+    editionMarkerPda: PublicKey,
     editionMint: Keypair,
     masterMintPubkey: PublicKey,
     masterAtaPda: PublicKey,
@@ -139,11 +140,12 @@ export function useAnchorProgram() {
   ): Promise<TransactionInstruction> {
     return await program.methods
       .checkIntoEvent(new BN(editionNumber))
-      .accounts({
+      .accountsPartial({
         authority: wallet.publicKey!,
         registrant: registrantUserPda,
         attendee: attendeePda,
         editionMint: editionMint.publicKey,
+        editionMarkerPda,
         masterMint: masterMintPubkey,
         masterTokenAccount: masterAtaPda,
         masterMetadata: masterMetadataPda,
