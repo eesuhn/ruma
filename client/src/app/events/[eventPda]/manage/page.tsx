@@ -407,7 +407,7 @@ export default function Page() {
                           )}
                         />
                         <div className="flex justify-end">
-                          <Button type="submit" className="bg-black text-white">
+                          <Button type="submit" className="bg-black text-white" disabled={isSendingTransaction}>
                             Save Changes
                           </Button>
                         </div>

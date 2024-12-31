@@ -32,7 +32,7 @@ export function QRTicket({
         <DialogHeader>
           <DialogTitle>Your Event Ticket</DialogTitle>
         </DialogHeader>
-        <div className="aspect-square w-full overflow-hidden rounded-lg">
+        <div className="aspect-auto w-full overflow-hidden rounded-lg flex justify-center">
           <Image src={qrUri} alt="Event ticket" width={300} height={300} />
         </div>
         <p className="text-center text-sm text-muted-foreground">

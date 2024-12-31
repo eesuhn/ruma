@@ -30,13 +30,7 @@ export async function GET(req: NextRequest) {
     const payload = `${attendeePda}-${eventPda}-${signature}`;
 
     // generate encoded QR code
-    const ticket = toDataURL(payload, (err, url) => {
-      if (err) {
-        throw err;
-      }
-
-      return url;
-    });
+    const ticket = await toDataURL(payload);
 
     return NextResponse.json({
       ticket,

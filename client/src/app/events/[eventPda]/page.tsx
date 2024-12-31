@@ -140,7 +140,7 @@ export default function Page() {
           } else if (attendeeAcc.status.approved) {
             if (attendeeAcc.status.checkedIn) {
               status = 'checked-in';
-            } else if (Number(event.data.startTimestamp) > Date.now()) {
+            } else if (Number(event.data.startTimestamp) < Date.now()) {
               status = 'not-checked-in';
             } else {
               status = 'event-not-started';
@@ -269,7 +269,7 @@ export default function Page() {
               attendeeData && (
                 <div className="flex w-full items-center">
                   <div className="flex-1">
-                    {!['checked-in', 'rejected'].includes(
+                    {!['checked-in', 'rejected', 'not-checked-in'].includes(
                       attendeeData.status
                     ) && (
                         <EventStatusDetailsButton
@@ -311,7 +311,7 @@ export default function Page() {
                         <QRTicket
                           qrUri={attendeeData.qrUri}
                           disabled={
-                            ['event-not-started'].includes(attendeeData.status) ||
+                            'event-not-started' === attendeeData.status ||
                             isSendingTransaction
                           }
                         />
