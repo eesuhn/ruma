@@ -1,3 +1,5 @@
+'use client';
+
 import { Trophy, Users } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
@@ -197,7 +199,7 @@ export default function Page() {
               </div>
             ) : (
               <h2 className="mt-12 text-center text-xl font-bold">
-                No badges Collected
+                No badges collected
               </h2>
             )}
           </div>
