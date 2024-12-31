@@ -57,6 +57,10 @@ export function toCamelCase(str: string): string {
     .join('');
 }
 
+export function truncateAddress(address: string, length: number = 4): string {
+  return `${address.slice(0, length)}...${address.slice(-length)}`;
+}
+
 export async function setComputeUnitLimitAndPrice(
   connection: Connection,
   instructions: TransactionInstruction[],

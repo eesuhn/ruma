@@ -29,6 +29,7 @@ import {
   getComputeLimitIx,
   getComputePriceIx,
   toCamelCase,
+  truncateAddress,
   verifyTicket,
 } from '@/lib/utils';
 import { ManageAttendeeObject, RegistrationStatus, StatusObject } from '@/types/event';
@@ -343,7 +344,7 @@ export default function Page() {
                       <div className="text-left">
                         <div className="font-medium">{attendee.name}</div>
                         <div className="text-sm text-gray-500">
-                          {attendee.attendeePda}
+                          {truncateAddress(attendee.attendeePda)}
                         </div>
                       </div>
                     </div>
@@ -368,7 +369,7 @@ export default function Page() {
                             {selectedAttendee.name}
                           </DialogTitle>
                           <p className="text-sm text-muted-foreground">
-                            {selectedAttendee.attendeePda}
+                            {truncateAddress(selectedAttendee.attendeePda)}
                           </p>
                         </div>
                       </div>
