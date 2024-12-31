@@ -6,8 +6,9 @@ import { toDataURL } from 'qrcode';
 
 export async function GET(req: NextRequest) {
   try {
-    const { attendeePda, eventPda }: { attendeePda: string; eventPda: string } =
-      await req.json();
+    const searchParams = req.nextUrl.searchParams;
+    const attendeePda = searchParams.get('attendeePda');
+    const eventPda = searchParams.get('eventPda');
 
     if (!attendeePda) {
       return NextResponse.json(

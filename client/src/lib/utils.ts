@@ -176,13 +176,11 @@ export async function generateTicket(
   attendeePda: PublicKey,
   eventPda: PublicKey
 ): Promise<string> {
-  const formData = new FormData();
-  formData.set('attendeePda', attendeePda.toBase58());
-  formData.set('eventPda', eventPda.toBase58());
+  const urlSearchParams = new URLSearchParams();
+  urlSearchParams.append('attendeePda', attendeePda.toBase58());
+  urlSearchParams.append('eventPda', eventPda.toBase58());
 
-  const response = await fetch('/api/ticket/generate', {
-    body: formData,
-  });
+  const response = await fetch(`/api/ticket/generate?${urlSearchParams.toString()}`);
 
   const data = await response.json();
 
