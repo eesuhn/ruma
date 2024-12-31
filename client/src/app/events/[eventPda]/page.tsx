@@ -33,6 +33,7 @@ import { getAttendeePda, getUserPda } from '@/lib/pda';
 import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 import { RUMA_WALLET } from '@/lib/constants';
 import { QRTicket } from '@/components/QRTicket';
+import { statusColors } from '@/lib/colorsRecord';
 
 function EventStatusDetailsButton({
   onClick,
@@ -55,7 +56,7 @@ function EventStatusDetailsButton({
 
 function EventStatusDetailsBadge({ status }: { status: RegistrationStatus }) {
   return (
-    <Badge className={`bg-status-${status} text-white`}>
+    <Badge className={`${statusColors[status]} text-white`}>
       {capitalizeFirstLetter(status)}
     </Badge>
   );

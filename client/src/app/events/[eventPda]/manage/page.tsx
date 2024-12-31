@@ -31,7 +31,7 @@ import {
   toCamelCase,
   verifyTicket,
 } from '@/lib/utils';
-import { ManageAttendeeObject, StatusObject } from '@/types/event';
+import { ManageAttendeeObject, RegistrationStatus, StatusObject } from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
 import { statusFormSchema } from '@/lib/formSchemas';
 import useSWR from 'swr';
@@ -57,6 +57,7 @@ import {
 } from '@/lib/umi';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getUserPda } from '@/lib/pda';
+import { statusColors } from '@/lib/colorsRecord';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
@@ -346,7 +347,7 @@ export default function Page() {
                         </div>
                       </div>
                     </div>
-                    <Badge className={`bg-badge-${attendee.status}`}>
+                    <Badge className={statusColors[attendee.status as RegistrationStatus]}>
                       {capitalizeFirstLetter(attendee.status)}
                     </Badge>
                   </button>

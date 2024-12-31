@@ -34,7 +34,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --status-pending: #f77f00;
-    --status-going: #79be79;
+    --status-approved: #79be79;
     --status-checked-in: #91d1ce;
     --status-rejected: #e5383b;
   }

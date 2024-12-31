@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { BN } from '@coral-xyz/anchor';
 import { RegistrationStatus } from '@/types/event';
 import { Button } from './ui/button';
+import { statusColors } from '@/lib/colorsRecord';
 
 function EventButtonTab({
   registrationStatus,
@@ -19,7 +20,7 @@ function EventButtonTab({
 
     return (
       <Badge
-        className={`bg-status-${registrationStatus} hover:bg-status-${registrationStatus} inline-block rounded-full px-3 py-1 text-sm font-normal`}
+        className={`${statusColors[registrationStatus]} inline-block rounded-full px-3 py-1 text-sm font-normal`}
       >
         {badgeName}
       </Badge>
