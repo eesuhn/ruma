@@ -15,12 +15,10 @@ import useSWR from 'swr';
 import { getAttendeePda, getUserPda } from '@/lib/pda';
 import {
   getEditionAcc,
-  getMasterEditionAcc,
   getMasterOrPrintedEditionPda,
   getMetadataAcc,
   getMetadataPda,
 } from '@/lib/umi';
-import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { useRouter } from 'next/navigation';
 
 export default function Page() {
@@ -51,23 +49,14 @@ export default function Page() {
     const badges = await Promise.all(
       userAcc.badges.map(async (badge) => {
         const { name, uri } = await getMetadataAcc(getMetadataPda(badge));
-        const { publicKey: userBadgePda, parent } = await getEditionAcc(
+        const { publicKey: userBadgePda } = await getEditionAcc(
           getMasterOrPrintedEditionPda(badge)
         );
-        const { publicKey: eventBadgePda } = await getMasterEditionAcc(
-          getMasterOrPrintedEditionPda(toWeb3JsPublicKey(parent))
-        );
-        const eventBadge = toWeb3JsPublicKey(eventBadgePda);
-        const matchedEvent = allEvents.find(({ account }) =>
-          account.badge?.equals(eventBadge)
-        );
-        const eventName = matchedEvent?.account.data.name ?? 'Unknown Event';
 
         return {
           pda: userBadgePda,
           name,
           image: uri,
-          eventName,
         };
       })
     );
@@ -171,12 +160,10 @@ export default function Page() {
                       pda,
                       name,
                       image,
-                      eventName,
                     }: {
                       pda: string;
                       name: string;
                       image: string;
-                      eventName: string;
                     }) => (
                       <TooltipProvider key={pda}>
                         <Tooltip>
@@ -194,9 +181,6 @@ export default function Page() {
                           <TooltipContent>
                             <p>
                               <strong>{name}</strong>
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              From: {eventName}
                             </p>
                           </TooltipContent>
                         </Tooltip>
