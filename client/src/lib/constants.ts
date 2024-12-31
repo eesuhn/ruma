@@ -34,4 +34,9 @@ export const ALLOWED_REGISTRATION_STATUSES = [
   'pending',
   'checked-in',
   'rejected',
-]
+];
+export const ALLOWED_CHANGED_STATUSES = [
+  'approved',
+  'checked-in',
+  'rejected',
+];

@@ -24,25 +24,27 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
-import { capitalizeFirstLetter } from '@/lib/utils';
-import { RegistrationStatus } from '@/types/event';
+import { capitalizeFirstLetter, getComputeLimitIx, getComputePriceIx, toCamelCase } from '@/lib/utils';
+import { ManageAttendeeObject, StatusObject } from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
 import { statusFormSchema } from '@/lib/formSchemas';
 import useSWR from 'swr';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useParams } from 'next/navigation';
-import { PublicKey } from '@solana/web3.js';
-import { ALLOWED_REGISTRATION_STATUSES } from '@/lib/constants';
+import { PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { ALLOWED_CHANGED_STATUSES, ALLOWED_REGISTRATION_STATUSES, RUMA_WALLET } from '@/lib/constants';
+import { useConnection } from '@solana/wallet-adapter-react';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
-  const { getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
+  const { connection } = useConnection();
+  const { changeAttendeeStatusIx, getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
   const [search, setSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedAttendee, setSelectedAttendee] = useState<any>(null);
-  const { data: event } = useSWR(eventPda, async (eventPda) => await getEventAcc(new PublicKey(eventPda)));
+  const [selectedAttendee, setSelectedAttendee] = useState<ManageAttendeeObject | null>(null);
+  const { data: event } = useSWR(eventPda, async (eventPda) => await getEventAcc(new PublicKey(eventPda))); // TODO: refactor
   const { data: manageData, isLoading, error } = useSWR(event ? [event, search] : null, async ([event, search]) => {
-    let attendees = [];
+    let attendees: ManageAttendeeObject[] = [];
 
     const attendeeAccs = (await getMultipleAttendeeAcc(event.attendees)).filter((acc) => acc !== null);
     const userAccs = (await getMultipleUserAcc(attendeeAccs.map((acc) => acc.user))).filter((acc) => acc !== null)
@@ -50,8 +52,9 @@ export default function Page() {
     attendees = attendeeAccs
       .map((acc, i) => {
         return {
-          pda: event.attendees[i].toBase58(),
+          attendeePda: event.attendees[i].toBase58(),
           status: Object.keys(acc.status)[0],
+          userPda: acc.user,
           name: userAccs[i].data.name,
           image: userAccs[i].data.image
         }
@@ -74,16 +77,52 @@ export default function Page() {
     },
   });
 
-  function handleStatusChange(values: z.infer<typeof statusFormSchema>) {
+  async function handleStatusChange(values: z.infer<typeof statusFormSchema>) {
     if (selectedAttendee) {
-      // TODO: implement changeAttendeeStatus
+      const status = { [toCamelCase(values.status)]: {} } as StatusObject;
+
+      try {
+        const ix = await changeAttendeeStatusIx(status, selectedAttendee.userPda, new PublicKey(eventPda));
+        const limitIx = await getComputeLimitIx(connection, [ix], RUMA_WALLET.publicKey);
+        const priceIx = await getComputePriceIx(connection);
+
+        const instructions: TransactionInstruction[] = [priceIx, ix];
+
+        if (limitIx) {
+          instructions.unshift(limitIx);
+        }
+
+        const { blockhash, lastValidBlockHeight } =
+          await connection.getLatestBlockhash();
+
+        const messageV0 = new TransactionMessage({
+          payerKey: RUMA_WALLET.publicKey,
+          recentBlockhash: blockhash,
+          instructions,
+        }).compileToV0Message();
+
+        const tx = new VersionedTransaction(messageV0);
+
+        const signature = await connection.sendTransaction(tx);
+        await connection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight,
+        });
+
+        // TODO: add success toast
+      } catch (err) {
+        console.error(err);
+        // TODO: add error toast
+      }
+
       form.reset();
       setSelectedAttendee(null);
     }
   };
 
   const handleQRScan = useCallback((data: string) => {
-    // TODO: implement checkIntoEvent
+    // TODO: call handleCheckIn here
     void data;
     window.alert('Verified');
     window.location.reload();
@@ -124,9 +163,9 @@ export default function Page() {
       </div>
 
       <div className="divide-y rounded-lg border">
-        {manageData.attendees.map((attendee) => (
+        {manageData.attendees.length ? manageData.attendees.map((attendee) => (
           <Dialog
-            key={attendee.pda}
+            key={attendee.attendeePda}
             onOpenChange={(open) => {
               if (!open) {
                 setSelectedAttendee(null);
@@ -139,7 +178,6 @@ export default function Page() {
                 className="flex w-full items-center justify-between p-4 hover:bg-gray-50"
                 onClick={() => {
                   setSelectedAttendee(attendee);
-                  form.setValue('status', attendee.status as RegistrationStatus);
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -153,7 +191,7 @@ export default function Page() {
                   <div className="text-left">
                     <div className="font-medium">{attendee.name}</div>
                     <div className="text-sm text-gray-500">
-                      {attendee.pda}
+                      {attendee.attendeePda}
                     </div>
                   </div>
                 </div>
@@ -162,24 +200,22 @@ export default function Page() {
                 </Badge>
               </button>
             </DialogTrigger>
-            <DialogContent>
+            {selectedAttendee && <DialogContent>
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  {selectedAttendee && (
-                    <Image
-                      src={selectedAttendee.image}
-                      alt={selectedAttendee.name}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
-                  )}
+                  <Image
+                    src={selectedAttendee.image}
+                    alt={selectedAttendee.name}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
                   <div>
                     <DialogTitle className="text-left">
-                      {selectedAttendee?.name}
+                      {selectedAttendee.name}
                     </DialogTitle>
                     <p className="text-sm text-muted-foreground">
-                      {selectedAttendee?.publicKey}
+                      {selectedAttendee.attendeePda}
                     </p>
                   </div>
                 </div>
@@ -192,7 +228,6 @@ export default function Page() {
                   <FormField
                     control={form.control}
                     name="status"
-                    defaultValue={selectedAttendee?.status}
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
@@ -204,7 +239,7 @@ export default function Page() {
                               <SelectValue placeholder="Choose new status" />
                             </SelectTrigger>
                             <SelectContent>
-                              {ALLOWED_REGISTRATION_STATUSES.map((status) => (
+                              {ALLOWED_CHANGED_STATUSES.map((status) => (
                                 <SelectItem key={status} value={status}>
                                   {capitalizeFirstLetter(status)}
                                 </SelectItem>
@@ -222,9 +257,13 @@ export default function Page() {
                   </div>
                 </form>
               </Form>
-            </DialogContent>
+            </DialogContent>}
           </Dialog>
-        ))}
+        )) : (
+          <p className="p-4 text-center text-gray-500">
+            No attendees registered
+          </p>
+        )}
       </div>
     </div>
   );
