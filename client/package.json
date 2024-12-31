@@ -38,6 +38,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.98.0",
+    "@types/qrcode": "^1.5.5",
     "bs58": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -45,6 +46,7 @@
     "lucide-react": "^0.462.0",
     "next": "15.0.3",
     "prettier": "^3.4.1",
+    "qrcode": "^1.5.4",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-day-picker": "8.10.1",
     "react-dom": "19.0.0-rc-66855b96-20241106",
@@ -54,6 +56,7 @@
     "swr": "^2.3.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "tweetnacl": "^1.0.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
