@@ -11,6 +11,8 @@ export function LandingPageBadge() {
     '/landing-page-badge',
     async () => {
       const events = await getAllEventAcc();
+      if (!events.length) return null;
+
       const { badge: randomBadge } =
         events[Math.floor(Math.random() * events.length)].account;
 
