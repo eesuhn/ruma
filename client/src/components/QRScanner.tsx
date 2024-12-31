@@ -21,6 +21,7 @@ export function QRScanner({
   disabled?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   // Note: The `ref` prop is not working
   // const scannerRef = useRef<any>(null);
 
@@ -30,8 +31,9 @@ export function QRScanner({
       error: Error | null | undefined
     ) => {
       if (error) return;
-      if (result) {
+      if (result && !isScanning) {
         const text = result.getText();
+        setIsScanning(true);
         const stopScan = await onScan(text);
 
         if (stopScan) {
@@ -41,6 +43,7 @@ export function QRScanner({
           window.location.reload();
         } else {
           console.log('continue scan');
+          setIsScanning(false);
         }
         return;
       }
@@ -82,7 +85,7 @@ export function QRScanner({
               onResult={handleResult}
               constraints={{ facingMode: 'environment' }}
               videoStyle={{ width: '100%', height: '100%' }}
-              scanDelay={200}
+              scanDelay={500}
               videoId="qr-reader-video"
             />
           )}
