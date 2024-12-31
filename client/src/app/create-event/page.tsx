@@ -168,7 +168,7 @@ export default function Page() {
           description: getExplorerLink(
             'tx',
             signature,
-            process.env.NEXT_PUBLIC_RPC_CLUSTER! as Cluster
+            process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster || 'devnet'
           ),
         });
       } catch (error) {
