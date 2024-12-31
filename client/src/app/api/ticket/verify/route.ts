@@ -48,32 +48,28 @@ export async function POST(req: NextRequest) {
     }
 
     if (eventAcc.attendees.includes(attendeePda)) {
-      // check if signature is signed by the internal secret key
+      // check if signature is signed by internal secret key
       const dataBytes = generateDataBytes(attendeePda, eventPda);
       const signatureBytes = new Uint8Array(Buffer.from(signature, 'hex'));
       const verified = sign.detached.verify(dataBytes, signatureBytes, VERIFICATION_PUBKEY);
 
       return verified
         ? NextResponse.json({
-          verified: true,
-          message: "Ticket verified successfully."
+          verified,
+          message: "Ticket verified successfully.",
+          attendeePda,
+          userPda: await attendeeAcc.user,
         })
-        : NextResponse.json(
-          {
-            error: "Invalid ticket signature."
-          },
-          {
-            status: 403,
-          }
-        );
+        : NextResponse.json({
+          verified,
+          message: "Invalid ticket signature.",
+        });
     } else {
       return NextResponse.json(
         {
-          error: "Attendee is not approved for this event."
+          verified: false,
+          message: "Attendee is not approved for this event."
         },
-        {
-          status: 403,
-        }
       )
     }
   } catch (err) {

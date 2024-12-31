@@ -24,26 +24,30 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
-import { capitalizeFirstLetter, getComputeLimitIx, getComputePriceIx, toCamelCase } from '@/lib/utils';
+import { capitalizeFirstLetter, getComputeLimitIx, getComputePriceIx, toCamelCase, verifyTicket } from '@/lib/utils';
 import { ManageAttendeeObject, StatusObject } from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
 import { statusFormSchema } from '@/lib/formSchemas';
 import useSWR from 'swr';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useParams } from 'next/navigation';
-import { PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { ALLOWED_CHANGED_STATUSES, ALLOWED_REGISTRATION_STATUSES, RUMA_WALLET } from '@/lib/constants';
 import { useConnection } from '@solana/wallet-adapter-react';
+import { getMasterEditionAcc, getMasterOrPrintedEditionPda, getMetadataPda } from '@/lib/umi';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { getUserPda } from '@/lib/pda';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
   const { connection } = useConnection();
-  const { changeAttendeeStatusIx, getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
+  const { getChangeAttendeeStatusIx, getCheckIntoEventIx, getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
   const [search, setSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedAttendee, setSelectedAttendee] = useState<ManageAttendeeObject | null>(null);
-  const { data: event } = useSWR(eventPda, async (eventPda) => await getEventAcc(new PublicKey(eventPda))); // TODO: refactor
-  const { data: manageData, isLoading, error } = useSWR(event ? [event, search] : null, async ([event, search]) => {
+  const [isSendingTransaction, setIsSendingTransaction] = useState<boolean>(false);
+  const { data: event } = useSWR(eventPda, async (eventPda) => await getEventAcc(new PublicKey(eventPda)));
+  const { data: eventData, isLoading, error } = useSWR(event && event.badge ? [event, event.badge, search] : null, async ([event, badge, search]) => {
     let attendees: ManageAttendeeObject[] = [];
 
     const attendeeAccs = (await getMultipleAttendeeAcc(event.attendees)).filter((acc) => acc !== null);
@@ -64,9 +68,23 @@ export default function Page() {
           && ['all', statusFilter].includes(attendee.status)
       })
 
+    const masterMetadataPda = getMetadataPda(badge);
+    const masterEditionPda = getMasterOrPrintedEditionPda(badge);
+    const masterEditionAcc = await getMasterEditionAcc(masterEditionPda);
+    const masterAtaPda = getAssociatedTokenAddressSync(
+      badge,
+      getUserPda(event.organizer),
+      true
+    );
+
     return {
       eventName: event.data.name,
       attendees,
+      currentEdition: Number(masterEditionAcc.supply),
+      masterMint: badge,
+      masterAtaPda,
+      masterMetadataPda: new PublicKey(masterMetadataPda),
+      masterEditionPda: new PublicKey(masterEditionPda),
     }
   })
 
@@ -77,12 +95,13 @@ export default function Page() {
     },
   });
 
-  async function handleStatusChange(values: z.infer<typeof statusFormSchema>) {
+  async function changeStatus(values: z.infer<typeof statusFormSchema>) {
     if (selectedAttendee) {
+      setIsSendingTransaction(true);
       const status = { [toCamelCase(values.status)]: {} } as StatusObject;
 
       try {
-        const ix = await changeAttendeeStatusIx(status, selectedAttendee.userPda, new PublicKey(eventPda));
+        const ix = await getChangeAttendeeStatusIx(status, selectedAttendee.userPda, new PublicKey(eventPda));
         const limitIx = await getComputeLimitIx(connection, [ix], RUMA_WALLET.publicKey);
         const priceIx = await getComputePriceIx(connection);
 
@@ -118,24 +137,86 @@ export default function Page() {
 
       form.reset();
       setSelectedAttendee(null);
+      setIsSendingTransaction(false);
     }
   };
 
-  const handleQRScan = useCallback((data: string) => {
-    // TODO: call handleCheckIn here
-    void data;
-    window.alert('Verified');
-    window.location.reload();
+  const checkIn = useCallback(async (userPda: PublicKey, attendeePda: PublicKey) => {
+    if (eventData) {
+      setIsSendingTransaction(true);
+
+      try {
+        const ix = await getCheckIntoEventIx(
+          eventData.currentEdition + 1,
+          userPda,
+          attendeePda,
+          Keypair.generate(),
+          eventData.masterMint,
+          eventData.masterAtaPda,
+          eventData.masterMetadataPda,
+          eventData.masterEditionPda,
+        );
+        const limitIx = await getComputeLimitIx(connection, [ix], RUMA_WALLET.publicKey);
+        const priceIx = await getComputePriceIx(connection);
+
+        const instructions: TransactionInstruction[] = [priceIx, ix];
+
+        if (limitIx) {
+          instructions.unshift(limitIx);
+        }
+
+        const { blockhash, lastValidBlockHeight } =
+          await connection.getLatestBlockhash();
+
+        const messageV0 = new TransactionMessage({
+          payerKey: RUMA_WALLET.publicKey,
+          recentBlockhash: blockhash,
+          instructions,
+        }).compileToV0Message();
+
+        const tx = new VersionedTransaction(messageV0);
+
+        const signature = await connection.sendTransaction(tx);
+        await connection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight,
+        });
+
+        // TODO: add success toast
+      } catch (err) {
+        console.error(err);
+        // TODO: add error toast
+      }
+
+      setIsSendingTransaction(false);
+    }
+  }, [connection, eventData, getCheckIntoEventIx]);
+
+  const handleQRScan = useCallback(async (payload: string) => {
+    // TODO: verify QR here
+    console.log(payload)
+    const { verified, message, attendeePda, userPda } = await verifyTicket(payload);
+
+    if (verified) {
+      // TODO: show promise toast for checkIn
+      console.log(message);
+      await checkIn(new PublicKey(userPda), new PublicKey(attendeePda));
+      return true;
+    } else {
+      // TODO: show error toast
+      console.log(message);
+      return false;
+    }
   }, []);
 
   // TODO: add error and loading states
   if (error) return <p>{error.message}</p>;
   if (isLoading) return <p>Loading...</p>;
 
-  return manageData && (
+  return eventData && (
     <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-3xl font-bold">{manageData.eventName}</h1>
-
+      <h1 className="mb-8 text-3xl font-bold">{eventData.eventName}</h1>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
@@ -159,11 +240,11 @@ export default function Page() {
             ))}
           </SelectContent>
         </Select>
-        <QRScanner onScan={handleQRScan} />
+        <QRScanner onScan={handleQRScan} disabled={isSendingTransaction} />
       </div>
 
       <div className="divide-y rounded-lg border">
-        {manageData.attendees.length ? manageData.attendees.map((attendee) => (
+        {eventData.attendees.length ? eventData.attendees.map((attendee) => (
           <Dialog
             key={attendee.attendeePda}
             onOpenChange={(open) => {
@@ -222,7 +303,7 @@ export default function Page() {
               </DialogHeader>
               <Form {...form}>
                 <form
-                  onSubmit={form.handleSubmit(handleStatusChange)}
+                  onSubmit={form.handleSubmit(changeStatus)}
                   className="space-y-4"
                 >
                   <FormField

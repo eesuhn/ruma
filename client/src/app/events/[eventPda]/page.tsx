@@ -12,17 +12,17 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
-import { Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { EventStatus, RegistrationStatus } from '@/types/event';
-import { capitalizeFirstLetter, getComputeLimitIx, getComputePriceIx } from '@/lib/utils';
+import { capitalizeFirstLetter, generateTicket, getComputeLimitIx, getComputePriceIx } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FC, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { getAttendeePda, getUserPda } from '@/lib/pda';
-import { getMasterEditionAcc, getMasterOrPrintedEditionPda, getMetadataAcc, getMetadataPda } from '@/lib/umi';
+import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 import { RUMA_WALLET } from '@/lib/constants';
-import { getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { QRTicket } from '@/components/QRTicket';
 
 function EventStatusDetailsButton({
   onClick,
@@ -80,7 +80,7 @@ export default function Page() {
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   const [isSendingTransaction, setIsSendingTransaction] = useState<boolean>(false);
-  const { getEventAcc, getAttendeeAcc, registerForEventIx, getCheckIntoEventIx } = useAnchorProgram();
+  const { getEventAcc, getAttendeeAcc, getRegisterForEventIx: registerForEventIx } = useAnchorProgram();
   const {
     data: event,
     isLoading: isEventLoading,
@@ -123,32 +123,21 @@ export default function Page() {
       }
 
       const attendeePda = getAttendeePda(userPda, new PublicKey(eventPda));
+      const qrUri = await generateTicket(attendeePda, new PublicKey(eventPda));
 
-      return { userPda, attendeePda, status }
+      return { userPda, attendeePda, status, qrUri }
     }
   );
   const { data: badge, isLoading: isBadgeLoading, error: badgeError } = useSWR(
-    event && event.badge ? { event, badge: event.badge } : null,
-    async ({ event, badge }) => {
+    event && event.badge ? event.badge : null,
+    async (badge) => {
       const masterMetadataPda = getMetadataPda(badge);
-      const masterMetadataAcc = await getMetadataAcc(masterMetadataPda);
-      const masterEditionPda = getMasterOrPrintedEditionPda(badge);
-      const masterEditionAcc = await getMasterEditionAcc(masterEditionPda);
-      const masterAtaPda = getAssociatedTokenAddressSync(
-        badge,
-        getUserPda(event.organizer),
-        true
-      );
+      const { name, uri, symbol } = await getMetadataAcc(masterMetadataPda);
 
       return {
-        name: masterMetadataAcc.name,
-        uri: masterMetadataAcc.uri,
-        symbol: masterMetadataAcc.symbol,
-        currentEdition: Number(masterEditionAcc.supply),
-        masterMint: badge,
-        masterAtaPda,
-        masterMetadataPda: new PublicKey(masterMetadataPda),
-        masterEditionPda: new PublicKey(masterEditionPda),
+        name,
+        uri,
+        symbol,
       }
     }
   );
@@ -192,58 +181,6 @@ export default function Page() {
     }
 
     setIsSendingTransaction(false);
-  }
-
-  async function handleCheckIn() {
-    if (badge && attendeeData) {
-      setIsSendingTransaction(true);
-
-      try {
-        const ix = await getCheckIntoEventIx(
-          badge.currentEdition + 1,
-          attendeeData.userPda,
-          attendeeData.attendeePda,
-          Keypair.generate(),
-          badge.masterMint,
-          badge.masterAtaPda,
-          badge.masterMetadataPda,
-          badge.masterEditionPda,
-        );
-        const limitIx = await getComputeLimitIx(connection, [ix], RUMA_WALLET.publicKey);
-        const priceIx = await getComputePriceIx(connection);
-
-        const instructions: TransactionInstruction[] = [priceIx, ix];
-
-        if (limitIx) {
-          instructions.unshift(limitIx);
-        }
-
-        const { blockhash, lastValidBlockHeight } =
-          await connection.getLatestBlockhash();
-
-        const messageV0 = new TransactionMessage({
-          payerKey: RUMA_WALLET.publicKey,
-          recentBlockhash: blockhash,
-          instructions,
-        }).compileToV0Message();
-
-        const tx = new VersionedTransaction(messageV0);
-
-        const signature = await connection.sendTransaction(tx);
-        await connection.confirmTransaction({
-          signature,
-          blockhash,
-          lastValidBlockHeight,
-        });
-
-        // TODO: add success toast
-      } catch (err) {
-        console.error(err);
-        // TODO: add error toast
-      }
-
-      setIsSendingTransaction(false);
-    }
   }
 
   // TODO: add error and loading states
@@ -305,7 +242,7 @@ export default function Page() {
                         ? () => router.push(`/events/${eventPda}/manage`)
                         : attendeeData.status === 'not-registered'
                           ? handleRegister
-                          : handleCheckIn // TODO: change to handleQR
+                          : undefined
                       }
                       Icon={
                         attendeeData.status === 'organizer'
@@ -324,6 +261,14 @@ export default function Page() {
                               : ''
                       }
                       disabled={['pending', 'event-not-started'].includes(attendeeData.status) || isSendingTransaction}
+                    />
+                  )}
+                  {['event-not-started', 'not-checked-in'].includes(attendeeData.status) && (
+                    <QRTicket
+                      qrUri={attendeeData.qrUri}
+                      disabled={
+                        ['event-not-started'].includes(attendeeData.status) || isSendingTransaction
+                      }
                     />
                   )}
                 </div>

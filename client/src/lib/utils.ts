@@ -114,23 +114,6 @@ export async function getComputePriceIx(connection: Connection): Promise<Transac
   });
 }
 
-export async function uploadFile(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.set('file', file);
-
-  const response = await fetch('/api/upload', {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to upload image.');
-  }
-
-  const { link } = await response.json();
-  return link;
-}
-
 export function sortEventsByTimestamp(
   events: DisplayedEvent[]
 ): DisplayedEvent[] {
@@ -164,4 +147,68 @@ export function deserializeProgramAccount(obj: { [key: string]: any } | null) {
   }
 
   return obj;
+}
+
+export async function uploadFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.set('file', file);
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data.link;
+}
+
+export async function generateTicket(attendeePda: PublicKey, eventPda: PublicKey): Promise<string> {
+  const formData = new FormData();
+  formData.set('attendeePda', attendeePda.toBase58());
+  formData.set('eventPda', eventPda.toBase58());
+
+  const response = await fetch('/api/ticket/generate', {
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data.ticket;
+}
+
+export async function verifyTicket(payload: string): Promise<{
+  verified: boolean,
+  message: string,
+  attendeePda: string,
+  userPda: string
+}> {
+  const formData = new FormData();
+  formData.set('payload', payload);
+
+  const response = await fetch('/api/ticket/verify', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return {
+    verified: data.verified,
+    message: data.message,
+    attendeePda: data.attendeePda,
+    userPda: data.userPda,
+  };
 }
