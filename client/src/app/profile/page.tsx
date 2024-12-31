@@ -25,16 +25,19 @@ import { toWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 export default function Page() {
   const { publicKey } = useWallet();
   const { getUserAcc, getAllEventAcc, getAttendeeAcc } = useAnchorProgram();
-  const { data: userData, isLoading: isUserLoading } = useSWR(publicKey, async (publicKey) => {
-    const userPda = getUserPda(publicKey);
-    const userAcc = await getUserAcc(userPda);
+  const { data: userData, isLoading: isUserLoading } = useSWR(
+    publicKey,
+    async (publicKey) => {
+      const userPda = getUserPda(publicKey);
+      const userAcc = await getUserAcc(userPda);
 
-    if (!userAcc) {
-      throw new Error('User not found.');
+      if (!userAcc) {
+        throw new Error('User not found.');
+      }
+
+      return { userPda, userAcc };
     }
-
-    return { userPda, userAcc };
-  });
+  );
   const {
     data: profileData,
     isLoading: isProfileLoading,
@@ -133,10 +136,12 @@ export default function Page() {
                           <div className="flex items-center gap-2">
                             <Users className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm">
-                              <strong>{profileData.eventsAttended}</strong> Attended
+                              <strong>{profileData.eventsAttended}</strong>{' '}
+                              Attended
                             </span>
                           </div>
-                        </div>)
+                        </div>
+                      )
                     )}
                   </div>
                 </div>
@@ -203,7 +208,8 @@ export default function Page() {
               </h2>
             )}
           </div>
-        ))}
+        )
+      )}
     </div>
-  )
+  );
 }

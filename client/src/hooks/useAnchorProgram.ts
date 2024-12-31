@@ -9,11 +9,7 @@ import {
 } from '@solana/wallet-adapter-react';
 import { useCallback, useMemo, useState } from 'react';
 import idl from '@/idl/ruma.json';
-import {
-  Keypair,
-  PublicKey,
-  TransactionInstruction,
-} from '@solana/web3.js';
+import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { getUserPda } from '@/lib/pda';
 import { RUMA_WALLET } from '@/lib/constants';
@@ -165,9 +161,12 @@ export function useAnchorProgram() {
     return await program.account.user.all();
   }, [program]);
 
-  const getMultipleUserAcc = useCallback(async (userPdas: PublicKey[]) => {
-    return await program.account.user.fetchMultiple(userPdas);
-  }, [program]);
+  const getMultipleUserAcc = useCallback(
+    async (userPdas: PublicKey[]) => {
+      return await program.account.user.fetchMultiple(userPdas);
+    },
+    [program]
+  );
 
   const getUserAcc = useCallback(
     async (userPda: PublicKey) => {
@@ -180,9 +179,12 @@ export function useAnchorProgram() {
     return await program.account.event.all();
   }, [program]);
 
-  const getMultipleEventAcc = useCallback(async (eventPdas: PublicKey[]) => {
-    return await program.account.event.fetchMultiple(eventPdas);
-  }, [program]);
+  const getMultipleEventAcc = useCallback(
+    async (eventPdas: PublicKey[]) => {
+      return await program.account.event.fetchMultiple(eventPdas);
+    },
+    [program]
+  );
 
   const getEventAcc = useCallback(
     async (eventPda: PublicKey) => {
@@ -195,9 +197,12 @@ export function useAnchorProgram() {
     return await program.account.attendee.all();
   }, [program]);
 
-  const getMultipleAttendeeAcc = useCallback(async (attendeePdas: PublicKey[]) => {
-    return await program.account.attendee.fetchMultiple(attendeePdas);
-  }, [program]);
+  const getMultipleAttendeeAcc = useCallback(
+    async (attendeePdas: PublicKey[]) => {
+      return await program.account.attendee.fetchMultiple(attendeePdas);
+    },
+    [program]
+  );
 
   const getAttendeeAcc = useCallback(
     async (attendeePda: PublicKey) => {

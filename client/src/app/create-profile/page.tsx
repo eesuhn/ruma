@@ -51,7 +51,7 @@ export default function Page() {
 
     setProfileImageSrc(getRandomDicebearLink('profile', publicKey.toBase58()));
     return;
-  })
+  });
 
   const form = useForm<z.infer<typeof createProfileFormSchema>>({
     resolver: zodResolver(createProfileFormSchema),
@@ -67,7 +67,7 @@ export default function Page() {
         setIsUploading(true);
         const uploadedImageUri = await uploadFile(
           values.profileImage ??
-          (await fetchDicebearAsFile('profile', publicKey.toBase58()))
+            (await fetchDicebearAsFile('profile', publicKey.toBase58()))
         );
         setIsUploading(false);
 
@@ -75,7 +75,7 @@ export default function Page() {
         const tx = await setComputeUnitLimitAndPrice(
           connection,
           [ix],
-          publicKey,
+          publicKey
         );
 
         const { blockhash, lastValidBlockHeight } =
@@ -96,7 +96,7 @@ export default function Page() {
           description: getExplorerLink(
             'tx',
             signature,
-            process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster || 'devnet'
+            (process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster) || 'devnet'
           ),
         });
       } catch (error) {

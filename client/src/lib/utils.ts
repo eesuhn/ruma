@@ -55,7 +55,7 @@ export function toCamelCase(str: string): string {
       index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
     )
     .join('');
-};
+}
 
 export async function setComputeUnitLimitAndPrice(
   connection: Connection,
@@ -101,7 +101,9 @@ export async function getComputeLimitIx(
   }
 }
 
-export async function getComputePriceIx(connection: Connection): Promise<TransactionInstruction> {
+export async function getComputePriceIx(
+  connection: Connection
+): Promise<TransactionInstruction> {
   const recentFees = await connection.getRecentPrioritizationFees();
   const priorityFee =
     recentFees.reduce(
@@ -124,7 +126,10 @@ export function sortEventsByTimestamp(
   );
 }
 
-export function generateDataBytes(attendeePda: string, eventPda: string): Uint8Array {
+export function generateDataBytes(
+  attendeePda: string,
+  eventPda: string
+): Uint8Array {
   const data = `${attendeePda}-${eventPda}`;
   return new Uint8Array(Buffer.from(data));
 }
@@ -167,7 +172,10 @@ export async function uploadFile(file: File): Promise<string> {
   return data.link;
 }
 
-export async function generateTicket(attendeePda: PublicKey, eventPda: PublicKey): Promise<string> {
+export async function generateTicket(
+  attendeePda: PublicKey,
+  eventPda: PublicKey
+): Promise<string> {
   const formData = new FormData();
   formData.set('attendeePda', attendeePda.toBase58());
   formData.set('eventPda', eventPda.toBase58());
@@ -186,10 +194,10 @@ export async function generateTicket(attendeePda: PublicKey, eventPda: PublicKey
 }
 
 export async function verifyTicket(payload: string): Promise<{
-  verified: boolean,
-  message: string,
-  attendeePda: string,
-  userPda: string
+  verified: boolean;
+  message: string;
+  attendeePda: string;
+  userPda: string;
 }> {
   const formData = new FormData();
   formData.set('payload', payload);

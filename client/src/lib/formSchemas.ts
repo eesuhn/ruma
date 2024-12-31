@@ -95,8 +95,7 @@ export const createEventFormSchema = z.object({
 });
 
 export const statusFormSchema = z.object({
-  status: z
-  .enum(["approved", "rejected"], {
+  status: z.enum(['approved', 'rejected'], {
     message: 'Status must be either "approved" or "rejected".',
-  })
+  }),
 });

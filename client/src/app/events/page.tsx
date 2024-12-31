@@ -29,11 +29,15 @@ export default function Page() {
     allEvents.forEach(async (event) => {
       const { startTimestamp } = event.account.data;
       const isOrganizer = userPda.equals(event.account.organizer);
-      const isAttendee = !isOrganizer &&
-        event.account.attendees.includes(getAttendeePda(userPda, event.publicKey));
+      const isAttendee =
+        !isOrganizer &&
+        event.account.attendees.includes(
+          getAttendeePda(userPda, event.publicKey)
+        );
 
       if (isOrganizer || isAttendee) {
-        const targetArray = Number(startTimestamp) > Date.now() ? upcoming : past;
+        const targetArray =
+          Number(startTimestamp) > Date.now() ? upcoming : past;
         targetArray.push({ event, isOrganizer });
       }
     });

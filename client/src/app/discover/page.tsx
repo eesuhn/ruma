@@ -48,6 +48,6 @@ export default function Page() {
     ) : (
       // TODO: add no events found state
       <p>No new events. Check back later!</p>
-    )
+    );
   }
 }

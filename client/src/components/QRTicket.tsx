@@ -1,11 +1,17 @@
-import { Ticket } from "lucide-react";
-import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import Image from "next/image";
+import { Ticket } from 'lucide-react';
+import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import Image from 'next/image';
 
 export function QRTicket({
   qrUri,
-  disabled
+  disabled,
 }: {
   qrUri: string;
   disabled?: boolean;
@@ -13,8 +19,13 @@ export function QRTicket({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="default" className="bg-black text-white" disabled={disabled}>
-          <Ticket className="mr-2 h-4 w-4" />View Ticket
+        <Button
+          variant="default"
+          className="bg-black text-white"
+          disabled={disabled}
+        >
+          <Ticket className="mr-2 h-4 w-4" />
+          View Ticket
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -22,12 +33,7 @@ export function QRTicket({
           <DialogTitle>Your Event Ticket</DialogTitle>
         </DialogHeader>
         <div className="aspect-square w-full overflow-hidden rounded-lg">
-          <Image
-            src={qrUri}
-            alt="Event ticket"
-            width={300}
-            height={300}
-          />
+          <Image src={qrUri} alt="Event ticket" width={300} height={300} />
         </div>
         <p className="text-center text-sm text-muted-foreground">
           Present this QR code to be scanned and checked-in

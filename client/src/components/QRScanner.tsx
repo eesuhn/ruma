@@ -25,7 +25,10 @@ export function QRScanner({
   // const scannerRef = useRef<any>(null);
 
   const handleResult = useCallback(
-    async (result: Result | null | undefined, error: Error | null | undefined) => {
+    async (
+      result: Result | null | undefined,
+      error: Error | null | undefined
+    ) => {
       if (error) return;
       if (result) {
         const text = result.getText();
@@ -37,7 +40,7 @@ export function QRScanner({
           // scannerRef.current.stop();
           window.location.reload();
         } else {
-          console.log("continue scan");
+          console.log('continue scan');
         }
         return;
       }
@@ -58,8 +61,13 @@ export function QRScanner({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="bg-black text-white" disabled={disabled}>
-          <Camera className="mr-2 h-4 w-4" />Scan Ticket
+        <Button
+          variant="default"
+          className="bg-black text-white"
+          disabled={disabled}
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          Scan Ticket
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

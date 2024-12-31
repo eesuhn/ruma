@@ -1,8 +1,8 @@
-import { VERIFICATION_PUBKEY } from "@/lib/constants";
-import { getAttendeeAcc, getEventAcc } from "@/lib/program";
-import { generateDataBytes } from "@/lib/utils";
-import { NextRequest, NextResponse } from "next/server";
-import { sign } from "tweetnacl";
+import { VERIFICATION_PUBKEY } from '@/lib/constants';
+import { getAttendeeAcc, getEventAcc } from '@/lib/program';
+import { generateDataBytes } from '@/lib/utils';
+import { NextRequest, NextResponse } from 'next/server';
+import { sign } from 'tweetnacl';
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     if (!payload) {
       return NextResponse.json(
         {
-          error: "Payload required."
+          error: 'Payload required.',
         },
         {
           status: 400,
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     if (!eventAcc) {
       return NextResponse.json(
         {
-          error: "Event not found."
+          error: 'Event not found.',
         },
         {
           status: 404,
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     if (!attendeeAcc) {
       return NextResponse.json(
         {
-          error: "Attendee not found."
+          error: 'Attendee not found.',
         },
         {
           status: 404,
@@ -51,31 +51,35 @@ export async function POST(req: NextRequest) {
       // check if signature is signed by internal secret key
       const dataBytes = generateDataBytes(attendeePda, eventPda);
       const signatureBytes = new Uint8Array(Buffer.from(signature, 'hex'));
-      const verified = sign.detached.verify(dataBytes, signatureBytes, VERIFICATION_PUBKEY);
+      const verified = sign.detached.verify(
+        dataBytes,
+        signatureBytes,
+        VERIFICATION_PUBKEY
+      );
 
       return verified
         ? NextResponse.json({
-          verified,
-          message: "Ticket verified successfully.",
-          attendeePda,
-          userPda: await attendeeAcc.user,
-        })
+            verified,
+            message: 'Ticket verified successfully.',
+            attendeePda,
+            userPda: await attendeeAcc.user,
+          })
         : NextResponse.json({
-          verified,
-          message: "Invalid ticket signature.",
-        });
+            verified,
+            message: 'Invalid ticket signature.',
+          });
     } else {
-      return NextResponse.json(
-        {
-          verified: false,
-          message: "Attendee is not approved for this event."
-        },
-      )
+      return NextResponse.json({
+        verified: false,
+        message: 'Attendee is not approved for this event.',
+      });
     }
   } catch (err) {
     console.error(err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Failed to verify ticket.' },
+      {
+        error: err instanceof Error ? err.message : 'Failed to verify ticket.',
+      },
       { status: 500 }
     );
   }

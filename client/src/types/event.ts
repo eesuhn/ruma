@@ -30,4 +30,4 @@ export type ManageAttendeeObject = {
   userPda: PublicKey;
   name: string;
   image: string;
-}
+};

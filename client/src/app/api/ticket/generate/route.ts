@@ -1,12 +1,13 @@
-import { generateDataBytes } from "@/lib/utils";
-import { sign } from "tweetnacl";
-import { NextRequest, NextResponse } from "next/server";
-import { RUMA_WALLET } from "@/lib/constants";
-import { toDataURL } from "qrcode";
+import { generateDataBytes } from '@/lib/utils';
+import { sign } from 'tweetnacl';
+import { NextRequest, NextResponse } from 'next/server';
+import { RUMA_WALLET } from '@/lib/constants';
+import { toDataURL } from 'qrcode';
 
 export async function GET(req: NextRequest) {
   try {
-    const { attendeePda, eventPda }: { attendeePda: string, eventPda: string } = await req.json();
+    const { attendeePda, eventPda }: { attendeePda: string; eventPda: string } =
+      await req.json();
 
     if (!attendeePda) {
       return NextResponse.json(
@@ -38,11 +39,14 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       ticket,
-    })
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Failed to generate ticket.' },
+      {
+        error:
+          err instanceof Error ? err.message : 'Failed to generate ticket.',
+      },
       { status: 500 }
     );
   }

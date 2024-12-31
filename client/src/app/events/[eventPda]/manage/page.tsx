@@ -24,69 +24,113 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
-import { capitalizeFirstLetter, getComputeLimitIx, getComputePriceIx, toCamelCase, verifyTicket } from '@/lib/utils';
+import {
+  capitalizeFirstLetter,
+  getComputeLimitIx,
+  getComputePriceIx,
+  toCamelCase,
+  verifyTicket,
+} from '@/lib/utils';
 import { ManageAttendeeObject, StatusObject } from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
 import { statusFormSchema } from '@/lib/formSchemas';
 import useSWR from 'swr';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useParams } from 'next/navigation';
-import { Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
-import { ALLOWED_CHANGED_STATUSES, ALLOWED_REGISTRATION_STATUSES, RUMA_WALLET } from '@/lib/constants';
+import {
+  Keypair,
+  PublicKey,
+  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
+} from '@solana/web3.js';
+import {
+  ALLOWED_CHANGED_STATUSES,
+  ALLOWED_REGISTRATION_STATUSES,
+  RUMA_WALLET,
+} from '@/lib/constants';
 import { useConnection } from '@solana/wallet-adapter-react';
-import { getMasterEditionAcc, getMasterOrPrintedEditionPda, getMetadataPda } from '@/lib/umi';
+import {
+  getMasterEditionAcc,
+  getMasterOrPrintedEditionPda,
+  getMetadataPda,
+} from '@/lib/umi';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getUserPda } from '@/lib/pda';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
   const { connection } = useConnection();
-  const { getChangeAttendeeStatusIx, getCheckIntoEventIx, getEventAcc, getMultipleUserAcc, getMultipleAttendeeAcc } = useAnchorProgram();
+  const {
+    getChangeAttendeeStatusIx,
+    getCheckIntoEventIx,
+    getEventAcc,
+    getMultipleUserAcc,
+    getMultipleAttendeeAcc,
+  } = useAnchorProgram();
   const [search, setSearch] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedAttendee, setSelectedAttendee] = useState<ManageAttendeeObject | null>(null);
-  const [isSendingTransaction, setIsSendingTransaction] = useState<boolean>(false);
-  const { data: event } = useSWR(eventPda, async (eventPda) => await getEventAcc(new PublicKey(eventPda)));
-  const { data: eventData, isLoading, error } = useSWR(event && event.badge ? [event, event.badge, search] : null, async ([event, badge, search]) => {
-    let attendees: ManageAttendeeObject[] = [];
+  const [selectedAttendee, setSelectedAttendee] =
+    useState<ManageAttendeeObject | null>(null);
+  const [isSendingTransaction, setIsSendingTransaction] =
+    useState<boolean>(false);
+  const { data: event } = useSWR(
+    eventPda,
+    async (eventPda) => await getEventAcc(new PublicKey(eventPda))
+  );
+  const {
+    data: eventData,
+    isLoading,
+    error,
+  } = useSWR(
+    event && event.badge ? [event, event.badge, search] : null,
+    async ([event, badge, search]) => {
+      let attendees: ManageAttendeeObject[] = [];
 
-    const attendeeAccs = (await getMultipleAttendeeAcc(event.attendees)).filter((acc) => acc !== null);
-    const userAccs = (await getMultipleUserAcc(attendeeAccs.map((acc) => acc.user))).filter((acc) => acc !== null)
+      const attendeeAccs = (
+        await getMultipleAttendeeAcc(event.attendees)
+      ).filter((acc) => acc !== null);
+      const userAccs = (
+        await getMultipleUserAcc(attendeeAccs.map((acc) => acc.user))
+      ).filter((acc) => acc !== null);
 
-    attendees = attendeeAccs
-      .map((acc, i) => {
-        return {
-          attendeePda: event.attendees[i].toBase58(),
-          status: Object.keys(acc.status)[0],
-          userPda: acc.user,
-          name: userAccs[i].data.name,
-          image: userAccs[i].data.image
-        }
-      })
-      .filter((attendee) => {
-        return attendee.name.toLowerCase().includes(search.toLowerCase())
-          && ['all', statusFilter].includes(attendee.status)
-      })
+      attendees = attendeeAccs
+        .map((acc, i) => {
+          return {
+            attendeePda: event.attendees[i].toBase58(),
+            status: Object.keys(acc.status)[0],
+            userPda: acc.user,
+            name: userAccs[i].data.name,
+            image: userAccs[i].data.image,
+          };
+        })
+        .filter((attendee) => {
+          return (
+            attendee.name.toLowerCase().includes(search.toLowerCase()) &&
+            ['all', statusFilter].includes(attendee.status)
+          );
+        });
 
-    const masterMetadataPda = getMetadataPda(badge);
-    const masterEditionPda = getMasterOrPrintedEditionPda(badge);
-    const masterEditionAcc = await getMasterEditionAcc(masterEditionPda);
-    const masterAtaPda = getAssociatedTokenAddressSync(
-      badge,
-      getUserPda(event.organizer),
-      true
-    );
+      const masterMetadataPda = getMetadataPda(badge);
+      const masterEditionPda = getMasterOrPrintedEditionPda(badge);
+      const masterEditionAcc = await getMasterEditionAcc(masterEditionPda);
+      const masterAtaPda = getAssociatedTokenAddressSync(
+        badge,
+        getUserPda(event.organizer),
+        true
+      );
 
-    return {
-      eventName: event.data.name,
-      attendees,
-      currentEdition: Number(masterEditionAcc.supply),
-      masterMint: badge,
-      masterAtaPda,
-      masterMetadataPda: new PublicKey(masterMetadataPda),
-      masterEditionPda: new PublicKey(masterEditionPda),
+      return {
+        eventName: event.data.name,
+        attendees,
+        currentEdition: Number(masterEditionAcc.supply),
+        masterMint: badge,
+        masterAtaPda,
+        masterMetadataPda: new PublicKey(masterMetadataPda),
+        masterEditionPda: new PublicKey(masterEditionPda),
+      };
     }
-  })
+  );
 
   const form = useForm<z.infer<typeof statusFormSchema>>({
     resolver: zodResolver(statusFormSchema),
@@ -101,8 +145,16 @@ export default function Page() {
       const status = { [toCamelCase(values.status)]: {} } as StatusObject;
 
       try {
-        const ix = await getChangeAttendeeStatusIx(status, selectedAttendee.userPda, new PublicKey(eventPda));
-        const limitIx = await getComputeLimitIx(connection, [ix], RUMA_WALLET.publicKey);
+        const ix = await getChangeAttendeeStatusIx(
+          status,
+          selectedAttendee.userPda,
+          new PublicKey(eventPda)
+        );
+        const limitIx = await getComputeLimitIx(
+          connection,
+          [ix],
+          RUMA_WALLET.publicKey
+        );
         const priceIx = await getComputePriceIx(connection);
 
         const instructions: TransactionInstruction[] = [priceIx, ix];
@@ -139,213 +191,230 @@ export default function Page() {
       setSelectedAttendee(null);
       setIsSendingTransaction(false);
     }
-  };
+  }
 
-  const checkIn = useCallback(async (userPda: PublicKey, attendeePda: PublicKey) => {
-    if (eventData) {
-      setIsSendingTransaction(true);
+  const checkIn = useCallback(
+    async (userPda: PublicKey, attendeePda: PublicKey) => {
+      if (eventData) {
+        setIsSendingTransaction(true);
 
-      try {
-        const ix = await getCheckIntoEventIx(
-          eventData.currentEdition + 1,
-          userPda,
-          attendeePda,
-          Keypair.generate(),
-          eventData.masterMint,
-          eventData.masterAtaPda,
-          eventData.masterMetadataPda,
-          eventData.masterEditionPda,
-        );
-        const limitIx = await getComputeLimitIx(connection, [ix], RUMA_WALLET.publicKey);
-        const priceIx = await getComputePriceIx(connection);
+        try {
+          const ix = await getCheckIntoEventIx(
+            eventData.currentEdition + 1,
+            userPda,
+            attendeePda,
+            Keypair.generate(),
+            eventData.masterMint,
+            eventData.masterAtaPda,
+            eventData.masterMetadataPda,
+            eventData.masterEditionPda
+          );
+          const limitIx = await getComputeLimitIx(
+            connection,
+            [ix],
+            RUMA_WALLET.publicKey
+          );
+          const priceIx = await getComputePriceIx(connection);
 
-        const instructions: TransactionInstruction[] = [priceIx, ix];
+          const instructions: TransactionInstruction[] = [priceIx, ix];
 
-        if (limitIx) {
-          instructions.unshift(limitIx);
+          if (limitIx) {
+            instructions.unshift(limitIx);
+          }
+
+          const { blockhash, lastValidBlockHeight } =
+            await connection.getLatestBlockhash();
+
+          const messageV0 = new TransactionMessage({
+            payerKey: RUMA_WALLET.publicKey,
+            recentBlockhash: blockhash,
+            instructions,
+          }).compileToV0Message();
+
+          const tx = new VersionedTransaction(messageV0);
+
+          const signature = await connection.sendTransaction(tx);
+          await connection.confirmTransaction({
+            signature,
+            blockhash,
+            lastValidBlockHeight,
+          });
+
+          // TODO: add success toast
+        } catch (err) {
+          console.error(err);
+          // TODO: add error toast
         }
 
-        const { blockhash, lastValidBlockHeight } =
-          await connection.getLatestBlockhash();
-
-        const messageV0 = new TransactionMessage({
-          payerKey: RUMA_WALLET.publicKey,
-          recentBlockhash: blockhash,
-          instructions,
-        }).compileToV0Message();
-
-        const tx = new VersionedTransaction(messageV0);
-
-        const signature = await connection.sendTransaction(tx);
-        await connection.confirmTransaction({
-          signature,
-          blockhash,
-          lastValidBlockHeight,
-        });
-
-        // TODO: add success toast
-      } catch (err) {
-        console.error(err);
-        // TODO: add error toast
+        setIsSendingTransaction(false);
       }
+    },
+    [connection, eventData, getCheckIntoEventIx]
+  );
 
-      setIsSendingTransaction(false);
-    }
-  }, [connection, eventData, getCheckIntoEventIx]);
+  const handleQRScan = useCallback(
+    async (payload: string) => {
+      // TODO: verify QR here
+      console.log(payload);
+      const { verified, message, attendeePda, userPda } =
+        await verifyTicket(payload);
 
-  const handleQRScan = useCallback(async (payload: string) => {
-    // TODO: verify QR here
-    console.log(payload)
-    const { verified, message, attendeePda, userPda } = await verifyTicket(payload);
-
-    if (verified) {
-      // TODO: show promise toast for checkIn
-      console.log(message);
-      await checkIn(new PublicKey(userPda), new PublicKey(attendeePda));
-      return true;
-    } else {
-      // TODO: show error toast
-      console.log(message);
-      return false;
-    }
-  }, []);
+      if (verified) {
+        // TODO: show promise toast for checkIn
+        console.log(message);
+        await checkIn(new PublicKey(userPda), new PublicKey(attendeePda));
+        return true;
+      } else {
+        // TODO: show error toast
+        console.log(message);
+        return false;
+      }
+    },
+    [checkIn]
+  );
 
   // TODO: add error and loading states
   if (error) return <p>{error.message}</p>;
   if (isLoading) return <p>Loading...</p>;
 
-  return eventData && (
-    <div className="mx-auto max-w-4xl">
-      <h1 className="mb-8 text-3xl font-bold">{eventData.eventName}</h1>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-          <Input
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+  return (
+    eventData && (
+      <div className="mx-auto max-w-4xl">
+        <h1 className="mb-8 text-3xl font-bold">{eventData.eventName}</h1>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+            <Input
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="All Guests" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Guests</SelectItem>
+              {ALLOWED_REGISTRATION_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {capitalizeFirstLetter(status)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <QRScanner onScan={handleQRScan} disabled={isSendingTransaction} />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="All Guests" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Guests</SelectItem>
-            {ALLOWED_REGISTRATION_STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {capitalizeFirstLetter(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <QRScanner onScan={handleQRScan} disabled={isSendingTransaction} />
-      </div>
 
-      <div className="divide-y rounded-lg border">
-        {eventData.attendees.length ? eventData.attendees.map((attendee) => (
-          <Dialog
-            key={attendee.attendeePda}
-            onOpenChange={(open) => {
-              if (!open) {
-                setSelectedAttendee(null);
-                form.reset();
-              }
-            }}
-          >
-            <DialogTrigger asChild>
-              <button
-                className="flex w-full items-center justify-between p-4 hover:bg-gray-50"
-                onClick={() => {
-                  setSelectedAttendee(attendee);
+        <div className="divide-y rounded-lg border">
+          {eventData.attendees.length ? (
+            eventData.attendees.map((attendee) => (
+              <Dialog
+                key={attendee.attendeePda}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setSelectedAttendee(null);
+                    form.reset();
+                  }
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={attendee.image}
-                    alt={attendee.name}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                  <div className="text-left">
-                    <div className="font-medium">{attendee.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {attendee.attendeePda}
+                <DialogTrigger asChild>
+                  <button
+                    className="flex w-full items-center justify-between p-4 hover:bg-gray-50"
+                    onClick={() => {
+                      setSelectedAttendee(attendee);
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={attendee.image}
+                        alt={attendee.name}
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                      />
+                      <div className="text-left">
+                        <div className="font-medium">{attendee.name}</div>
+                        <div className="text-sm text-gray-500">
+                          {attendee.attendeePda}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <Badge className={`bg-badge-${attendee.status}`}>
-                  {capitalizeFirstLetter(attendee.status)}
-                </Badge>
-              </button>
-            </DialogTrigger>
-            {selectedAttendee && <DialogContent>
-              <DialogHeader>
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={selectedAttendee.image}
-                    alt={selectedAttendee.name}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                  <div>
-                    <DialogTitle className="text-left">
-                      {selectedAttendee.name}
-                    </DialogTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedAttendee.attendeePda}
-                    </p>
-                  </div>
-                </div>
-              </DialogHeader>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(changeStatus)}
-                  className="space-y-4"
-                >
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose new status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ALLOWED_CHANGED_STATUSES.map((status) => (
-                                <SelectItem key={status} value={status}>
-                                  {capitalizeFirstLetter(status)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button type="submit" className="bg-black text-white">
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>}
-          </Dialog>
-        )) : (
-          <p className="p-4 text-center text-gray-500">
-            No attendees registered
-          </p>
-        )}
+                    <Badge className={`bg-badge-${attendee.status}`}>
+                      {capitalizeFirstLetter(attendee.status)}
+                    </Badge>
+                  </button>
+                </DialogTrigger>
+                {selectedAttendee && (
+                  <DialogContent>
+                    <DialogHeader>
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src={selectedAttendee.image}
+                          alt={selectedAttendee.name}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                        <div>
+                          <DialogTitle className="text-left">
+                            {selectedAttendee.name}
+                          </DialogTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedAttendee.attendeePda}
+                          </p>
+                        </div>
+                      </div>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form
+                        onSubmit={form.handleSubmit(changeStatus)}
+                        className="space-y-4"
+                      >
+                        <FormField
+                          control={form.control}
+                          name="status"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Select
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Choose new status" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {ALLOWED_CHANGED_STATUSES.map((status) => (
+                                      <SelectItem key={status} value={status}>
+                                        {capitalizeFirstLetter(status)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="flex justify-end">
+                          <Button type="submit" className="bg-black text-white">
+                            Save Changes
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                )}
+              </Dialog>
+            ))
+          ) : (
+            <p className="p-4 text-center text-gray-500">
+              No attendees registered
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    )
   );
 }

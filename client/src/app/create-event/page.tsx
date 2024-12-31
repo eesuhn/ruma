@@ -97,11 +97,11 @@ export default function Page() {
         setIsUploading(true);
         const uploadedEventImageUri = await uploadFile(
           values.eventImage ??
-          (await fetchDicebearAsFile('event', publicKey.toBase58()))
+            (await fetchDicebearAsFile('event', publicKey.toBase58()))
         );
         const uploadedBadgeImageUri = await uploadFile(
           values.badgeImage ??
-          (await fetchDicebearAsFile('badge', publicKey.toBase58()))
+            (await fetchDicebearAsFile('badge', publicKey.toBase58()))
         );
         setIsUploading(false);
 
@@ -141,7 +141,7 @@ export default function Page() {
           uploadedBadgeImageUri,
           capacity,
           getEventPda(getUserPda(publicKey), eventName),
-          masterMint,
+          masterMint
         );
 
         const tx = await setComputeUnitLimitAndPrice(
@@ -168,7 +168,7 @@ export default function Page() {
           description: getExplorerLink(
             'tx',
             signature,
-            process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster || 'devnet'
+            (process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster) || 'devnet'
           ),
         });
       } catch (error) {

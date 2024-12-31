@@ -17,10 +17,7 @@ export function DiscoverEventCard({
 }) {
   return (
     <div className="rounded-lg bg-[#F6F6F6] p-4 shadow-lg ease-in-out hover:bg-slate-300">
-      <Link
-        href={`/events/${eventPda}`}
-        className="group flex gap-6"
-      >
+      <Link href={`/events/${eventPda}`} className="group flex gap-6">
         <div className="relative h-[120px] w-[120px] flex-shrink-0 overflow-hidden rounded-lg">
           <Image src={image} alt={name} fill className="object-cover" />
         </div>
@@ -36,7 +33,7 @@ export function DiscoverEventCard({
                 day: 'numeric',
                 hour: 'numeric',
                 minute: '2-digit',
-                hour12: true
+                hour12: true,
               })}
             </p>
           )}
