@@ -101,7 +101,7 @@ export default function Page() {
     async (eventPda) => {
       const eventAcc = await getEventAcc(new PublicKey(eventPda))
 
-      if(!eventAcc) {
+      if (!eventAcc) {
         throw new Error('Event not found.');
       }
 
@@ -242,18 +242,16 @@ export default function Page() {
                   <CalendarIcon className="h-4 w-4" />
                   <span>
                     {Number(event.data.startTimestamp)
-                      ? `${new Date(Number(event.data.startTimestamp) * 1000).toLocaleDateString()}`
+                      ? `${new Date(Number(event.data.startTimestamp)).toLocaleDateString()}`
                       : 'Not available'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span>
-                    {Number(event.data.startTimestamp) &&
-                      Number(event.data.endTimestamp)
-                      ? `${new Date(Number(event.data.startTimestamp) * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} to ${new Date(event.data.endTimestamp * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
-                      : 'Time not available'}
-                  </span>
+                  {Number(event.data.startTimestamp) !== 0 && <span>
+                    {new Date(Number(event.data.startTimestamp)).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                    {Number(event.data.endTimestamp) !== 0 && ` to ${new Date(Number(event.data.endTimestamp)).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`}
+                  </span>}
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
