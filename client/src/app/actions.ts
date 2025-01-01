@@ -1,10 +1,24 @@
 'use server';
 
-import { getExplorerLink, getSimulationComputeUnits } from "@solana-developers/helpers";
-import { AddressLookupTableAccount, Cluster, ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
+import {
+  getExplorerLink,
+  getSimulationComputeUnits,
+} from '@solana-developers/helpers';
+import {
+  AddressLookupTableAccount,
+  Cluster,
+  ComputeBudgetProgram,
+  Connection,
+  PublicKey,
+  TransactionInstruction,
+} from '@solana/web3.js';
 
 export async function getTransactionLink(signature: string): Promise<string> {
-  return getExplorerLink("tx", signature, process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster ?? "devnet");
+  return getExplorerLink(
+    'tx',
+    signature,
+    (process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster) ?? 'devnet'
+  );
 }
 
 export async function getComputeLimitIx(

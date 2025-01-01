@@ -166,7 +166,9 @@ export async function generateTicket(
   urlSearchParams.append('attendeePda', attendeePda.toBase58());
   urlSearchParams.append('eventPda', eventPda.toBase58());
 
-  const response = await fetch(`/api/ticket/generate?${urlSearchParams.toString()}`);
+  const response = await fetch(
+    `/api/ticket/generate?${urlSearchParams.toString()}`
+  );
 
   const data = await response.json();
 

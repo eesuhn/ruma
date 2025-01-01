@@ -55,7 +55,9 @@ export function EventCard({
   isOrganizer: boolean;
 }) {
   return (
-    <Link href={isOrganizer ? `/events/${eventPda}/manage` : `/events/${eventPda}`}>
+    <Link
+      href={isOrganizer ? `/events/${eventPda}/manage` : `/events/${eventPda}`}
+    >
       <Card className="mb-2 overflow-hidden transition-shadow hover:shadow-lg">
         <div className="grid gap-4 p-4 md:grid-cols-[1fr,200px]">
           <div className="space-y-3">
@@ -70,7 +72,10 @@ export function EventCard({
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {new Date(Number(startTimestamp) || 0).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                  {new Date(Number(startTimestamp) || 0).toLocaleString(
+                    'en-US',
+                    { hour: 'numeric', minute: '2-digit', hour12: true }
+                  )}
                 </span>
               </div>
               <div className="flex items-center gap-2">

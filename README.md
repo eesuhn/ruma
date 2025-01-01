@@ -11,7 +11,7 @@ RUMA — **Solana**-powered dApp that redefines event hosting by creating NFT me
 - Streamline authentication with NFT badges
 
 *Check out our demo video!* <br>
-[RUMA - Demo](https://youtu.be/x05mT8t_vkM)
+[RUMA - Demo](https://youtu.be/SXuu8t_rglI)
 
 ### Setting Up Locally
 
