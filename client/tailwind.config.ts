@@ -58,7 +58,7 @@ export default {
           '5': 'hsl(var(--chart-5))',
         },
         'status-pending': 'var(--status-pending)',
-        'status-going': 'var(--status-going)',
+        'status-approved': 'var(--status-approved)',
         'status-checked-in': 'var(--status-checked-in)',
         'status-rejected': 'var(--status-rejected)',
         'status-default': 'black',

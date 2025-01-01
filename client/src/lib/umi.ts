@@ -7,6 +7,7 @@ import {
   fetchEdition,
   fetchMasterEdition,
   fetchMetadata,
+  findEditionMarkerFromEditionNumberPda,
   findMasterEditionPda,
   findMetadataPda,
   MasterEdition,
@@ -14,7 +15,7 @@ import {
 } from '@metaplex-foundation/mpl-token-metadata';
 import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 
-export const umi = createUmi(CONNECTION.rpcEndpoint, 'confirmed');
+const umi = createUmi(CONNECTION.rpcEndpoint, 'confirmed');
 
 export function getMasterOrPrintedEditionPda(
   mintPubkey: PublicKey
@@ -27,6 +28,13 @@ export function getMasterOrPrintedEditionPda(
 export function getMetadataPda(mintPubkey: PublicKey): UmiPublicKey {
   return findMetadataPda(umi, {
     mint: fromWeb3JsPublicKey(mintPubkey),
+  })[0];
+}
+
+export function getEditionMarkerPda(masterMintPubkey: PublicKey, editionNumber: number): UmiPublicKey {
+  return findEditionMarkerFromEditionNumberPda(umi, {
+    mint: fromWeb3JsPublicKey(masterMintPubkey),
+    editionNumber,
   })[0];
 }
 

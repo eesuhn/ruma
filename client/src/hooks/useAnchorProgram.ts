@@ -9,15 +9,9 @@ import {
 } from '@solana/wallet-adapter-react';
 import { useCallback, useMemo, useState } from 'react';
 import idl from '@/idl/ruma.json';
-import {
-  Keypair,
-  PublicKey,
-  TransactionInstruction,
-  TransactionSignature,
-} from '@solana/web3.js';
+import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { getEventPda, getUserPda } from '@/lib/pda';
-import { RUMA_WALLET } from '@/lib/constants';
+import { getUserPda } from '@/lib/pda';
 
 export function useAnchorProgram() {
   const { connection } = useConnection();
@@ -84,15 +78,13 @@ export function useAnchorProgram() {
   }
 
   async function getCreateBadgeIx(
-    eventName: string,
     badgeName: string,
     badgeSymbol: string,
     badgeUri: string,
     maxSupply: number | null,
+    eventPda: PublicKey,
     masterMint: Keypair
   ): Promise<TransactionInstruction> {
-    const userPda = getUserPda(wallet.publicKey!);
-
     return await program.methods
       .createBadge(
         badgeName,
@@ -102,45 +94,44 @@ export function useAnchorProgram() {
       )
       .accounts({
         authority: wallet.publicKey!,
-        event: getEventPda(userPda, eventName),
+        event: eventPda,
         masterMint: masterMint.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .instruction();
   }
 
-  async function registerForEvent(
+  async function getRegisterForEventIx(
     eventPda: PublicKey
-  ): Promise<TransactionSignature> {
+  ): Promise<TransactionInstruction> {
     return await program.methods
       .registerForEvent()
       .accounts({
         registrant: getUserPda(wallet.publicKey!),
         event: eventPda,
       })
-      .signers([RUMA_WALLET])
-      .rpc();
+      .instruction();
   }
 
-  async function changeAttendeeStatus(
+  async function getChangeAttendeeStatusIx(
     status: { approved: {} } | { rejected: {} },
     registrantPda: PublicKey,
     eventPda: PublicKey
-  ): Promise<TransactionSignature> {
+  ): Promise<TransactionInstruction> {
     return await program.methods
       .changeAttendeeStatus(status)
       .accounts({
         registrant: registrantPda,
         event: eventPda,
       })
-      .signers([RUMA_WALLET])
-      .rpc();
+      .instruction();
   }
 
   async function getCheckIntoEventIx(
     editionNumber: number,
     registrantUserPda: PublicKey,
     attendeePda: PublicKey,
+    editionMarkerPda: PublicKey,
     editionMint: Keypair,
     masterMintPubkey: PublicKey,
     masterAtaPda: PublicKey,
@@ -149,24 +140,31 @@ export function useAnchorProgram() {
   ): Promise<TransactionInstruction> {
     return await program.methods
       .checkIntoEvent(new BN(editionNumber))
-      .accounts({
+      .accountsPartial({
         authority: wallet.publicKey!,
         registrant: registrantUserPda,
         attendee: attendeePda,
         editionMint: editionMint.publicKey,
+        editionMarkerPda,
         masterMint: masterMintPubkey,
         masterTokenAccount: masterAtaPda,
         masterMetadata: masterMetadataPda,
         masterEdition: masterEditionPda,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([RUMA_WALLET, editionMint])
       .instruction();
   }
 
   const getAllUserAcc = useCallback(async () => {
     return await program.account.user.all();
   }, [program]);
+
+  const getMultipleUserAcc = useCallback(
+    async (userPdas: PublicKey[]) => {
+      return await program.account.user.fetchMultiple(userPdas);
+    },
+    [program]
+  );
 
   const getUserAcc = useCallback(
     async (userPda: PublicKey) => {
@@ -179,6 +177,13 @@ export function useAnchorProgram() {
     return await program.account.event.all();
   }, [program]);
 
+  const getMultipleEventAcc = useCallback(
+    async (eventPdas: PublicKey[]) => {
+      return await program.account.event.fetchMultiple(eventPdas);
+    },
+    [program]
+  );
+
   const getEventAcc = useCallback(
     async (eventPda: PublicKey) => {
       return await program.account.event.fetchNullable(eventPda);
@@ -189,6 +194,13 @@ export function useAnchorProgram() {
   const getAllAttendeeAcc = useCallback(async () => {
     return await program.account.attendee.all();
   }, [program]);
+
+  const getMultipleAttendeeAcc = useCallback(
+    async (attendeePdas: PublicKey[]) => {
+      return await program.account.attendee.fetchMultiple(attendeePdas);
+    },
+    [program]
+  );
 
   const getAttendeeAcc = useCallback(
     async (attendeePda: PublicKey) => {
@@ -201,14 +213,17 @@ export function useAnchorProgram() {
     getCreateProfileIx,
     getCreateEventIx,
     getCreateBadgeIx,
-    registerForEvent,
-    changeAttendeeStatus,
+    getRegisterForEventIx,
+    getChangeAttendeeStatusIx,
     getCheckIntoEventIx,
     getAllUserAcc,
+    getMultipleUserAcc,
     getUserAcc,
     getAllEventAcc,
+    getMultipleEventAcc,
     getEventAcc,
     getAllAttendeeAcc,
+    getMultipleAttendeeAcc,
     getAttendeeAcc,
   };
 }

@@ -92,7 +92,7 @@ pub struct CheckIntoEvent<'info> {
     )]
     pub registrant: Box<Account<'info, User>>,
     #[account(mut)]
-    pub attendee: Account<'info, Attendee>,
+    pub attendee: Box<Account<'info, Attendee>>,
     #[account(
         init,
         payer = payer,
@@ -109,7 +109,7 @@ pub struct CheckIntoEvent<'info> {
         associated_token::authority = registrant,
         associated_token::token_program = token_program,
     )]
-    pub edition_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub edition_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
     /// CHECK: initialized by Metaplex Token Metadata program
     #[account(
         mut,

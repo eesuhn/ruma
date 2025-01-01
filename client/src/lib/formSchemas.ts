@@ -60,7 +60,7 @@ export const createEventFormSchema = z.object({
     .optional(),
   visibility: z.string(),
   startDate: z.date().nullable(),
-  endDate: z.date().nullable(),
+  endDate: z.date().nullable().optional(),
   location: z.string().min(1, {
     message: 'Location is required.',
   }),
@@ -92,4 +92,10 @@ export const createEventFormSchema = z.object({
       message: `Badge image must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
+});
+
+export const statusFormSchema = z.object({
+  status: z.enum(['approved', 'rejected'], {
+    message: 'Status must be either "approved" or "rejected".',
+  }),
 });

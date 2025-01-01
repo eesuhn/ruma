@@ -21,15 +21,6 @@ export default function Home() {
                   Discover Events
                 </Button>
               </Link>
-              <Link href="/create-event">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto"
-                >
-                  Host Event
-                </Button>
-              </Link>
             </div>
           </div>
           <div className="mx-auto w-full max-w-md flex-1 md:max-w-none">

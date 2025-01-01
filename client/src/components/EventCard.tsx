@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { BN } from '@coral-xyz/anchor';
 import { RegistrationStatus } from '@/types/event';
 import { Button } from './ui/button';
+import { statusColors } from '@/lib/colorsRecord';
 
 function EventButtonTab({
   registrationStatus,
@@ -19,7 +20,7 @@ function EventButtonTab({
 
     return (
       <Badge
-        className={`bg-status-${registrationStatus} hover:bg-status-${registrationStatus} inline-block rounded-full px-3 py-1 text-sm font-normal`}
+        className={`${statusColors[registrationStatus]} inline-block rounded-full px-3 py-1 text-sm font-normal`}
       >
         {badgeName}
       </Badge>
@@ -37,6 +38,7 @@ function EventButtonTab({
 }
 
 export function EventCard({
+  eventPda,
   name,
   image,
   startTimestamp,
@@ -44,6 +46,7 @@ export function EventCard({
   registrationStatus,
   isOrganizer,
 }: {
+  eventPda: string;
   name: string;
   image: string;
   startTimestamp: BN | null;
@@ -52,7 +55,7 @@ export function EventCard({
   isOrganizer: boolean;
 }) {
   return (
-    <Link href={isOrganizer ? `/events/${name}/manage` : `/events/${name}`}>
+    <Link href={isOrganizer ? `/events/${eventPda}/manage` : `/events/${eventPda}`}>
       <Card className="mb-2 overflow-hidden transition-shadow hover:shadow-lg">
         <div className="grid gap-4 p-4 md:grid-cols-[1fr,200px]">
           <div className="space-y-3">
@@ -61,13 +64,13 @@ export function EventCard({
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span>
-                  {new Date(startTimestamp * 1000 || 0).toLocaleDateString()}
+                  {new Date(Number(startTimestamp) || 0).toLocaleDateString()}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {new Date(startTimestamp * 1000 || 0).toLocaleTimeString()}
+                  {new Date(Number(startTimestamp) || 0).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                 </span>
               </div>
               <div className="flex items-center gap-2">

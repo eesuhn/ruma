@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
@@ -28,15 +28,31 @@ import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { getExplorerLink } from '@solana-developers/helpers';
 import { Cluster } from '@solana/web3.js';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
+import useSWR from 'swr';
+import { getUserPda } from '@/lib/pda';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
-  const { getCreateProfileIx } = useAnchorProgram();
+  const router = useRouter();
+  const { getCreateProfileIx, getUserAcc } = useAnchorProgram();
   const { toast } = useToast();
   const [profileImageSrc, setProfileImageSrc] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isLoading, error } = useSWR(publicKey, async (publicKey) => {
+    const userPda = getUserPda(publicKey);
+    const userAcc = await getUserAcc(userPda);
+
+    if (userAcc) {
+      router.push('/profile');
+      return null;
+    }
+
+    setProfileImageSrc(getRandomDicebearLink('profile', publicKey.toBase58()));
+    return;
+  });
 
   const form = useForm<z.infer<typeof createProfileFormSchema>>({
     resolver: zodResolver(createProfileFormSchema),
@@ -46,63 +62,61 @@ export default function Page() {
     },
   });
 
-  useEffect(() => {
-    if (publicKey) {
-      setProfileImageSrc(
-        getRandomDicebearLink('profile', publicKey.toBase58())
-      );
-    }
-  }, [publicKey]);
-
   async function onSubmit(values: z.infer<typeof createProfileFormSchema>) {
-    try {
-      setIsUploading(true);
-      const uploadedImageUri = await uploadFile(
-        values.profileImage ??
-          (await fetchDicebearAsFile('profile', publicKey!.toBase58()))
-      );
-      setIsUploading(false);
+    if (publicKey) {
+      try {
+        setIsUploading(true);
+        const uploadedImageUri = await uploadFile(
+          values.profileImage ??
+            (await fetchDicebearAsFile('profile', publicKey.toBase58()))
+        );
+        setIsUploading(false);
 
-      const ix = await getCreateProfileIx(values.name, uploadedImageUri);
-      const tx = await setComputeUnitLimitAndPrice(
-        connection,
-        [ix],
-        publicKey!
-      );
+        const ix = await getCreateProfileIx(values.name, uploadedImageUri);
+        const tx = await setComputeUnitLimitAndPrice(
+          connection,
+          [ix],
+          publicKey
+        );
 
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash();
-      tx.recentBlockhash = blockhash;
-      tx.lastValidBlockHeight = lastValidBlockHeight;
+        const { blockhash, lastValidBlockHeight } =
+          await connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.lastValidBlockHeight = lastValidBlockHeight;
 
-      const signature = await sendTransaction(tx, connection);
+        const signature = await sendTransaction(tx, connection);
 
-      await connection.confirmTransaction({
-        signature,
-        blockhash,
-        lastValidBlockHeight,
-      });
-
-      toast({
-        title: 'Profile created successfully',
-        description: getExplorerLink(
-          'tx',
+        await connection.confirmTransaction({
           signature,
-          process.env.NEXT_PUBLIC_RPC_CLUSTER! as Cluster
-        ),
-      });
-    } catch (error) {
-      console.error(error);
+          blockhash,
+          lastValidBlockHeight,
+        });
 
-      toast({
-        title: 'Error',
-        description: 'Failed to create profile. Please try again.',
-        variant: 'destructive',
-      });
+        toast({
+          title: 'Profile created successfully',
+          description: getExplorerLink(
+            'tx',
+            signature,
+            (process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster) || 'devnet'
+          ),
+        });
+      } catch (error) {
+        console.error(error);
 
-      setIsUploading(false);
+        toast({
+          title: 'Error',
+          description: 'Failed to create profile. Please try again.',
+          variant: 'destructive',
+        });
+
+        setIsUploading(false);
+      }
     }
   }
+
+  // TODO: add error and loading states
+  if (error) return <p>{error.message}</p>;
+  if (isLoading) return <p>Loading...</p>;
 
   return (
     <div className="flex min-h-screen justify-center">

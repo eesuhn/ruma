@@ -1,4 +1,4 @@
-import { irysUploader } from '@/lib/irys';
+import { upload } from '@/lib/irys';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -19,27 +19,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded.' }, { status: 400 });
     }
 
-    const price = await irysUploader.getPrice(file.size);
-    await irysUploader.fund(price);
+    const link = await upload(file);
 
-    const receipt = await irysUploader.upload(
-      Buffer.from(await file.arrayBuffer()),
-      {
-        tags: [
-          {
-            name: 'Content-Type',
-            value: file.type,
-          },
-          {
-            name: 'Name',
-            value: file.name,
-          },
-        ],
-      }
-    );
-
-    const link = `https://gateway.irys.xyz/${receipt.id}`;
-    console.log(`Uploaded to ${link}`);
     return NextResponse.json({ link });
   } catch (err) {
     console.error(err);
