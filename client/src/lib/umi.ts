@@ -31,7 +31,10 @@ export function getMetadataPda(mintPubkey: PublicKey): UmiPublicKey {
   })[0];
 }
 
-export function getEditionMarkerPda(masterMintPubkey: PublicKey, editionNumber: number): UmiPublicKey {
+export function getEditionMarkerPda(
+  masterMintPubkey: PublicKey,
+  editionNumber: number
+): UmiPublicKey {
   return findEditionMarkerFromEditionNumberPda(umi, {
     mint: fromWeb3JsPublicKey(masterMintPubkey),
     editionNumber,

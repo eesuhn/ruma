@@ -14,7 +14,10 @@ export default function Page() {
     const allEvents = await getAllEventAcc();
 
     allEvents.filter(({ account }) => {
-      return Number(account.data.startTimestamp) > Date.now() && account.data.isPublic;
+      return (
+        Number(account.data.startTimestamp) > Date.now() &&
+        account.data.isPublic
+      );
     });
 
     return allEvents;
