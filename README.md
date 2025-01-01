@@ -1,14 +1,17 @@
-## RUMA
+<p align="center">
+    <img src="./docs/banner.png" alt="screenshot" width="380" />
+</p>
 
-<img src="./docs/screenshot.png" alt="screenshot" width="480" /> <br>
-
-A NFT-based event hosting platform. Built on Solana blockchain.
+RUMA — **Solana**-powered dApp that redefines event hosting by creating NFT memories for attendees
 
 ![Next.js][next] ![Anchor][anchor] ![Rust][rust] ![Shadcn][shadcn] ![Bun][bun]
 
-- Host events on chain
-- Mint NFT badges for events
-- Verify attendees with NFT badges
+- Host events directly on chain
+- Provide attendees with unique digital mementos
+- Streamline authentication with NFT badges
+
+*Check out our demo video!* <br>
+[RUMA - Demo](https://youtu.be/x05mT8t_vkM)
 
 ### Setting Up Locally
 
