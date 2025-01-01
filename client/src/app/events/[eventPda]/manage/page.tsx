@@ -26,7 +26,6 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
 import {
   capitalizeFirstLetter,
-  getComputeLimitIx,
   getComputePriceIx,
   toCamelCase,
   truncateAddress,
@@ -60,6 +59,7 @@ import {
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getUserPda } from '@/lib/pda';
 import { statusColors } from '@/lib/colorsRecord';
+import { getComputeLimitIx } from '@/app/actions';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();

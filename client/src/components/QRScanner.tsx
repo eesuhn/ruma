@@ -48,7 +48,7 @@ export function QRScanner({
         return;
       }
     },
-    [onScan]
+    [onScan, isScanning]
   );
 
   const handleOpenChange = (open: boolean) => {

@@ -52,11 +52,11 @@ import { SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Cluster, Keypair } from '@solana/web3.js';
-import { getExplorerLink } from '@solana-developers/helpers';
+import { Keypair } from '@solana/web3.js';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
 import useSWR from 'swr';
 import { getEventPda, getUserPda } from '@/lib/pda';
+import { getTransactionLink } from '../actions';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -165,11 +165,7 @@ export default function Page() {
 
         toast({
           title: 'Event create successfully',
-          description: getExplorerLink(
-            'tx',
-            signature,
-            (process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster) || 'devnet'
-          ),
+          description: await getTransactionLink(signature),
         });
       } catch (error) {
         console.error(error);

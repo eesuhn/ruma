@@ -10,9 +10,9 @@ import {
   Transaction,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { getSimulationComputeUnits } from '@solana-developers/helpers';
 import { DisplayedEvent } from '@/types/event';
 import { BN } from '@coral-xyz/anchor';
+import { getComputeLimitIx } from '@/app/actions';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -85,26 +85,6 @@ export async function setComputeUnitLimitAndPrice(
   tx.add(await getComputePriceIx(connection), ...instructions);
 
   return tx;
-}
-
-export async function getComputeLimitIx(
-  connection: Connection,
-  instructions: TransactionInstruction[],
-  payer: PublicKey,
-  lookupTables: Array<AddressLookupTableAccount> = []
-): Promise<TransactionInstruction | undefined> {
-  const units = await getSimulationComputeUnits(
-    connection,
-    instructions,
-    payer,
-    lookupTables
-  );
-
-  if (units) {
-    return ComputeBudgetProgram.setComputeUnitLimit({
-      units: Math.ceil(units * 1.1),
-    });
-  }
 }
 
 export async function getComputePriceIx(
