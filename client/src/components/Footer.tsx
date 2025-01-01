@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Footer() {
+export function Footer() {
   return (
     <footer className="flex w-full justify-center bg-muted pb-5 pt-4">
       <div className="container px-[6%]">

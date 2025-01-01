@@ -113,7 +113,7 @@ describe('checkIntoEvent', () => {
       mint: fromWeb3JsPublicKey(masterMint.publicKey),
     });
 
-    const { editionAcc, registrantUserAcc } = await checkIntoEvent(
+    const { editionAcc, registrantUserAcc, attendeeAcc } = await checkIntoEvent(
       program,
       umi,
       organizer,
@@ -136,6 +136,7 @@ describe('checkIntoEvent', () => {
     // @ts-ignore
     expect(Number(editionAcc.edition.edition)).toEqual(editionNumber);
     expect(registrantUserAcc.badges[0]).toEqual(editionMint.publicKey);
+    expect(attendeeAcc.status).toEqual({ checkedIn: {} });
   });
 
   test('throws when checking into an event with without being approved', async () => {

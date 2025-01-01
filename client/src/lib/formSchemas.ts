@@ -32,10 +32,10 @@ export const createProfileFormSchema = z.object({
   profileImage: z
     .any()
     .refine(validateFileSize, {
-      message: `Invalid image. Must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+      message: `Profile image must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
     .refine(validateFileType, {
-      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
+      message: `Profile image must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
 });
@@ -52,15 +52,15 @@ export const createEventFormSchema = z.object({
   eventImage: z
     .any()
     .refine(validateFileSize, {
-      message: `Invalid image. Must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+      message: `Event image must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
     .refine(validateFileType, {
-      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
+      message: `Event image must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
   visibility: z.string(),
   startDate: z.date().nullable(),
-  endDate: z.date().nullable(),
+  endDate: z.date().nullable().optional(),
   location: z.string().min(1, {
     message: 'Location is required.',
   }),
@@ -86,10 +86,16 @@ export const createEventFormSchema = z.object({
   badgeImage: z
     .any()
     .refine(validateFileSize, {
-      message: `Invalid image. Must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
+      message: `Badge image must be less than ${MAX_FILE_SIZE / 1024 / 1024}MB.`,
     })
     .refine(validateFileType, {
-      message: `Invalid image. Must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
+      message: `Badge image must be a valid file type (${ACCEPTED_IMAGE_TYPES.join(', ')}).`,
     })
     .optional(),
+});
+
+export const statusFormSchema = z.object({
+  status: z.enum(['approved', 'rejected'], {
+    message: 'Status must be either "approved" or "rejected".',
+  }),
 });

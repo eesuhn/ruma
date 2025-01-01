@@ -65,6 +65,8 @@ pub fn check_into_event(ctx: Context<CheckIntoEvent>, edition_number: u64) -> Re
         .badges
         .push(ctx.accounts.edition_mint.key());
 
+    ctx.accounts.attendee.status = AttendeeStatus::CheckedIn;
+
     Ok(())
 }
 
@@ -89,7 +91,8 @@ pub struct CheckIntoEvent<'info> {
         realloc::zero = false,
     )]
     pub registrant: Box<Account<'info, User>>,
-    pub attendee: Account<'info, Attendee>,
+    #[account(mut)]
+    pub attendee: Box<Account<'info, Attendee>>,
     #[account(
         init,
         payer = payer,
@@ -106,7 +109,7 @@ pub struct CheckIntoEvent<'info> {
         associated_token::authority = registrant,
         associated_token::token_program = token_program,
     )]
-    pub edition_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub edition_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
     /// CHECK: initialized by Metaplex Token Metadata program
     #[account(
         mut,

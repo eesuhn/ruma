@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { QrReader } from 'react-qr-reader';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,22 +13,39 @@ import {
 } from '@/components/ui/dialog';
 import { Result } from '@zxing/library';
 
-interface QRScannerProps {
-  onScan?: (data: string) => void;
-}
-
-export default function QRScanner({ onScan }: QRScannerProps) {
+export function QRScanner({
+  onScan,
+  disabled,
+}: {
+  onScan: (text: string) => Promise<boolean>;
+  disabled?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
-  const scannerRef = useRef<any>(false);
+  const [isScanning, setIsScanning] = useState(false);
+  // Note: The `ref` prop is not working
+  // const scannerRef = useRef<any>(null);
 
-  const handleScan = useCallback(
-    (result: Result | null | undefined, error: Error | null | undefined) => {
+  const handleResult = useCallback(
+    async (
+      result: Result | null | undefined,
+      error: Error | null | undefined
+    ) => {
       if (error) return;
-      if (result && !scannerRef.current) {
+      if (result && !isScanning) {
         const text = result.getText();
-        onScan?.(text);
-        setIsOpen(false);
-        scannerRef.current.stop();
+        setIsScanning(true);
+        const stopScan = await onScan(text);
+
+        if (stopScan) {
+          setIsOpen(false);
+          // Note: The `ref` prop is not working
+          // scannerRef.current.stop();
+          window.location.reload();
+        } else {
+          console.log('continue scan');
+          setIsScanning(false);
+        }
+        return;
       }
     },
     [onScan]
@@ -36,24 +53,36 @@ export default function QRScanner({ onScan }: QRScannerProps) {
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if (!open) window.location.reload();
+
+    if (!open) {
+      // Note: The `ref` prop is not working
+      // scannerRef.current.stop();
+      window.location.reload();
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="bg-black text-white">
-          <Camera className="mr-2 h-4 w-4" /> Scan Ticket
+        <Button
+          variant="default"
+          className="bg-black text-white"
+          disabled={disabled}
+        >
+          <Camera className="mr-2 h-4 w-4" />
+          Scan Ticket
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Scan QR Code</DialogTitle>
+          <DialogTitle>Scan Ticket</DialogTitle>
         </DialogHeader>
         <div className="aspect-square w-full overflow-hidden rounded-lg">
           {isOpen && (
             <QrReader
-              onResult={handleScan}
+              // Note: The `ref` prop is not working
+              // ref={scannerRef}
+              onResult={handleResult}
               constraints={{ facingMode: 'environment' }}
               videoStyle={{ width: '100%', height: '100%' }}
               scanDelay={500}

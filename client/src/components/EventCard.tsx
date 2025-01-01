@@ -1,63 +1,61 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { Card, Button, Badge } from '@/components/ui';
-import { EventData } from '@/types/state';
+import { ArrowRight, Badge, CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { BN } from '@coral-xyz/anchor';
+import { RegistrationStatus } from '@/types/event';
+import { Button } from './ui/button';
+import { statusColors } from '@/lib/colorsRecord';
 
-const getBadgeVariant = (status?: string) => {
-  switch (status) {
-    case 'pending':
-      return 'bg-[#f77f00]';
-    case 'going':
-      return 'bg-[#79be79]';
-    case 'checked-in':
-      return 'bg-[#91d1ce]';
-    case 'rejected':
-      return 'bg-[#e5383b]';
-    default:
-      return 'bg-black';
+function EventButtonTab({
+  registrationStatus,
+  isOrganizer,
+}: {
+  registrationStatus?: RegistrationStatus;
+  isOrganizer: boolean;
+}) {
+  if (registrationStatus) {
+    const badgeName =
+      registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1);
+
+    return (
+      <Badge
+        className={`${statusColors[registrationStatus]} inline-block rounded-full px-3 py-1 text-sm font-normal`}
+      >
+        {badgeName}
+      </Badge>
+    );
   }
-};
 
-interface EventCardProps extends EventData {
-  registrationStatus?: 'pending' | 'going' | 'checked-in' | 'rejected';
-  showManage?: boolean;
+  if (isOrganizer) {
+    return (
+      <Button size="sm" className="h-9">
+        Manage Event
+        <ArrowRight className="h-4 w-4" />
+      </Button>
+    );
+  }
 }
 
-export default function EventCard({
+export function EventCard({
+  eventPda,
   name,
   image,
   startTimestamp,
   location,
   registrationStatus,
-  showManage,
-}: EventCardProps) {
-  const getButtonContent = () => {
-    if (registrationStatus) {
-      const badgeColor = getBadgeVariant(registrationStatus);
-      const badgeName =
-        registrationStatus.charAt(0).toUpperCase() +
-        registrationStatus.slice(1);
-      return (
-        <Badge
-          className={`${badgeColor} hover:${badgeColor} inline-block rounded-full px-3 py-1 text-sm font-normal`}
-        >
-          {badgeName}
-        </Badge>
-      );
-    }
-    if (showManage) {
-      return (
-        <Button size="sm" className="h-9">
-          Manage Event
-          <ArrowRight className="h-4 w-4" />
-        </Button>
-      );
-    }
-  };
-
+  isOrganizer,
+}: {
+  eventPda: string;
+  name: string;
+  image: string;
+  startTimestamp: BN | null;
+  location: string;
+  registrationStatus?: RegistrationStatus;
+  isOrganizer: boolean;
+}) {
   return (
-    <Link href={showManage ? `/events/${name}/manage` : `/events/${name}`}>
+    <Link href={isOrganizer ? `/events/${eventPda}/manage` : `/events/${eventPda}`}>
       <Card className="mb-2 overflow-hidden transition-shadow hover:shadow-lg">
         <div className="grid gap-4 p-4 md:grid-cols-[1fr,200px]">
           <div className="space-y-3">
@@ -66,13 +64,13 @@ export default function EventCard({
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span>
-                  {new Date(startTimestamp * 1000 || 0).toLocaleDateString()}
+                  {new Date(Number(startTimestamp) || 0).toLocaleDateString()}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {new Date(startTimestamp * 1000 || 0).toLocaleTimeString()}
+                  {new Date(Number(startTimestamp) || 0).toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -80,7 +78,10 @@ export default function EventCard({
                 <span>{location || 'TBA'}</span>
               </div>
             </div>
-            {getButtonContent()}
+            <EventButtonTab
+              registrationStatus={registrationStatus}
+              isOrganizer={isOrganizer}
+            />
           </div>
           <div className="relative aspect-[4/3] w-full">
             <Image

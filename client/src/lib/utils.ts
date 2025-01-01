@@ -1,39 +1,21 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { createAvatar } from '@dicebear/core';
-import { bigSmile, shapes, rings } from '@dicebear/collection';
 import { UseFormReturn } from 'react-hook-form';
 import { RefObject } from 'react';
-
-interface DicebearProps {
-  seed: string;
-  style: 'profile' | 'event' | 'badge';
-}
-
-const styleMap = {
-  profile: bigSmile,
-  event: shapes,
-  badge: rings,
-};
+import {
+  AddressLookupTableAccount,
+  ComputeBudgetProgram,
+  Connection,
+  PublicKey,
+  Transaction,
+  TransactionInstruction,
+} from '@solana/web3.js';
+import { getSimulationComputeUnits } from '@solana-developers/helpers';
+import { DisplayedEvent } from '@/types/event';
+import { BN } from '@coral-xyz/anchor';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-/**
- * Generate a Dicebear Avatar URI based on the seed and style
- *
- * @param {DicebearProps} seed
- * @param {DicebearProps} style 'profile' | 'event' | 'badge'
- * @returns {string} Avatar URI
- */
-export function generateDicebearAvatarUri({
-  seed,
-  style,
-}: DicebearProps): string {
-  return createAvatar(styleMap[style], {
-    seed,
-  }).toDataUri();
 }
 
 export function handleImageChange(
@@ -61,13 +43,184 @@ export function handleImageClick(ref: RefObject<HTMLInputElement>) {
   ref.current?.click();
 }
 
-export const statusStyles = {
-  going: 'bg-[#79be79] text-white',
-  pending: 'bg-[#f77f00] text-white',
-  rejected: 'bg-[#e5383b] text-white',
-  'checked-in': 'bg-[#91d1ce] text-white',
-} as const;
+export function capitalizeFirstLetter(str: string): string {
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
 
-export const formatStatus = (status: string): string => {
-  return status.charAt(0).toUpperCase() + status.slice(1);
-};
+export function toCamelCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split('-')
+    .map((word: string, index: number) =>
+      index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join('');
+}
+
+export function truncateAddress(address: string, length: number = 4): string {
+  return `${address.slice(0, length)}...${address.slice(-length)}`;
+}
+
+export async function setComputeUnitLimitAndPrice(
+  connection: Connection,
+  instructions: TransactionInstruction[],
+  payer: PublicKey,
+  lookupTables: Array<AddressLookupTableAccount> = []
+): Promise<Transaction> {
+  const tx = new Transaction();
+
+  const limitIx = await getComputeLimitIx(
+    connection,
+    instructions,
+    payer,
+    lookupTables
+  );
+
+  if (limitIx) {
+    tx.add(limitIx);
+  }
+
+  tx.add(await getComputePriceIx(connection), ...instructions);
+
+  return tx;
+}
+
+export async function getComputeLimitIx(
+  connection: Connection,
+  instructions: TransactionInstruction[],
+  payer: PublicKey,
+  lookupTables: Array<AddressLookupTableAccount> = []
+): Promise<TransactionInstruction | undefined> {
+  const units = await getSimulationComputeUnits(
+    connection,
+    instructions,
+    payer,
+    lookupTables
+  );
+
+  if (units) {
+    return ComputeBudgetProgram.setComputeUnitLimit({
+      units: Math.ceil(units * 1.1),
+    });
+  }
+}
+
+export async function getComputePriceIx(
+  connection: Connection
+): Promise<TransactionInstruction> {
+  const recentFees = await connection.getRecentPrioritizationFees();
+  const priorityFee =
+    recentFees.reduce(
+      (acc, { prioritizationFee }) => acc + prioritizationFee,
+      0
+    ) / recentFees.length;
+
+  return ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: BigInt(Math.ceil(priorityFee)),
+  });
+}
+
+export function sortEventsByTimestamp(
+  events: DisplayedEvent[]
+): DisplayedEvent[] {
+  return events.sort(
+    (a, b) =>
+      Number(a.event.account.data.startTimestamp) -
+      Number(b.event.account.data.startTimestamp)
+  );
+}
+
+export function generateDataBytes(
+  attendeePda: string,
+  eventPda: string
+): Uint8Array {
+  const data = `${attendeePda}-${eventPda}`;
+  return new Uint8Array(Buffer.from(data));
+}
+
+export function deserializeProgramAccount(obj: { [key: string]: any } | null) {
+  if (obj === null) {
+    return null;
+  }
+
+  for (const key in obj) {
+    if (obj[key] instanceof PublicKey) {
+      obj[key] = obj[key].toBase58();
+    } else if (obj[key] instanceof BN) {
+      obj[key] = Number(obj[key]);
+    } else if (Array.isArray(obj[key])) {
+      obj[key] = obj[key].map((item) => deserializeProgramAccount(item));
+    } else if (obj[key] instanceof Object) {
+      obj[key] = deserializeProgramAccount(obj[key]);
+    }
+  }
+
+  return obj;
+}
+
+export async function uploadFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.set('file', file);
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data.link;
+}
+
+export async function generateTicket(
+  attendeePda: PublicKey,
+  eventPda: PublicKey
+): Promise<string> {
+  const urlSearchParams = new URLSearchParams();
+  urlSearchParams.append('attendeePda', attendeePda.toBase58());
+  urlSearchParams.append('eventPda', eventPda.toBase58());
+
+  const response = await fetch(`/api/ticket/generate?${urlSearchParams.toString()}`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data.ticket;
+}
+
+export async function verifyTicket(payload: string): Promise<{
+  verified: boolean;
+  message: string;
+  attendeePda: string;
+  userPda: string;
+}> {
+  const formData = new FormData();
+  formData.set('payload', payload);
+
+  const response = await fetch('/api/ticket/verify', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return {
+    verified: data.verified,
+    message: data.message,
+    attendeePda: data.attendeePda,
+    userPda: data.userPda,
+  };
+}

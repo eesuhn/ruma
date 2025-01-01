@@ -3,27 +3,33 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { Button } from '@/components/ui/button';
 import {
-  Button,
   Sheet,
-  SheetTrigger,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui';
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { FiPlusCircle } from 'react-icons/fi';
 import { MenuSquareIcon, Ticket, Compass, User } from 'lucide-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { cn } from '@/lib/utils';
+
+const WalletMultiButtonDynamic = dynamic(
+  async () =>
+    (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+  { ssr: false }
+);
 
 const navItems = [
-  { name: 'Events', href: '/events', icon: Ticket },
-  { name: 'Discover', href: '/discover', icon: Compass },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Events', href: '/events', Icon: Ticket },
+  { name: 'Discover', href: '/discover', Icon: Compass },
+  { name: 'Profile', href: '/profile', Icon: User },
 ] as const;
 
-export default function Navbar() {
+export function Navbar() {
   const pathname = usePathname();
-  const isActive = (path: string) => (pathname === path ? ' text-black' : '');
 
   return (
     <nav className="fixed left-0 top-0 z-50 w-full bg-white shadow-md">
@@ -41,15 +47,18 @@ export default function Navbar() {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline gap-6">
-              {navItems.map((item) => (
+              {navItems.map(({ name, href, Icon }) => (
                 <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`rounded-md px-3 py-2 text-base text-[#999999] hover:text-black ${isActive(item.href)} flex items-center gap-2`}
+                  key={name}
+                  href={href}
+                  className={cn(
+                    pathname === href ? 'text-black' : '',
+                    'flex items-center gap-2 rounded-md px-3 py-2 text-base text-[#999999] hover:text-black'
+                  )}
                   prefetch={false}
                 >
-                  <item.icon size={20} className="mr-[2px] mt-[-2px]" />
-                  {item.name}
+                  <Icon size={20} className="mr-[2px] mt-[-2px]" />
+                  {name}
                 </Link>
               ))}
             </div>
@@ -64,7 +73,7 @@ export default function Navbar() {
                 Create Event
               </Button>
             </Link>
-            <WalletMultiButton />
+            <WalletMultiButtonDynamic />
           </div>
           <div className="flex items-center md:hidden">
             <Sheet>
@@ -79,15 +88,15 @@ export default function Navbar() {
                   <SheetTitle className="sr-only">Mobile Navigation</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col space-y-4">
-                  <WalletMultiButton />
-                  {navItems.map((item) => (
+                  <WalletMultiButtonDynamic />
+                  {navItems.map(({ name, href }) => (
                     <Link
-                      key={item.name}
-                      href={item.href}
+                      key={name}
+                      href={href}
                       className="text-lg font-medium hover:underline"
                       prefetch={false}
                     >
-                      {item.name}
+                      {name}
                     </Link>
                   ))}
                   <Link
