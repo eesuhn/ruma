@@ -25,12 +25,11 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useAnchorProgram } from '@/hooks/useAnchorProgram';
-import { getExplorerLink } from '@solana-developers/helpers';
-import { Cluster } from '@solana/web3.js';
 import { fetchDicebearAsFile, getRandomDicebearLink } from '@/lib/dicebear';
 import useSWR from 'swr';
 import { getUserPda } from '@/lib/pda';
 import { useRouter } from 'next/navigation';
+import { getTransactionLink } from '../actions';
 
 export default function Page() {
   const { publicKey, sendTransaction } = useWallet();
@@ -94,11 +93,7 @@ export default function Page() {
 
         toast({
           title: 'Profile created successfully',
-          description: getExplorerLink(
-            'tx',
-            signature,
-            (process.env.NEXT_PUBLIC_RPC_CLUSTER as Cluster) || 'devnet'
-          ),
+          description: await getTransactionLink(signature),
         });
       } catch (error) {
         console.error(error);

@@ -22,7 +22,6 @@ import { EventStatus, RegistrationStatus } from '@/types/event';
 import {
   capitalizeFirstLetter,
   generateTicket,
-  getComputeLimitIx,
   getComputePriceIx,
 } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +33,7 @@ import { getMetadataAcc, getMetadataPda } from '@/lib/umi';
 import { RUMA_WALLET } from '@/lib/constants';
 import { QRTicket } from '@/components/QRTicket';
 import { statusColors } from '@/lib/colorsRecord';
+import { getComputeLimitIx } from '@/app/actions';
 
 function EventStatusDetailsButton({
   onClick,
