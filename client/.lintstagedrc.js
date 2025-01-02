@@ -1,10 +1,8 @@
 const buildEslintCommand = (filenames) =>
-  `next lint --fix --file ${filenames
-    .join(' --file ')}`;
+  `next lint --fix --file ${filenames.join(' --file ')}`;
 
 const buildPrettierCommand = (filenames) =>
-  `prettier ${filenames
-    .join(' ')} -w`;
+  `prettier ${filenames.join(' ')} -w`;
 
 export default {
   'src/**/*.{js,jsx,ts,tsx}': [buildEslintCommand],
