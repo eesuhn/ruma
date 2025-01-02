@@ -49,7 +49,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (eventAcc.attendees.some(attendee => attendee.equals(new PublicKey(attendeePda)))) {
+    if (
+      eventAcc.attendees.some((attendee) =>
+        attendee.equals(new PublicKey(attendeePda))
+      )
+    ) {
       // check if signature is signed by internal secret key
       const dataBytes = generateDataBytes(attendeePda, eventPda);
       const signatureBytes = new Uint8Array(Buffer.from(signature, 'hex'));

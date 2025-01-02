@@ -43,3 +43,6 @@ next-env.d.ts
 # IDL
 src/idl/ruma.json
 src/types/ruma.ts
+
+# Build artifacts
+target/

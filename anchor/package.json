@@ -4,7 +4,7 @@
     "format": "prettier . -w",
     "format:check": "prettier . --check",
     "local": "solana-test-validator",
-    "sync": "./sync.sh"
+    "sync": "./docs/sync.sh"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.30.1",
@@ -17,8 +17,5 @@
     "@types/bun": "^1.1.13",
     "prettier": "^3.3.3",
     "typescript": "^4.3.5"
-  },
-  "dependencies": {
-    "prettier-plugin-tailwindcss": "^0.6.9"
   }
 }

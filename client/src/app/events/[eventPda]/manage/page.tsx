@@ -26,13 +26,16 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import Image from 'next/image';
 import {
   capitalizeFirstLetter,
-  getComputeLimitIx,
   getComputePriceIx,
   toCamelCase,
   truncateAddress,
   verifyTicket,
 } from '@/lib/utils';
-import { ManageAttendeeObject, RegistrationStatus, StatusObject } from '@/types/event';
+import {
+  ManageAttendeeObject,
+  RegistrationStatus,
+  StatusObject,
+} from '@/types/event';
 import { QRScanner } from '@/components/QRScanner';
 import { statusFormSchema } from '@/lib/formSchemas';
 import useSWR from 'swr';
@@ -60,6 +63,7 @@ import {
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { getUserPda } from '@/lib/pda';
 import { statusColors } from '@/lib/colorsRecord';
+import { getComputeLimitIx } from '@/app/actions';
 
 export default function Page() {
   const { eventPda } = useParams<{ eventPda: string }>();
@@ -98,16 +102,15 @@ export default function Page() {
         await getMultipleUserAcc(attendeeAccs.map((acc) => acc.user))
       ).filter((acc) => acc !== null);
 
-      attendees = attendeeAccs
-        .map((acc, i) => {
-          return {
-            attendeePda: event.attendees[i].toBase58(),
-            status: Object.keys(acc.status)[0],
-            userPda: acc.user,
-            name: userAccs[i].data.name,
-            image: userAccs[i].data.image,
-          };
-        })
+      attendees = attendeeAccs.map((acc, i) => {
+        return {
+          attendeePda: event.attendees[i].toBase58(),
+          status: Object.keys(acc.status)[0],
+          userPda: acc.user,
+          name: userAccs[i].data.name,
+          image: userAccs[i].data.image,
+        };
+      });
 
       const masterMetadataPda = getMetadataPda(badge);
       const masterEditionPda = getMasterOrPrintedEditionPda(badge);
@@ -132,14 +135,17 @@ export default function Page() {
       };
     }
   );
-  const { data: filteredAttendees } = useSWR(eventData ? [eventData.attendees, search, statusFilter] : null, ([attendees, search, statusFilter]) => {
-    return attendees.filter((attendee) => {
-      return (
-        attendee.name.toLowerCase().includes(search.toLowerCase()) &&
-        (statusFilter === 'all' || statusFilter === attendee.status)
-      );
-    });
-  })
+  const { data: filteredAttendees } = useSWR(
+    eventData ? [eventData.attendees, search, statusFilter] : null,
+    ([attendees, search, statusFilter]) => {
+      return attendees.filter((attendee) => {
+        return (
+          attendee.name.toLowerCase().includes(search.toLowerCase()) &&
+          (statusFilter === 'all' || statusFilter === attendee.status)
+        );
+      });
+    }
+  );
 
   const form = useForm<z.infer<typeof statusFormSchema>>({
     resolver: zodResolver(statusFormSchema),
@@ -182,7 +188,7 @@ export default function Page() {
         }).compileToV0Message();
 
         const tx = new VersionedTransaction(messageV0);
-        tx.sign([RUMA_WALLET])
+        tx.sign([RUMA_WALLET]);
 
         const signature = await connection.sendTransaction(tx);
         await connection.confirmTransaction({
@@ -247,7 +253,7 @@ export default function Page() {
           }).compileToV0Message();
 
           const tx = new VersionedTransaction(messageV0);
-          tx.sign([RUMA_WALLET, editionMint])
+          tx.sign([RUMA_WALLET, editionMint]);
 
           const signature = await sendTransaction(tx, connection);
           await connection.confirmTransaction({
@@ -357,7 +363,11 @@ export default function Page() {
                         </div>
                       </div>
                     </div>
-                    <Badge className={statusColors[attendee.status as RegistrationStatus]}>
+                    <Badge
+                      className={
+                        statusColors[attendee.status as RegistrationStatus]
+                      }
+                    >
                       {capitalizeFirstLetter(attendee.status)}
                     </Badge>
                   </button>
@@ -414,7 +424,11 @@ export default function Page() {
                           )}
                         />
                         <div className="flex justify-end">
-                          <Button type="submit" className="bg-black text-white" disabled={isSendingTransaction}>
+                          <Button
+                            type="submit"
+                            className="bg-black text-white"
+                            disabled={isSendingTransaction}
+                          >
                             Save Changes
                           </Button>
                         </div>

@@ -28,11 +28,13 @@ export default function Page() {
 
     allEvents.forEach(async (event) => {
       const { endTimestamp } = event.account.data;
-      console.log(endTimestamp)
+      console.log(endTimestamp);
       const isOrganizer = userPda.equals(event.account.organizer);
       const isAttendee =
         !isOrganizer &&
-        event.account.attendees.some((attendee) => attendee.equals(getAttendeePda(userPda, event.publicKey)));
+        event.account.attendees.some((attendee) =>
+          attendee.equals(getAttendeePda(userPda, event.publicKey))
+        );
 
       if (isOrganizer || isAttendee) {
         if (Number(endTimestamp) < Date.now()) {
@@ -69,46 +71,50 @@ export default function Page() {
 
         <Tabs value={activeTab}>
           <TabsContent value="upcoming" className="space-y-4">
-            {registeredEvents.upcoming && registeredEvents.upcoming.length ? registeredEvents.upcoming.map(
-              ({
-                event,
-                isOrganizer,
-              }: {
-                event: ProgramAccount<Event>;
-                isOrganizer: boolean;
-              }) => (
-                <EventCard
-                  key={event.publicKey.toBase58()}
-                  eventPda={event.publicKey.toBase58()}
-                  name={event.account.data.name}
-                  image={event.account.data.image}
-                  startTimestamp={event.account.data.startTimestamp}
-                  location={event.account.data.location}
-                  isOrganizer={isOrganizer}
-                />
+            {registeredEvents.upcoming && registeredEvents.upcoming.length ? (
+              registeredEvents.upcoming.map(
+                ({
+                  event,
+                  isOrganizer,
+                }: {
+                  event: ProgramAccount<Event>;
+                  isOrganizer: boolean;
+                }) => (
+                  <EventCard
+                    key={event.publicKey.toBase58()}
+                    eventPda={event.publicKey.toBase58()}
+                    name={event.account.data.name}
+                    image={event.account.data.image}
+                    startTimestamp={event.account.data.startTimestamp}
+                    location={event.account.data.location}
+                    isOrganizer={isOrganizer}
+                  />
+                )
               )
             ) : (
               <p>No upcoming events</p>
             )}
           </TabsContent>
           <TabsContent value="past" className="space-y-4">
-            {registeredEvents.past && registeredEvents.past.length ? registeredEvents.past.map(
-              ({
-                event,
-                isOrganizer,
-              }: {
-                event: ProgramAccount<Event>;
-                isOrganizer: boolean;
-              }) => (
-                <EventCard
-                  key={event.publicKey.toBase58()}
-                  eventPda={event.publicKey.toBase58()}
-                  name={event.account.data.name}
-                  image={event.account.data.image}
-                  startTimestamp={event.account.data.startTimestamp}
-                  location={event.account.data.location}
-                  isOrganizer={isOrganizer}
-                />
+            {registeredEvents.past && registeredEvents.past.length ? (
+              registeredEvents.past.map(
+                ({
+                  event,
+                  isOrganizer,
+                }: {
+                  event: ProgramAccount<Event>;
+                  isOrganizer: boolean;
+                }) => (
+                  <EventCard
+                    key={event.publicKey.toBase58()}
+                    eventPda={event.publicKey.toBase58()}
+                    name={event.account.data.name}
+                    image={event.account.data.image}
+                    startTimestamp={event.account.data.startTimestamp}
+                    location={event.account.data.location}
+                    isOrganizer={isOrganizer}
+                  />
+                )
               )
             ) : (
               <p>No past events</p>
