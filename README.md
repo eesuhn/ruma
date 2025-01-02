@@ -2,40 +2,28 @@
     <img src="./docs/banner.png" alt="screenshot" width="380" />
 </p>
 
-RUMA — **Solana**-powered dApp that redefines event hosting by creating NFT memories for attendees
+**Solana**-powered dApp that redefines events hosting with digital memories.
 
-![Next.js][next] ![Anchor][anchor] ![Rust][rust] ![Shadcn][shadcn] ![Bun][bun]
+![Next.js][next] ![Anchor][anchor] ![Rust][rust] ![shadcn/ui][shadcn] ![Bun][bun]
 
-- Host events directly on chain
-- Provide attendees with unique digital mementos
-- Streamline authentication with NFT badges
+- Host events directly on-chain
+- Enable attendees to mint NFTs as memories
+- Streamline authentication with NFT-based badges
 
-*Check out our demo video!* <br>
-[RUMA - Demo](https://youtu.be/SXuu8t_rglI)
+_Check out our demo video!_ <br>
+[RUMA — Demo](https://youtu.be/SXuu8t_rglI)
 
-### Setting Up Locally
+### Setting up 🚀
 
-1. Setting up Solana local node with [SETUP.md](./docs/SETUP.md)
+> [!IMPORTANT]
+> Install `Bun` before proceeding. <br> > `curl -fsSL https://bun.sh/install | bash`
 
-2. For client side, navigate to `client/` and run:
+There are two main components: `client/` and `anchor/` to set up. <br>
+Before proceeding, run `bun i` to install the necessary dependencies for both directories. <br>
+It is recommended to start with the `anchor/` first.
 
-   ```bash
-   bun install
-   ```
-
-3. Make a copy of `.env.example`:
-
-   ```bash
-   cp .env.example .env.development
-   ```
-
-   > For `NEXT_PUBLIC_RUMA_WALLET`, copy the content from `ruma-wallet.json`
-
-4. Run the client:
-
-   ```bash
-   bun run dev
-   ```
+- For `anchor/`, please follow the instructions in the [`anchor/README.md`](./anchor/README.md). <br>
+- For `client/`, please follow the instructions in the [`client/README.md`](./client/README.md).
 
 ### Contributors
 
@@ -44,7 +32,8 @@ RUMA — **Solana**-powered dApp that redefines event hosting by creating NFT me
 • [Karweiii](https://github.com/Karweiii)
 
 <!-- LINKS -->
-[next]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+
+[next]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&lo/go=nextdotjs&logoColor=/white
 [anchor]: https://img.shields.io/badge/anchor-1f44f2?style=for-the-badge&logo=solana&logoColor=white
 [rust]: https://img.shields.io/badge/rust-8b3103?style=for-the-badge&logo=rust&logoColor=white
 [shadcn]: https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcn/ui&logoColor=white
