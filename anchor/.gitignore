@@ -4,6 +4,7 @@
 # Build artifacts
 target/
 .next/
+.anchor/
 
 # Backup files
 **/*.rs.bk
@@ -13,13 +14,13 @@ node_modules/
 
 # Test-related files
 test-ledger/
-tests/fixtures/
+tests/fixtures/*
+!tests/fixtures/.gitkeep
 
 # Yarn files
 .yarn/
 
 # Sensitive files
 *wallet.json
-.env
-
-.anchor
+.env*
+!.env.example
